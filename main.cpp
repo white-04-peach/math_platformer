@@ -120,9 +120,50 @@ public:
         return getTransform().transformRect(sprite.getGlobalBounds());
     }
 
+
+
+    virtual void movement(){}
+    virtual Vector2f getSpeed() {
+        return {0.f, 0.f};}
+
+
+
+
     void draw(RenderTarget& target, RenderStates states) const override {
         states.transform *= getTransform();
         target.draw(sprite, states);
+    }
+};
+
+
+class MovingPlatform: public Platform{
+private:
+    float left;
+    float right;
+    float speed;
+    int direction;
+
+public:
+    MovingPlatform(float startX, float startY, float l){
+
+        setPosition(startX, startY);
+        left=startX;
+        right=startX+l;
+        speed=2.f;
+        direction=1;
+    }
+
+    Vector2f getSpeed() override{
+        return {speed*direction, 0.f};
+    }
+
+    void movement() override{
+        move(speed*direction, 0.f);
+
+        if (getPosition().x>=right)
+            direction=-1;
+        if (getPosition().x<=left)
+            direction=1;
     }
 };
 
@@ -194,18 +235,13 @@ int main() {
     plat4.setPosition(530.f, 265.f);
     plat4.small_plat();
 
-    Platform plat5;
-    plat5.setPosition(800.f, 265.f);
+    MovingPlatform plat5(800.f, 265.f, 600.f);
     plat5.medium_plat();
 
     Platform plat6;
-    plat6.setPosition(1400.f, 265.f);
-    plat6.medium_plat();
+    plat6.setPosition(2100.f, 700.f);
 
-    Platform plat7;
-    plat7.setPosition(2100.f, 700.f);
-
-    vector<Platform*> platforms={&plat1, &plat2, &plat3, &plat4, &plat5, &plat6, &plat7};
+    vector<Platform*> platforms={&plat1, &plat2, &plat3, &plat4, &plat5, &plat6};
 
     Health health;
     int damageCount=0;
@@ -225,9 +261,14 @@ int main() {
             }
         }
 
+
         Vector2f prevPos=character.getPosition();
 
         character.movement();
+
+        for (int i=0; i<platforms.size(); i++) {
+            (*platforms[i]).movement();
+        }
 
 
         if (character.getPosition().y>900.f) {
@@ -235,9 +276,10 @@ int main() {
             health.updateHealth(damageCount);
 
             character.setPosition(startPos);
-            character.dy=0.f;
+            character.landing();
+
             character.direct=1.f;
-            character.sprite.setScale(0.6f, 0.6f);
+            prevPos=character.getPosition();
             continue;
         }
 
@@ -253,6 +295,7 @@ int main() {
                     character.setPosition(character.getPosition().x, pos_y);
                     character.landing();
                     onPlatform=true;
+                    character.move((*platforms[i]).getSpeed());
                 }
 
                 else if (character.dy < 0.f && (prevPos.y-characterBounds.height/2.f)>=(platfBounds.top+platfBounds.height-5.f)) {
