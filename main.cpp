@@ -1,6 +1,11 @@
+#define VERSION 2
+
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <string>
+#if VERSION==3
+    #include <optional>
+#endif
 
 using namespace sf;
 using namespace std;
@@ -23,16 +28,25 @@ public:
     float dy=0.f;
     const float gravity=0.5f;
 
-    Character(){
-        textures[0].loadFromFile("sprites/cat_run1_c.png");
-        textures[1].loadFromFile("sprites/cat_run2_cc.png");
-        textures[2].loadFromFile("sprites/cat_run1_c.png");
-        textures[3].loadFromFile("sprites/cat_run4_c.png");
-        jumpTexture.loadFromFile("sprites/cat_jump.png");
+    Character(): sprite(textures[0]){
+        /*textures[0].loadFromFile("sprites/characters/dog/run_1.png");
+        textures[1].loadFromFile("sprites/characters/dog/run_4.png");
+        textures[2].loadFromFile("sprites/characters/dog/run_3.png");
+        textures[3].loadFromFile("sprites/characters/dog/run_22.png");
+        jumpTexture.loadFromFile("sprites/characters/dog/jump.png");*/
+
+
+        textures[0].loadFromFile("sprites/characters/panda/run_1.png");
+        textures[1].loadFromFile("sprites/characters/panda/run_2.png");
+        textures[2].loadFromFile("sprites/characters/panda/run_3.png");
+        textures[3].loadFromFile("sprites/characters/panda/run_4.png");
+        jumpTexture.loadFromFile("sprites/characters/panda/jump_2.png");
+
+
         current=0;
         sprite.setTexture(textures[current], true);
         sprite.setOrigin(textures[current].getSize().x/2.f, textures[current].getSize().y/2.f);
-        sprite.setScale(0.6f, 0.6f);
+        sprite.setScale({0.4f, 0.4f});
     }
 
     void animation() {
@@ -48,32 +62,32 @@ public:
             isJump=true;
             dy=-14.f;
             sprite.setTexture(jumpTexture, true);
-            sprite.setScale(direct*0.6f, 0.6f);
+            sprite.setScale({direct*0.4f, 0.4f});
         }
     }
 
     void movement() {
-        if (Keyboard::isKeyPressed(Keyboard::A)) {
-            move(-speed, 0.f);
+        if (Keyboard::isKeyPressed(Keyboard::Key::A)) {
+            move({-speed, 0.f});
             direct=-1.f;
-            sprite.setScale(-0.6f, 0.6f);
+            sprite.setScale({-0.4f, 0.4f});
             if (!isJump) animation();
         }
-        if (Keyboard::isKeyPressed(Keyboard::D)) {
-            move(speed, 0.f);
+        if (Keyboard::isKeyPressed(Keyboard::Key::D)) {
+            move({speed, 0.f});
             direct=1.f;
-            sprite.setScale(0.6f, 0.6f);
+            sprite.setScale({0.4f, 0.4f});
             if (!isJump) animation();
         }
         dy+=gravity;
-        move(0.f, dy);
+        move({0.f, dy});
     }
 
     void landing() {
         isJump=false;
         dy=0.f;
         sprite.setTexture(textures[current], true);
-        sprite.setScale(direct*0.6f, 0.6f);
+        sprite.setScale({direct*0.4f, 0.4f});
     }
 
     FloatRect getBounds() {
@@ -98,22 +112,22 @@ private:
     Texture small;
 
 public:
-    Platform() {
+    Platform(): sprite(large) {
         large.loadFromFile("sprites/plat_big.png");
         medium.loadFromFile("sprites/plat_medium.png");
         small.loadFromFile("sprites/plat_small.png");
         sprite.setTexture(large, true);
-        sprite.setScale(0.6f, 0.6f);
+        sprite.setScale({0.6f, 0.6f});
     }
 
     void medium_plat() {
         sprite.setTexture(medium, true);
-        sprite.setScale(0.36f, 0.36f);
+        sprite.setScale({0.36f, 0.36f});
     }
 
     void small_plat() {
         sprite.setTexture(small, true);
-        sprite.setScale(0.47f, 0.47f);
+        sprite.setScale({0.47f, 0.47f});
     }
 
     FloatRect getBounds(){
@@ -123,7 +137,7 @@ public:
 
 
     virtual void movement(){}
-    virtual Vector2f getSpeed() {
+    virtual Vector2f getSpeed(){
         return {0.f, 0.f};}
 
 
@@ -146,7 +160,7 @@ private:
 public:
     MovingPlatform(float startX, float startY, float l){
 
-        setPosition(startX, startY);
+        setPosition({startX, startY});
         left=startX;
         right=startX+l;
         speed=2.f;
@@ -158,7 +172,7 @@ public:
     }
 
     void movement() override{
-        move(speed*direction, 0.f);
+        move({speed*direction, 0.f});
 
         if (getPosition().x>=right)
             direction=-1;
@@ -177,14 +191,14 @@ private:
     Sprite sprite;
 
 public:
-    Health() {
+    Health(): sprite(healthTex[0]){
         healthTex[0].loadFromFile("sprites/health/3.png");
         healthTex[1].loadFromFile("sprites/health/2.png");
         healthTex[2].loadFromFile("sprites/health/1.png");
         healthTex[3].loadFromFile("sprites/health/0.png");
         sprite.setTexture(healthTex[0]);
-        sprite.setPosition(20.f, 20.f);
-        sprite.setScale(1.1f, 1.1f);
+        sprite.setPosition({20.f, 20.f});
+        sprite.setScale({1.1f, 1.1f});
     }
 
     void updateHealth(int damageCount){
@@ -205,41 +219,47 @@ public:
 
 
 int main() {
-    RenderWindow window(VideoMode(1500, 900), "Platformer");
+    RenderWindow window(VideoMode({1500, 900}), "Platformer");
     window.setFramerateLimit(60);
+    View view(FloatRect({0.f, 0.f}, {1500.f, 900.f}));
 
     RectangleShape backk({2850.f, 900.f});
     backk.setFillColor(Color(172, 231, 242));
 
-    View view(FloatRect(0.f, 0.f, 1500.f, 900.f));
+    Texture backgroundTex;
+    backgroundTex.loadFromFile("sprites/background.jpg");
+    Sprite background;
+    background.setTexture(backgroundTex);
+    background.setScale({1.5f, 1.5f});
 
-    const Vector2f startPos(50.f, 665.f);
 
+
+    const Vector2f startPos(50.f, 660.f);
     Character character;
     character.setPosition(startPos);
 
     Platform plat1;
-    plat1.setPosition(0.f, 700.f);
+    plat1.setPosition({0.f, 700.f});
     plat1.medium_plat();
 
 
     Platform plat2;
-    plat2.setPosition(450.f, 560.f);
+    plat2.setPosition({450.f, 560.f});
     plat2.small_plat();
 
     Platform plat3;
-    plat3.setPosition(250.f, 420.f);
+    plat3.setPosition({250.f, 420.f});
     plat3.small_plat();
 
     Platform plat4;
-    plat4.setPosition(530.f, 265.f);
+    plat4.setPosition({530.f, 265.f});
     plat4.small_plat();
 
     MovingPlatform plat5(800.f, 265.f, 600.f);
     plat5.medium_plat();
 
     Platform plat6;
-    plat6.setPosition(2100.f, 700.f);
+    plat6.setPosition({2100.f, 700.f});
 
     vector<Platform*> platforms={&plat1, &plat2, &plat3, &plat4, &plat5, &plat6};
 
@@ -248,6 +268,17 @@ int main() {
 
     while (window.isOpen())
     {
+#if VERSION == 3
+        while (const std::optional event = window.pollEvent()) {
+            if (event->is<Event::Closed>())
+                window.close();
+            if (const auto* keyPressed = event->getIf<Event::KeyPressed>()) {
+                if (keyPressed->code == Keyboard::Key::Space) {
+                    character.jump();
+                }
+            }
+        }
+#else
         Event event;
         while (window.pollEvent(event))
         {
@@ -255,11 +286,12 @@ int main() {
                 window.close();
 
             if(event.type==Event::KeyPressed) {
-                if(event.key.code==Keyboard::Space) {
+                if(event.key.code==Keyboard::Key::Space){
                     character.jump();
                 }
             }
         }
+#endif
 
 
         Vector2f prevPos=character.getPosition();
@@ -288,7 +320,29 @@ int main() {
 
         for (int i=0; i<platforms.size(); i++) {
             FloatRect platfBounds=(*platforms[i]).getBounds();
-
+#if VERSION == 3
+            if (characterBounds.findIntersection(platfBounds)) {
+                if (character.dy >= 0.f && (prevPos.y + characterBounds.size.y / 2.f) <= platfBounds.position.y + 5.f) {
+                    float pos_y = platfBounds.position.y - (characterBounds.size.y / 2.f);
+                    character.setPosition({character.getPosition().x, pos_y});
+                    character.landing();
+                    onPlatform = true;
+                    character.move((*platforms[i]).getSpeed());
+                }
+                else if (character.dy < 0.f && (prevPos.y - characterBounds.size.y / 2.f) >= (platfBounds.position.y + platfBounds.size.y - 5.f)) {
+                    character.setPosition({character.getPosition().x, prevPos.y});
+                    character.dy = 0.f;
+                }
+                else {
+                    if (prevPos.x < platfBounds.position.x) {
+                        character.setPosition({platfBounds.position.x - characterBounds.size.x / 2.f, character.getPosition().y});
+                    }
+                    else if (prevPos.x > platfBounds.position.x + platfBounds.size.x) {
+                        character.setPosition({platfBounds.position.x + platfBounds.size.x + characterBounds.size.x / 2.f, character.getPosition().y});
+                    }
+                }
+            }
+#else
             if (characterBounds.intersects(platfBounds)) {
                 if (character.dy>=0.f && (prevPos.y+characterBounds.height/2.f)<= platfBounds.top+5.f){
                     float pos_y=platfBounds.top-(characterBounds.height/2.f);
@@ -313,6 +367,7 @@ int main() {
                     }
                 }
             }
+#endif
         }
 
         if (!onPlatform)
@@ -323,7 +378,7 @@ int main() {
             cameraX=750.f;
         if (cameraX>2100.f)
             cameraX=2100.f;
-        view.setCenter(cameraX, 450.f);
+        view.setCenter({cameraX, 450.f});
 
 
         window.clear();
@@ -331,11 +386,14 @@ int main() {
 
 
         window.draw(backk);
+        window.draw(background);
+
         for (int i=0; i<platforms.size(); i++) {
             window.draw(*platforms[i]);
         }
 
         window.draw(character);
+
 
 
 
