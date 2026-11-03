@@ -1,4 +1,4 @@
-#define VERSION 3
+#define VERSION 2
 
 #include <SFML/Graphics.hpp>
 #include <vector>
@@ -12,7 +12,7 @@ using namespace sf;
 using namespace std;
 
 
-//  Å“â‰ˆâ€“â€”Å’Ã•Â¿âˆ†
+//  ÏÅÐÑÎÍÀÆ
 
 class Character: public Drawable, public Transformable {
 private:
@@ -28,6 +28,11 @@ public:
     float direct=1.f;
     float dy=0.f;
     const float gravity=0.5f;
+
+    bool invuln=false;
+    Clock invulnClock;
+    Clock blinkClock;
+    bool isBlink=false;
 
     Character(): sprite(textures[0]){
         /*textures[0].loadFromFile("sprites/characters/dog/run_1.png");
@@ -81,7 +86,44 @@ public:
         }
         dy+=gravity;
         move({0.f, dy});
+
+
+
+        if (invuln){
+            if (invulnClock.getElapsedTime().asSeconds()<=1.0f){
+                if (blinkClock.getElapsedTime().asSeconds()>=0.1f){
+                    isBlink=!isBlink;
+                    if (isBlink){
+                        sprite.setColor(Color::White);
+                    }
+                    else{
+                        sprite.setColor(Color(255, 255, 255, 70));
+                    }
+
+                    blinkClock.restart();
+                }
+            }
+            else{
+                invuln=false;
+                isBlink=false;
+                sprite.setColor(Color::White);
+            }
+        }
+
+
     }
+
+
+    void getDamage(){
+        if (!invuln){
+            invuln=true;
+            invulnClock.restart();
+            blinkClock.restart();
+
+            setPosition({getPosition().x-(direct*50.f), getPosition().y});
+        }
+    }
+
 
     void landing() {
         isJump=false;
@@ -102,7 +144,7 @@ public:
 
 
 
-//   Å“Ã€Â¿â€œâ€˜Å’â€“Ãƒâ‚¬
+//   ÏËÀÒÔÎÐÌÛ
 
 class Platform: public Drawable, public Transformable {
 protected:
@@ -249,7 +291,7 @@ public:
 
 
 
-//   Â«Æ’Å’â€“Å’Â¬â€¹â‰ˆ
+//   ÇÄÎÐÎÂÜÅ
 
 class Health: public Drawable, public Transformable{
 private:
@@ -262,7 +304,7 @@ public:
         healthTex[1].loadFromFile("sprites/health/2.png");
         healthTex[2].loadFromFile("sprites/health/1.png");
         healthTex[3].loadFromFile("sprites/health/0.png");
-        sprite.setTexture(healthTex[0]);
+        sprite.setTexture(healthTex[0], true);
         sprite.setPosition({20.f, 20.f});
         sprite.setScale({1.1f, 1.1f});
     }
@@ -280,9 +322,40 @@ public:
 };
 
 
+class Checkpoint: public Drawable, public Transformable{
+private:
+    Texture active;
+    Texture unactive;
+    Sprite sprite;
+    bool activated=false;
 
+public:
+    Checkpoint(float x, float y): sprite(unactive){
+        unactive.loadFromFile("sprites/checkpoint_false.png");
+        active.loadFromFile("sprites/checkpoint_true.png");
+        sprite.setTexture(unactive, true);
+        sprite.setScale({0.5f, 0.5f});
+        setPosition({x, y});
+    }
 
+    bool activate(){
+        if (!activated){
+            activated=true;
+            sprite.setTexture(active, true);
+            return true;
+        }
+        return false;
+    }
 
+    FloatRect getBounds() {
+        return getTransform().transformRect(sprite.getGlobalBounds());
+    }
+
+    void draw(RenderTarget& target, RenderStates states) const override {
+        states.transform *= getTransform();
+        target.draw(sprite, states);
+    }
+};
 
 int main() {
     RenderWindow window(VideoMode({1500, 900}), "Platformer");
@@ -335,6 +408,15 @@ int main() {
     vector<Platform*> platforms = {&plat1, &plat2, &plat3, &plat4, &plat5, &fragilePlat, &plat6, &plat7, &plat8, &plat9, &plat10, &plat11};
 
 
+    vector<Checkpoint> checkpoints;
+    Vector2f respawn=startPos;
+
+    Checkpoint checkP_1(610.f, 180.f);
+    Checkpoint checkP_2(2210.f, 615.f);
+    checkpoints.push_back(checkP_1);
+    checkpoints.push_back( checkP_2);
+
+
     Health health;
     int damageCount=0;
 
@@ -380,10 +462,10 @@ int main() {
             health.updateHealth(damageCount);
             fragilePlat.reset();
 
-            character.setPosition(startPos);
+            character.setPosition(respawn);
+            character.direct=1.f;
             character.landing();
 
-            character.direct=1.f;
             prevPos=character.getPosition();
             continue;
         }
@@ -405,18 +487,26 @@ int main() {
 #endif
         }
 
-        if (hitSpike) {
-            damageCount++;
-            if (damageCount>=3) damageCount = 0;
-            health.updateHealth(damageCount);
-            character.setPosition(startPos);
-            character.dy=0.f;
-            fragilePlat.reset();
-            prevPos=character.getPosition();
-            continue;
+        if (hitSpike){
+            if (!character.invuln){
+                character.getDamage();
+                damageCount++;
+                health.updateHealth(damageCount);
+            }
         }
 
 
+        for (auto& checkpoint: checkpoints) {
+#if VERSION==3
+            if (characterBounds.findIntersection(checkpoint.getBounds())){
+#else
+            if (characterBounds.intersects(checkpoint.getBounds())) {
+#endif
+                if (checkpoint.activate()){
+                    respawn=checkpoint.getPosition();
+                }
+            }
+        }
 
         bool onPlatform=false;
 
@@ -500,6 +590,10 @@ int main() {
 
         for (auto& spike : spikes) {
             window.draw(spike);
+        }
+
+        for (auto& i: checkpoints) {
+            window.draw(i);
         }
 
         window.draw(character);
