@@ -1,8 +1,9 @@
-#define VERSION 2
+#define VERSION 3
 
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <string>
+
 #if VERSION==3
     #include <optional>
 #endif
@@ -11,7 +12,7 @@ using namespace sf;
 using namespace std;
 
 
-//  ÏÅÐÑÎÍÀÆ
+//  Å“â‰ˆâ€“â€”Å’Ã•Â¿âˆ†
 
 class Character: public Drawable, public Transformable {
 private:
@@ -41,7 +42,6 @@ public:
         textures[2].loadFromFile("sprites/characters/panda/run_3.png");
         textures[3].loadFromFile("sprites/characters/panda/run_4.png");
         jumpTexture.loadFromFile("sprites/characters/panda/jump_2.png");
-
 
         current=0;
         sprite.setTexture(textures[current], true);
@@ -102,10 +102,10 @@ public:
 
 
 
-//   ÏËÀÒÔÎÐÌÛ
+//   Å“Ã€Â¿â€œâ€˜Å’â€“Ãƒâ‚¬
 
 class Platform: public Drawable, public Transformable {
-private:
+protected:
     Sprite sprite;
     Texture large;
     Texture medium;
@@ -140,6 +140,8 @@ public:
     virtual Vector2f getSpeed(){
         return {0.f, 0.f};}
 
+    virtual void onStepped() {}
+    virtual bool isBroken() const { return false; }
 
 
 
@@ -182,8 +184,72 @@ public:
 };
 
 
+class FragilePlatform: public Platform {
+private:
+    Clock lifeTimer;
+    bool broken = false, timerStarted = false;
+    Vector2f basePos;
 
-//   ÇÄÎÐÎÂÜÅ
+public:
+    void setStartPos(Vector2f pos) {
+        basePos = pos;
+        setPosition(pos); }
+
+    void reset() {
+        broken = false;
+        timerStarted = false;
+        sprite.setColor(Color::White);
+        setPosition(basePos);
+        lifeTimer.restart(); }
+
+
+    void onStepped() override {
+        if (!timerStarted) {
+                lifeTimer.restart();
+                timerStarted = true;
+                basePos = getPosition(); }
+    }
+
+
+    void movement() override {
+        if (timerStarted && !broken) {
+            float time = lifeTimer.getElapsedTime().asSeconds();
+            if (time > 2.0f) { broken = true; sprite.setColor(Color::Transparent); }
+            else {
+                setPosition({basePos.x + static_cast<float>(rand() % 5 - 2), basePos.y});
+                int alpha = 255 - static_cast<int>((time / 2.0f) * 255.f);
+                sprite.setColor(Color(255, 255, 255, (alpha < 0 ? 0 : alpha)));
+            }
+        }
+    }
+
+    bool isBroken() const override { return broken; }
+};
+
+
+
+class Spike: public Drawable, public Transformable {
+private:
+    ConvexShape triangle;
+public:
+    Spike() {
+        triangle.setPointCount(3);
+        triangle.setPoint(0, {0.f, 0.f});
+        triangle.setPoint(1, {15.f, -25.f});
+        triangle.setPoint(2, {30.f, 0.f});
+        triangle.setFillColor(Color(200, 0, 0));
+    }
+    FloatRect getBounds() const {
+        return getTransform().transformRect(triangle.getGlobalBounds()); }
+
+    void draw(RenderTarget& target, RenderStates states) const override {
+        states.transform *= getTransform(); target.draw(triangle, states);
+    }
+};
+
+
+
+//   Â«Æ’Å’â€“Å’Â¬â€¹â‰ˆ
 
 class Health: public Drawable, public Transformable{
 private:
@@ -228,7 +294,7 @@ int main() {
 
     Texture backgroundTex;
     backgroundTex.loadFromFile("sprites/background.jpg");
-    Sprite background;
+    Sprite background(backgroundTex);
     background.setTexture(backgroundTex);
     background.setScale({1.5f, 1.5f});
 
@@ -238,37 +304,43 @@ int main() {
     Character character;
     character.setPosition(startPos);
 
-    Platform plat1;
-    plat1.setPosition({0.f, 700.f});
-    plat1.medium_plat();
+    Platform plat1; plat1.setPosition({0.f, 700.f}); plat1.medium_plat();
+    Platform plat2; plat2.setPosition({450.f, 560.f}); plat2.small_plat();
+    Platform plat3; plat3.setPosition({250.f, 420.f}); plat3.small_plat();
+    Platform plat4; plat4.setPosition({530.f, 265.f}); plat4.small_plat();
 
+    MovingPlatform plat5(750.f, 265.f, 600.f); plat5.medium_plat();
 
-    Platform plat2;
-    plat2.setPosition({450.f, 560.f});
-    plat2.small_plat();
+    FragilePlatform fragilePlat;
+    fragilePlat.setStartPos({1500.f, 500.f});
+    fragilePlat.medium_plat();
 
-    Platform plat3;
-    plat3.setPosition({250.f, 420.f});
-    plat3.small_plat();
+    Platform plat6; plat6.setPosition({2000.f, 700.f}); plat6.medium_plat();
+    MovingPlatform plat7(2330.f, 550.f, 250.f); plat7.small_plat();
+    MovingPlatform plat8(2600.f, 400.f, 250.f); plat8.small_plat();
 
-    Platform plat4;
-    plat4.setPosition({530.f, 265.f});
-    plat4.small_plat();
+    Platform plat9; plat9.setPosition({3000.f, 750.f}); plat9.medium_plat();
 
-    MovingPlatform plat5(800.f, 265.f, 600.f);
-    plat5.medium_plat();
+    FragilePlatform plat10; plat10.setStartPos({3100.f, 350.f}); plat10.small_plat();
+    Platform plat11; plat11.setPosition({3400.f, 500.f}); plat11.medium_plat();
 
-    Platform plat6;
-    plat6.setPosition({2100.f, 700.f});
+    vector<Spike> spikes;
+    Spike s1; s1.setPosition({2100.f, 700.f});
+    Spike s2; s2.setPosition({2350.f, 700.f});
+    spikes.push_back(s1); spikes.push_back(s2);
 
-    vector<Platform*> platforms={&plat1, &plat2, &plat3, &plat4, &plat5, &plat6};
+    Spike s3; s3.setPosition({3700.f, 500.f});
+    spikes.push_back(s3);
+
+    vector<Platform*> platforms = {&plat1, &plat2, &plat3, &plat4, &plat5, &fragilePlat, &plat6, &plat7, &plat8, &plat9, &plat10, &plat11};
+
 
     Health health;
     int damageCount=0;
 
     while (window.isOpen())
     {
-#if VERSION == 3
+#if VERSION==3
         while (const std::optional event = window.pollEvent()) {
             if (event->is<Event::Closed>())
                 window.close();
@@ -306,6 +378,7 @@ int main() {
         if (character.getPosition().y>900.f) {
             damageCount++;
             health.updateHealth(damageCount);
+            fragilePlat.reset();
 
             character.setPosition(startPos);
             character.landing();
@@ -316,17 +389,48 @@ int main() {
         }
 
         FloatRect characterBounds=character.getBounds();
+
+        bool hitSpike = false;
+        for (auto& spike : spikes) {
+#if VERSION==3
+            if (characterBounds.findIntersection(spike.getBounds())) {
+                hitSpike = true;
+                break;
+            }
+#else
+            if (characterBounds.intersects(spike.getBounds())) {
+                hitSpike = true;
+                break;
+            }
+#endif
+        }
+
+        if (hitSpike) {
+            damageCount++;
+            if (damageCount>=3) damageCount = 0;
+            health.updateHealth(damageCount);
+            character.setPosition(startPos);
+            character.dy=0.f;
+            fragilePlat.reset();
+            prevPos=character.getPosition();
+            continue;
+        }
+
+
+
         bool onPlatform=false;
 
         for (int i=0; i<platforms.size(); i++) {
             FloatRect platfBounds=(*platforms[i]).getBounds();
-#if VERSION == 3
+#if VERSION==3
             if (characterBounds.findIntersection(platfBounds)) {
+                if ((*platforms[i]).isBroken()) continue;
                 if (character.dy >= 0.f && (prevPos.y + characterBounds.size.y / 2.f) <= platfBounds.position.y + 5.f) {
                     float pos_y = platfBounds.position.y - (characterBounds.size.y / 2.f);
                     character.setPosition({character.getPosition().x, pos_y});
                     character.landing();
                     onPlatform = true;
+                    (*platforms[i]).onStepped();
                     character.move((*platforms[i]).getSpeed());
                 }
                 else if (character.dy < 0.f && (prevPos.y - characterBounds.size.y / 2.f) >= (platfBounds.position.y + platfBounds.size.y - 5.f)) {
@@ -344,11 +448,13 @@ int main() {
             }
 #else
             if (characterBounds.intersects(platfBounds)) {
+                if ((*platforms[i]).isBroken()) continue;
                 if (character.dy>=0.f && (prevPos.y+characterBounds.height/2.f)<= platfBounds.top+5.f){
                     float pos_y=platfBounds.top-(characterBounds.height/2.f);
                     character.setPosition(character.getPosition().x, pos_y);
                     character.landing();
                     onPlatform=true;
+                    (*platforms[i]).onStepped();
                     character.move((*platforms[i]).getSpeed());
                 }
 
@@ -376,8 +482,8 @@ int main() {
         float cameraX=character.getPosition().x +250.f;
         if (cameraX<750.f)
             cameraX=750.f;
-        if (cameraX>2100.f)
-            cameraX=2100.f;
+        if (cameraX>3150.f)
+            cameraX=3150.f;
         view.setCenter({cameraX, 450.f});
 
 
@@ -390,6 +496,10 @@ int main() {
 
         for (int i=0; i<platforms.size(); i++) {
             window.draw(*platforms[i]);
+        }
+
+        for (auto& spike : spikes) {
+            window.draw(spike);
         }
 
         window.draw(character);
