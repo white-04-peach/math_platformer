@@ -12,7 +12,7 @@ using namespace sf;
 using namespace std;
 
 
-//  ПЕРСОНАЖ
+//........................CHARACTER..........................................
 
 class Character: public Drawable, public Transformable {
 private:
@@ -144,7 +144,7 @@ public:
 
 
 
-//   ПЛАТФОРМЫ
+// .........................PLATFORMS.......................
 
 class Platform: public Drawable, public Transformable {
 protected:
@@ -184,6 +184,7 @@ public:
 
     virtual void onStepped() {}
     virtual bool isBroken() const { return false; }
+    virtual void reset(){}
 
 
 
@@ -269,6 +270,7 @@ public:
 };
 
 
+//......................SPLIKES....................................
 
 class Spike: public Drawable, public Transformable {
 private:
@@ -291,7 +293,7 @@ public:
 
 
 
-//   ЗДОРОВЬЕ
+//.................HEALTHBAR............................
 
 class Health: public Drawable, public Transformable{
 private:
@@ -322,6 +324,8 @@ public:
 };
 
 
+//..........................CHECKPOINT............................
+
 class Checkpoint: public Drawable, public Transformable{
 private:
     Texture active;
@@ -330,7 +334,12 @@ private:
     bool activated=false;
 
 public:
+#if VERSION==3
     Checkpoint(float x, float y): sprite(unactive){
+#else
+    Checkpoint(float x, float y){
+#endif
+
         unactive.loadFromFile("sprites/checkpoint_false.png");
         active.loadFromFile("sprites/checkpoint_true.png");
         sprite.setTexture(unactive, true);
@@ -357,6 +366,90 @@ public:
     }
 };
 
+
+//.........................LEVELS.......................................
+
+class Level{
+public:
+    vector<Platform*> platforms;
+    vector<Spike> spikes;
+    vector<Checkpoint> checkpoints;
+    //потом еще штуки будут, когда добавим их
+    //фон, кстати, тоже тут надо
+    Vector2f startPos;
+
+    Level(){}
+    void create(int levelNumber){
+        clearLevel();
+
+        switch(levelNumber){
+            case 1:{
+                startPos={50.f, 660.f};
+
+                Platform* plat1=new Platform(); (*plat1).setPosition({0.f, 700.f}); (*plat1).medium_plat();
+                Platform* plat2=new Platform(); (*plat2).setPosition({450.f, 560.f}); (*plat2).small_plat();
+                Platform* plat3=new Platform(); (*plat3).setPosition({250.f, 420.f}); (*plat3).small_plat();
+                Platform* plat4=new Platform(); (*plat4).setPosition({530.f, 265.f}); (*plat4).small_plat();
+
+                MovingPlatform* plat5=new MovingPlatform(750.f, 265.f, 600.f); (*plat5).medium_plat();
+
+                FragilePlatform* fragilePlat=new FragilePlatform();
+                (*fragilePlat).setStartPos({1500.f, 500.f});
+                (*fragilePlat).medium_plat();
+
+                Platform* plat6=new Platform(); (*plat6).setPosition({2000.f, 700.f}); (*plat6).medium_plat();
+                MovingPlatform* plat7=new MovingPlatform(2330.f, 550.f, 250.f); (*plat7).small_plat();
+                MovingPlatform* plat8=new MovingPlatform(2600.f, 400.f, 250.f); (*plat8).small_plat();
+                Platform* plat9=new Platform(); (*plat9).setPosition({3000.f, 750.f});(*plat9).medium_plat();
+
+                FragilePlatform* plat10=new FragilePlatform(); (*plat10).setStartPos({3100.f, 350.f}); (*plat10).small_plat();
+                Platform* plat11=new Platform(); (*plat11).setPosition({3400.f, 500.f}); (*plat11).medium_plat();
+
+                platforms={plat1, plat2, plat3, plat4, plat5, fragilePlat, plat6, plat7, plat8, plat9, plat10, plat11};
+
+                Spike s1; s1.setPosition({2100.f, 700.f});
+                Spike s2; s2.setPosition({2350.f, 700.f});
+                Spike s3; s3.setPosition({3700.f, 500.f});
+                spikes.push_back(s1);
+                spikes.push_back(s2);
+                spikes.push_back(s3);
+
+
+
+                Checkpoint checkP_1(610.f, 180.f);
+                Checkpoint checkP_2(2210.f, 615.f);
+                checkpoints.push_back(checkP_1);
+                checkpoints.push_back( checkP_2);
+                break;
+            }
+
+
+            case 2:
+                //просто для теста, потом придумаем сам уровень
+                startPos={50.f, 660.f};
+                Platform* plat1=new Platform(); (*plat1).setPosition({0.f, 700.f}); (*plat1).medium_plat();
+                Platform* plat2=new Platform(); (*plat2).setPosition({450.f, 560.f}); (*plat2).small_plat();
+                Platform* plat3=new Platform(); (*plat3).setPosition({250.f, 420.f}); (*plat3).small_plat();
+                Platform* plat4=new Platform(); (*plat4).setPosition({530.f, 265.f}); (*plat4).small_plat();
+
+                platforms={plat1, plat2, plat3, plat4};
+                break;
+        }
+    }
+
+    void clearLevel(){
+        for (int i=0; i<platforms.size(); i++) {
+            delete platforms[i];
+        }
+        platforms.clear();
+        spikes.clear();
+        checkpoints.clear();
+    }
+};
+
+
+
+
 int main() {
     RenderWindow window(VideoMode({1500, 900}), "Platformer");
     window.setFramerateLimit(60);
@@ -373,48 +466,13 @@ int main() {
 
 
 
-    const Vector2f startPos(50.f, 660.f);
+    Level level;
+    int levelNumb=1;
+    level.create(levelNumb);
+
     Character character;
-    character.setPosition(startPos);
-
-    Platform plat1; plat1.setPosition({0.f, 700.f}); plat1.medium_plat();
-    Platform plat2; plat2.setPosition({450.f, 560.f}); plat2.small_plat();
-    Platform plat3; plat3.setPosition({250.f, 420.f}); plat3.small_plat();
-    Platform plat4; plat4.setPosition({530.f, 265.f}); plat4.small_plat();
-
-    MovingPlatform plat5(750.f, 265.f, 600.f); plat5.medium_plat();
-
-    FragilePlatform fragilePlat;
-    fragilePlat.setStartPos({1500.f, 500.f});
-    fragilePlat.medium_plat();
-
-    Platform plat6; plat6.setPosition({2000.f, 700.f}); plat6.medium_plat();
-    MovingPlatform plat7(2330.f, 550.f, 250.f); plat7.small_plat();
-    MovingPlatform plat8(2600.f, 400.f, 250.f); plat8.small_plat();
-
-    Platform plat9; plat9.setPosition({3000.f, 750.f}); plat9.medium_plat();
-
-    FragilePlatform plat10; plat10.setStartPos({3100.f, 350.f}); plat10.small_plat();
-    Platform plat11; plat11.setPosition({3400.f, 500.f}); plat11.medium_plat();
-
-    vector<Spike> spikes;
-    Spike s1; s1.setPosition({2100.f, 700.f});
-    Spike s2; s2.setPosition({2350.f, 700.f});
-    spikes.push_back(s1); spikes.push_back(s2);
-
-    Spike s3; s3.setPosition({3700.f, 500.f});
-    spikes.push_back(s3);
-
-    vector<Platform*> platforms = {&plat1, &plat2, &plat3, &plat4, &plat5, &fragilePlat, &plat6, &plat7, &plat8, &plat9, &plat10, &plat11};
-
-
-    vector<Checkpoint> checkpoints;
-    Vector2f respawn=startPos;
-
-    Checkpoint checkP_1(610.f, 180.f);
-    Checkpoint checkP_2(2210.f, 615.f);
-    checkpoints.push_back(checkP_1);
-    checkpoints.push_back( checkP_2);
+    character.setPosition(level.startPos);
+    Vector2f respawn=level.startPos;
 
 
     Health health;
@@ -452,19 +510,20 @@ int main() {
 
         character.movement();
 
-        for (int i=0; i<platforms.size(); i++) {
-            (*platforms[i]).movement();
-        }
+        for (int i=0; i<level.platforms.size(); i++)
+            (*level.platforms[i]).movement();
 
 
         if (character.getPosition().y>900.f) {
             damageCount++;
             health.updateHealth(damageCount);
-            fragilePlat.reset();
 
             character.setPosition(respawn);
             character.direct=1.f;
             character.landing();
+
+            for(int i=0; i<level.platforms.size(); i++)
+                (*level.platforms[i]).reset();
 
             prevPos=character.getPosition();
             continue;
@@ -472,16 +531,16 @@ int main() {
 
         FloatRect characterBounds=character.getBounds();
 
-        bool hitSpike = false;
-        for (auto& spike : spikes) {
+        bool hitSpike=false;
+        for (auto& spike: level.spikes) {
 #if VERSION==3
             if (characterBounds.findIntersection(spike.getBounds())) {
-                hitSpike = true;
+                hitSpike=true;
                 break;
             }
 #else
             if (characterBounds.intersects(spike.getBounds())) {
-                hitSpike = true;
+                hitSpike=true;
                 break;
             }
 #endif
@@ -496,7 +555,7 @@ int main() {
         }
 
 
-        for (auto& checkpoint: checkpoints) {
+        for (auto& checkpoint: level.checkpoints){
 #if VERSION==3
             if (characterBounds.findIntersection(checkpoint.getBounds())){
 #else
@@ -510,18 +569,18 @@ int main() {
 
         bool onPlatform=false;
 
-        for (int i=0; i<platforms.size(); i++) {
-            FloatRect platfBounds=(*platforms[i]).getBounds();
+        for (int i=0; i<level.platforms.size(); i++) {
+            FloatRect platfBounds=(*level.platforms[i]).getBounds();
 #if VERSION==3
             if (characterBounds.findIntersection(platfBounds)) {
-                if ((*platforms[i]).isBroken()) continue;
+                if ((*level.platforms[i]).isBroken()) continue;
                 if (character.dy >= 0.f && (prevPos.y + characterBounds.size.y / 2.f) <= platfBounds.position.y + 5.f) {
                     float pos_y = platfBounds.position.y - (characterBounds.size.y / 2.f);
                     character.setPosition({character.getPosition().x, pos_y});
                     character.landing();
                     onPlatform = true;
-                    (*platforms[i]).onStepped();
-                    character.move((*platforms[i]).getSpeed());
+                    (*level.platforms[i]).onStepped();
+                    character.move((*level.platforms[i]).getSpeed());
                 }
                 else if (character.dy < 0.f && (prevPos.y - characterBounds.size.y / 2.f) >= (platfBounds.position.y + platfBounds.size.y - 5.f)) {
                     character.setPosition({character.getPosition().x, prevPos.y});
@@ -538,14 +597,14 @@ int main() {
             }
 #else
             if (characterBounds.intersects(platfBounds)) {
-                if ((*platforms[i]).isBroken()) continue;
+                if ((*level.platforms[i]).isBroken()) continue;
                 if (character.dy>=0.f && (prevPos.y+characterBounds.height/2.f)<= platfBounds.top+5.f){
                     float pos_y=platfBounds.top-(characterBounds.height/2.f);
                     character.setPosition(character.getPosition().x, pos_y);
                     character.landing();
                     onPlatform=true;
-                    (*platforms[i]).onStepped();
-                    character.move((*platforms[i]).getSpeed());
+                    (*level.platforms[i]).onStepped();
+                    character.move((*level.platforms[i]).getSpeed());
                 }
 
                 else if (character.dy < 0.f && (prevPos.y-characterBounds.height/2.f)>=(platfBounds.top+platfBounds.height-5.f)) {
@@ -584,21 +643,19 @@ int main() {
         window.draw(backk);
         window.draw(background);
 
-        for (int i=0; i<platforms.size(); i++) {
-            window.draw(*platforms[i]);
+        for (int i=0; i<level.platforms.size(); i++) {
+            window.draw(*level.platforms[i]);
         }
 
-        for (auto& spike : spikes) {
+        for (auto& spike : level.spikes) {
             window.draw(spike);
         }
 
-        for (auto& i: checkpoints) {
+        for (auto& i: level.checkpoints) {
             window.draw(i);
         }
 
         window.draw(character);
-
-
 
 
         window.setView(window.getDefaultView());
@@ -607,5 +664,6 @@ int main() {
         window.display();
     }
 
+    level.clearLevel();
     return 0;
 }
