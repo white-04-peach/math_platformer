@@ -72,13 +72,13 @@ public:
     }
 
     void movement() {
-        if (Keyboard::isKeyPressed(Keyboard::Key::A)) {
+        if (Keyboard::isKeyPressed(Keyboard::Key::A) || Keyboard::isKeyPressed(Keyboard::Key::Left)) {
             move({-speed, 0.f});
             direct=-1.f;
             sprite.setScale({-0.4f, 0.4f});
             if (!isJump) animation();
         }
-        if (Keyboard::isKeyPressed(Keyboard::Key::D)) {
+        if (Keyboard::isKeyPressed(Keyboard::Key::D) || Keyboard::isKeyPressed(Keyboard::Key::Right)) {
             move({speed, 0.f});
             direct=1.f;
             sprite.setScale({0.4f, 0.4f});
@@ -374,8 +374,8 @@ public:
     vector<Platform*> platforms;
     vector<Spike> spikes;
     vector<Checkpoint> checkpoints;
-    //потом еще штуки будут, когда добавим их
-    //фон, кстати, тоже тут надо
+    //ГЇГ®ГІГ®Г¬ ГҐГ№ГҐ ГёГІГіГЄГЁ ГЎГіГ¤ГіГІ, ГЄГ®ГЈГ¤Г  Г¤Г®ГЎГ ГўГЁГ¬ ГЁГµ
+    //ГґГ®Г­, ГЄГ±ГІГ ГІГЁ, ГІГ®Г¦ГҐ ГІГіГІ Г­Г Г¤Г®
     Vector2f startPos;
 
     Level(){}
@@ -425,7 +425,7 @@ public:
 
 
             case 2:
-                //просто для теста, потом придумаем сам уровень
+                //ГЇГ°Г®Г±ГІГ® Г¤Г«Гї ГІГҐГ±ГІГ , ГЇГ®ГІГ®Г¬ ГЇГ°ГЁГ¤ГіГ¬Г ГҐГ¬ Г±Г Г¬ ГіГ°Г®ГўГҐГ­Гј
                 startPos={50.f, 660.f};
                 Platform* plat1=new Platform(); (*plat1).setPosition({0.f, 700.f}); (*plat1).medium_plat();
                 Platform* plat2=new Platform(); (*plat2).setPosition({450.f, 560.f}); (*plat2).small_plat();
