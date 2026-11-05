@@ -1,4 +1,4 @@
-#define VERSION 2
+#define VERSION 3
 
 #include <SFML/Graphics.hpp>
 #include <vector>
@@ -10,7 +10,6 @@
 
 using namespace sf;
 using namespace std;
-
 
 //........................CHARACTER..........................................
 
@@ -29,19 +28,15 @@ public:
     float dy=0.f;
     const float gravity=0.5f;
 
+    bool isMovingLeft = false;
+    bool isMovingRight = false;
+
     bool invuln=false;
     Clock invulnClock;
     Clock blinkClock;
     bool isBlink=false;
 
     Character(): sprite(textures[0]){
-        /*textures[0].loadFromFile("sprites/characters/dog/run_1.png");
-        textures[1].loadFromFile("sprites/characters/dog/run_4.png");
-        textures[2].loadFromFile("sprites/characters/dog/run_3.png");
-        textures[3].loadFromFile("sprites/characters/dog/run_22.png");
-        jumpTexture.loadFromFile("sprites/characters/dog/jump.png");*/
-
-
         textures[0].loadFromFile("sprites/characters/panda/run_1.png");
         textures[1].loadFromFile("sprites/characters/panda/run_2.png");
         textures[2].loadFromFile("sprites/characters/panda/run_3.png");
@@ -50,7 +45,7 @@ public:
 
         current=0;
         sprite.setTexture(textures[current], true);
-        sprite.setOrigin(textures[current].getSize().x/2.f, textures[current].getSize().y/2.f);
+        sprite.setOrigin({textures[current].getSize().x/2.f, textures[current].getSize().y/2.f});
         sprite.setScale({0.4f, 0.4f});
     }
 
@@ -72,13 +67,13 @@ public:
     }
 
     void movement() {
-        if (Keyboard::isKeyPressed(Keyboard::Key::A) || Keyboard::isKeyPressed(Keyboard::Key::Left)) {
+        if (isMovingLeft) {
             move({-speed, 0.f});
             direct=-1.f;
             sprite.setScale({-0.4f, 0.4f});
             if (!isJump) animation();
         }
-        if (Keyboard::isKeyPressed(Keyboard::Key::D) || Keyboard::isKeyPressed(Keyboard::Key::Right)) {
+        if (isMovingRight) {
             move({speed, 0.f});
             direct=1.f;
             sprite.setScale({0.4f, 0.4f});
@@ -87,19 +82,12 @@ public:
         dy+=gravity;
         move({0.f, dy});
 
-
-
         if (invuln){
             if (invulnClock.getElapsedTime().asSeconds()<=1.0f){
                 if (blinkClock.getElapsedTime().asSeconds()>=0.1f){
                     isBlink=!isBlink;
-                    if (isBlink){
-                        sprite.setColor(Color::White);
-                    }
-                    else{
-                        sprite.setColor(Color(255, 255, 255, 70));
-                    }
-
+                    if (isBlink) sprite.setColor(Color::White);
+                    else sprite.setColor(Color(255, 255, 255, 70));
                     blinkClock.restart();
                 }
             }
@@ -109,21 +97,16 @@ public:
                 sprite.setColor(Color::White);
             }
         }
-
-
     }
-
 
     void getDamage(){
         if (!invuln){
             invuln=true;
             invulnClock.restart();
             blinkClock.restart();
-
             setPosition({getPosition().x-(direct*50.f), getPosition().y});
         }
     }
-
 
     void landing() {
         isJump=false;
@@ -132,26 +115,19 @@ public:
         sprite.setScale({direct*0.4f, 0.4f});
     }
 
-    FloatRect getBounds() {
-        return getTransform().transformRect(sprite.getGlobalBounds());
-    }
-
+    FloatRect getBounds() { return getTransform().transformRect(sprite.getGlobalBounds()); }
     void draw(RenderTarget& target, RenderStates states) const override {
         states.transform *= getTransform();
         target.draw(sprite, states);
     }
 };
 
-
-
 // .........................PLATFORMS.......................
 
 class Platform: public Drawable, public Transformable {
 protected:
     Sprite sprite;
-    Texture large;
-    Texture medium;
-    Texture small;
+    Texture large, medium, small;
 
 public:
     Platform(): sprite(large) {
@@ -162,98 +138,48 @@ public:
         sprite.setScale({0.6f, 0.6f});
     }
 
-    void medium_plat() {
-        sprite.setTexture(medium, true);
-        sprite.setScale({0.36f, 0.36f});
-    }
-
-    void small_plat() {
-        sprite.setTexture(small, true);
-        sprite.setScale({0.47f, 0.47f});
-    }
-
-    FloatRect getBounds(){
-        return getTransform().transformRect(sprite.getGlobalBounds());
-    }
-
-
-
+    void medium_plat() { sprite.setTexture(medium, true); sprite.setScale({0.36f, 0.36f}); }
+    void small_plat() { sprite.setTexture(small, true); sprite.setScale({0.47f, 0.47f}); }
+    FloatRect getBounds() { return getTransform().transformRect(sprite.getGlobalBounds()); }
     virtual void movement(){}
-    virtual Vector2f getSpeed(){
-        return {0.f, 0.f};}
-
+    virtual Vector2f getSpeed(){ return {0.f, 0.f}; }
     virtual void onStepped() {}
     virtual bool isBroken() const { return false; }
     virtual void reset(){}
 
-
-
     void draw(RenderTarget& target, RenderStates states) const override {
-        states.transform *= getTransform();
-        target.draw(sprite, states);
+        states.transform *= getTransform(); target.draw(sprite, states);
     }
 };
-
 
 class MovingPlatform: public Platform{
 private:
-    float left;
-    float right;
-    float speed;
+    float left, right, speed;
     int direction;
-
 public:
     MovingPlatform(float startX, float startY, float l){
-
         setPosition({startX, startY});
-        left=startX;
-        right=startX+l;
-        speed=2.f;
-        direction=1;
+        left=startX; right=startX+l; speed=2.f; direction=1;
     }
-
-    Vector2f getSpeed() override{
-        return {speed*direction, 0.f};
-    }
-
+    Vector2f getSpeed() override{ return {speed*direction, 0.f}; }
     void movement() override{
         move({speed*direction, 0.f});
-
-        if (getPosition().x>=right)
-            direction=-1;
-        if (getPosition().x<=left)
-            direction=1;
+        if (getPosition().x>=right) direction=-1;
+        if (getPosition().x<=left) direction=1;
     }
 };
-
 
 class FragilePlatform: public Platform {
 private:
     Clock lifeTimer;
     bool broken = false, timerStarted = false;
     Vector2f basePos;
-
 public:
-    void setStartPos(Vector2f pos) {
-        basePos = pos;
-        setPosition(pos); }
-
-    void reset() {
-        broken = false;
-        timerStarted = false;
-        sprite.setColor(Color::White);
-        setPosition(basePos);
-        lifeTimer.restart(); }
-
-
+    void setStartPos(Vector2f pos) { basePos = pos; setPosition(pos); }
+    void reset() { broken = false; timerStarted = false; sprite.setColor(Color::White); setPosition(basePos); lifeTimer.restart(); }
     void onStepped() override {
-        if (!timerStarted) {
-                lifeTimer.restart();
-                timerStarted = true;
-                basePos = getPosition(); }
+        if (!timerStarted) { lifeTimer.restart(); timerStarted = true; basePos = getPosition(); }
     }
-
-
     void movement() override {
         if (timerStarted && !broken) {
             float time = lifeTimer.getElapsedTime().asSeconds();
@@ -265,10 +191,8 @@ public:
             }
         }
     }
-
     bool isBroken() const override { return broken; }
 };
-
 
 //......................SPLIKES....................................
 
@@ -283,15 +207,11 @@ public:
         triangle.setPoint(2, {30.f, 0.f});
         triangle.setFillColor(Color(200, 0, 0));
     }
-    FloatRect getBounds() const {
-        return getTransform().transformRect(triangle.getGlobalBounds()); }
-
+    FloatRect getBounds() const { return getTransform().transformRect(triangle.getGlobalBounds()); }
     void draw(RenderTarget& target, RenderStates states) const override {
         states.transform *= getTransform(); target.draw(triangle, states);
     }
 };
-
-
 
 //.................HEALTHBAR............................
 
@@ -299,7 +219,6 @@ class Health: public Drawable, public Transformable{
 private:
     Texture healthTex[4];
     Sprite sprite;
-
 public:
     Health(): sprite(healthTex[0]){
         healthTex[0].loadFromFile("sprites/health/3.png");
@@ -310,62 +229,104 @@ public:
         sprite.setPosition({20.f, 20.f});
         sprite.setScale({1.1f, 1.1f});
     }
-
     void updateHealth(int damageCount){
-        if (damageCount>=0 && damageCount<4){
-            sprite.setTexture(healthTex[damageCount], true);
-        }
+        if (damageCount>=0 && damageCount<4) sprite.setTexture(healthTex[damageCount], true);
     }
-
     void draw(RenderTarget& target, RenderStates states) const override {
-        states.transform *= getTransform();
-        target.draw(sprite, states);
+        states.transform *= getTransform(); target.draw(sprite, states);
     }
 };
-
 
 //..........................CHECKPOINT............................
 
 class Checkpoint: public Drawable, public Transformable{
 private:
-    Texture active;
-    Texture unactive;
+    Texture active, unactive, finishTex;
     Sprite sprite;
     bool activated=false;
-
+    bool isFinishFlag;
 public:
 #if VERSION==3
-    Checkpoint(float x, float y): sprite(unactive){
+    Checkpoint(float x, float y, bool isFinish = false): sprite(unactive){
 #else
-    Checkpoint(float x, float y){
+    Checkpoint(float x, float y, bool isFinish = false){
 #endif
-
-        unactive.loadFromFile("sprites/checkpoint_false.png");
-        active.loadFromFile("sprites/checkpoint_true.png");
-        sprite.setTexture(unactive, true);
-        sprite.setScale({0.5f, 0.5f});
+        isFinishFlag = isFinish;
+        if (isFinishFlag) {
+            finishTex.loadFromFile("sprites/final_checkpoint.png");
+            sprite.setTexture(finishTex, true);
+            sprite.setScale({0.2f, 0.2f}); // Флаг маленький
+        } else {
+            unactive.loadFromFile("sprites/checkpoint_false.png");
+            active.loadFromFile("sprites/checkpoint_true.png");
+            sprite.setTexture(unactive, true);
+            sprite.setScale({0.5f, 0.5f}); // Чекпоинты нормального размера
+        }
         setPosition({x, y});
     }
 
     bool activate(){
-        if (!activated){
-            activated=true;
-            sprite.setTexture(active, true);
-            return true;
-        }
+        if (!activated){ activated=true; sprite.setTexture(active, true); return true; }
         return false;
     }
-
-    FloatRect getBounds() {
-        return getTransform().transformRect(sprite.getGlobalBounds());
-    }
-
+    bool isFinish() const { return isFinishFlag; }
+    FloatRect getBounds() { return getTransform().transformRect(sprite.getGlobalBounds()); }
     void draw(RenderTarget& target, RenderStates states) const override {
-        states.transform *= getTransform();
-        target.draw(sprite, states);
+        states.transform *= getTransform(); target.draw(sprite, states);
     }
 };
 
+// ...................КНОПКИ...........................
+class Button : public Drawable, public Transformable {
+protected:
+    RectangleShape rect;
+    Text text;
+public:
+    Button(float x, float y, float w, float h, const string& label, Font& font) : text(font) {
+        rect.setSize({w, h});
+        rect.setFillColor(Color(80, 140, 80));
+        setPosition({x, y});
+        
+        text.setString(sf::String::fromUtf8(label.begin(), label.end()));
+        text.setCharacterSize(20);
+        text.setFillColor(Color::White);
+       
+#if VERSION==3
+        text.setOrigin({text.getLocalBounds().size.x / 2.f, text.getLocalBounds().size.y / 2.f});
+#else
+        text.setOrigin({text.getLocalBounds().width / 2.f, text.getLocalBounds().height / 2.f});
+#endif
+        text.setPosition({w / 2.f, h / 2.f});
+    }
+    
+    virtual void onClick() = 0;
+    bool isClicked(Vector2f mousePos) {
+        return rect.getGlobalBounds().contains(mousePos) && getTransform().transformRect(rect.getGlobalBounds()).contains(mousePos);
+    }
+    void draw(RenderTarget& target, RenderStates states) const override {
+        states.transform *= getTransform();
+        target.draw(rect, states);
+        target.draw(text, states);
+    }
+};
+
+class ButtonMenu : public Button {
+public:
+    ButtonMenu(float x, float y, float w, float h, const string& label, Font& font) : Button(x, y, w, h, label, font) {}
+    void onClick() override { }
+};
+
+class ButtonRetry : public Button {
+public:
+    ButtonRetry(float x, float y, float w, float h, const string& label, Font& font) : Button(x, y, w, h, label, font) {}
+    void onClick() override { }
+};
+
+class ButtonNext : public Button {
+public:
+    ButtonNext(float x, float y, float w, float h, const string& label, Font& font) : Button(x, y, w, h, label, font) {}
+    void onClick() override { }
+};
 
 //.........................LEVELS.......................................
 
@@ -373,9 +334,7 @@ class Level{
 public:
     vector<Platform*> platforms;
     vector<Spike> spikes;
-    vector<Checkpoint> checkpoints;
-    //ïîòîì åùå øòóêè áóäóò, êîãäà äîáàâèì èõ
-    //ôîí, êñòàòè, òîæå òóò íàäî
+    vector<Checkpoint*> checkpoints; // Вектор указателей
     Vector2f startPos;
 
     Level(){}
@@ -390,18 +349,13 @@ public:
                 Platform* plat2=new Platform(); (*plat2).setPosition({450.f, 560.f}); (*plat2).small_plat();
                 Platform* plat3=new Platform(); (*plat3).setPosition({250.f, 420.f}); (*plat3).small_plat();
                 Platform* plat4=new Platform(); (*plat4).setPosition({530.f, 265.f}); (*plat4).small_plat();
-
                 MovingPlatform* plat5=new MovingPlatform(750.f, 265.f, 600.f); (*plat5).medium_plat();
-
                 FragilePlatform* fragilePlat=new FragilePlatform();
-                (*fragilePlat).setStartPos({1500.f, 500.f});
-                (*fragilePlat).medium_plat();
-
+                (*fragilePlat).setStartPos({1500.f, 500.f}); (*fragilePlat).medium_plat();
                 Platform* plat6=new Platform(); (*plat6).setPosition({2000.f, 700.f}); (*plat6).medium_plat();
                 MovingPlatform* plat7=new MovingPlatform(2330.f, 550.f, 250.f); (*plat7).small_plat();
                 MovingPlatform* plat8=new MovingPlatform(2600.f, 400.f, 250.f); (*plat8).small_plat();
                 Platform* plat9=new Platform(); (*plat9).setPosition({3000.f, 750.f});(*plat9).medium_plat();
-
                 FragilePlatform* plat10=new FragilePlatform(); (*plat10).setStartPos({3100.f, 350.f}); (*plat10).small_plat();
                 Platform* plat11=new Platform(); (*plat11).setPosition({3400.f, 500.f}); (*plat11).medium_plat();
 
@@ -409,23 +363,16 @@ public:
 
                 Spike s1; s1.setPosition({2100.f, 700.f});
                 Spike s2; s2.setPosition({2350.f, 700.f});
-                Spike s3; s3.setPosition({3700.f, 500.f});
-                spikes.push_back(s1);
-                spikes.push_back(s2);
-                spikes.push_back(s3);
+                Spike s3; s3.setPosition({3600.f, 500.f});
+                spikes.push_back(s1); spikes.push_back(s2); spikes.push_back(s3);
 
-
-
-                Checkpoint checkP_1(610.f, 180.f);
-                Checkpoint checkP_2(2210.f, 615.f);
-                checkpoints.push_back(checkP_1);
-                checkpoints.push_back( checkP_2);
+                // СОЗДАЕМ ЧЕРЕЗ new
+                checkpoints.push_back(new Checkpoint(610.f, 180.f));
+                checkpoints.push_back(new Checkpoint(2210.f, 615.f));
+                checkpoints.push_back(new Checkpoint(3750.f, 418.f, true));
                 break;
             }
-
-
             case 2:
-                //ïðîñòî äëÿ òåñòà, ïîòîì ïðèäóìàåì ñàì óðîâåíü
                 startPos={50.f, 660.f};
                 Platform* plat1=new Platform(); (*plat1).setPosition({0.f, 700.f}); (*plat1).medium_plat();
                 Platform* plat2=new Platform(); (*plat2).setPosition({450.f, 560.f}); (*plat2).small_plat();
@@ -433,22 +380,21 @@ public:
                 Platform* plat4=new Platform(); (*plat4).setPosition({530.f, 265.f}); (*plat4).small_plat();
 
                 platforms={plat1, plat2, plat3, plat4};
+                checkpoints.push_back(new Checkpoint(2000.f, 500.f, true));
                 break;
         }
     }
 
     void clearLevel(){
-        for (int i=0; i<platforms.size(); i++) {
-            delete platforms[i];
-        }
+        for (int i=0; i<platforms.size(); i++) delete platforms[i];
         platforms.clear();
-        spikes.clear();
+        
+        for (int i=0; i<checkpoints.size(); i++) delete checkpoints[i]; // Очистка памяти
         checkpoints.clear();
+        
+        spikes.clear();
     }
 };
-
-
-
 
 int main() {
     RenderWindow window(VideoMode({1500, 900}), "Platformer");
@@ -460,11 +406,10 @@ int main() {
 
     Texture backgroundTex;
     backgroundTex.loadFromFile("sprites/background.jpg");
+    backgroundTex.setRepeated(true);
     Sprite background(backgroundTex);
-    background.setTexture(backgroundTex);
+    background.setTextureRect(sf::IntRect({0, 0}, {5000, 900}));
     background.setScale({1.5f, 1.5f});
-
-
 
     Level level;
     int levelNumb=1;
@@ -474,50 +419,73 @@ int main() {
     character.setPosition(level.startPos);
     Vector2f respawn=level.startPos;
 
-
     Health health;
     int damageCount=0;
+    
+    bool levelCompleted = false;
+
+    Font font;
+    font.openFromFile("/System/Library/Fonts/Supplemental/Arial.ttf");
+
+    RectangleShape winPanel({600.f, 400.f});
+    winPanel.setFillColor(Color(200, 230, 200, 220));
+    winPanel.setPosition({450.f, 250.f});
+
+    Text winText(font);
+    winText.setString(L"УРОВЕНЬ ПРОЙДЕН!");
+    winText.setCharacterSize(40);
+    winText.setFillColor(Color(20, 40, 20));
+    winText.setPosition({550.f, 300.f});
+
+    // БЕЗ БУКВЫ L
+    ButtonMenu btnMenu(550.f, 400.f, 400.f, 50.f, "В главное меню", font);
+    ButtonRetry btnRetry(550.f, 470.f, 400.f, 50.f, "Пройти уровень еще раз", font);
+    ButtonNext btnNext(550.f, 540.f, 400.f, 50.f, "Следующий уровень", font);
 
     while (window.isOpen())
     {
-#if VERSION==3
         while (const std::optional event = window.pollEvent()) {
-            if (event->is<Event::Closed>())
-                window.close();
+            if (event->is<Event::Closed>()) window.close();
+                
             if (const auto* keyPressed = event->getIf<Event::KeyPressed>()) {
-                if (keyPressed->code == Keyboard::Key::Space) {
-                    character.jump();
+                if (keyPressed->code == Keyboard::Key::Space) character.jump();
+                if (keyPressed->code == Keyboard::Key::A || keyPressed->code == Keyboard::Key::Left) character.isMovingLeft = true;
+                if (keyPressed->code == Keyboard::Key::D || keyPressed->code == Keyboard::Key::Right) character.isMovingRight = true;
+            }
+            if (const auto* keyReleased = event->getIf<Event::KeyReleased>()) {
+                if (keyReleased->code == Keyboard::Key::A || keyReleased->code == Keyboard::Key::Left) character.isMovingLeft = false;
+                if (keyReleased->code == Keyboard::Key::D || keyReleased->code == Keyboard::Key::Right) character.isMovingRight = false;
+            }
+            
+            if (levelCompleted) {
+                if (const auto* mouse = event->getIf<Event::MouseButtonPressed>()) {
+                    if (mouse->button == Mouse::Button::Left) {
+                        Vector2f mousePos = Vector2f(mouse->position);
+                        
+                        if (btnMenu.isClicked(mousePos)) {
+                            levelCompleted = false; levelNumb = 1; level.create(levelNumb); character.setPosition(level.startPos);
+                        }
+                        else if (btnRetry.isClicked(mousePos)) {
+                            levelCompleted = false; level.create(levelNumb); character.setPosition(level.startPos);
+                        }
+                        else if (btnNext.isClicked(mousePos)) {
+                            levelCompleted = false; levelNumb++; if (levelNumb > 2) levelNumb = 1;
+                            level.create(levelNumb); character.setPosition(level.startPos);
+                        }
+                    }
                 }
             }
         }
-#else
-        Event event;
-        while (window.pollEvent(event))
-        {
-            if(event.type==Event::Closed)
-                window.close();
-
-            if(event.type==Event::KeyPressed) {
-                if(event.key.code==Keyboard::Key::Space){
-                    character.jump();
-                }
-            }
-        }
-#endif
-
 
         Vector2f prevPos=character.getPosition();
-
         character.movement();
 
         for (int i=0; i<level.platforms.size(); i++)
             (*level.platforms[i]).movement();
 
-
         if (character.getPosition().y>900.f) {
             damageCount++;
             health.updateHealth(damageCount);
-
             character.setPosition(respawn);
             character.direct=1.f;
             character.landing();
@@ -530,39 +498,25 @@ int main() {
         }
 
         FloatRect characterBounds=character.getBounds();
-
         bool hitSpike=false;
         for (auto& spike: level.spikes) {
-#if VERSION==3
-            if (characterBounds.findIntersection(spike.getBounds())) {
-                hitSpike=true;
-                break;
-            }
-#else
-            if (characterBounds.intersects(spike.getBounds())) {
-                hitSpike=true;
-                break;
-            }
-#endif
+            if (characterBounds.findIntersection(spike.getBounds())) { hitSpike=true; break; }
         }
 
         if (hitSpike){
-            if (!character.invuln){
-                character.getDamage();
-                damageCount++;
-                health.updateHealth(damageCount);
-            }
+            if (!character.invuln){ character.getDamage(); damageCount++; health.updateHealth(damageCount); }
         }
 
-
-        for (auto& checkpoint: level.checkpoints){
-#if VERSION==3
-            if (characterBounds.findIntersection(checkpoint.getBounds())){
-#else
-            if (characterBounds.intersects(checkpoint.getBounds())) {
-#endif
-                if (checkpoint.activate()){
-                    respawn=checkpoint.getPosition();
+        
+        for (auto* checkpoint: level.checkpoints){
+            if (characterBounds.findIntersection(checkpoint->getBounds())){
+                if (checkpoint->isFinish()) {
+                    levelCompleted = true;
+                }
+                else {
+                    if (checkpoint->activate()){
+                        respawn=checkpoint->getPosition();
+                    }
                 }
             }
         }
@@ -571,7 +525,6 @@ int main() {
 
         for (int i=0; i<level.platforms.size(); i++) {
             FloatRect platfBounds=(*level.platforms[i]).getBounds();
-#if VERSION==3
             if (characterBounds.findIntersection(platfBounds)) {
                 if ((*level.platforms[i]).isBroken()) continue;
                 if (character.dy >= 0.f && (prevPos.y + characterBounds.size.y / 2.f) <= platfBounds.position.y + 5.f) {
@@ -587,79 +540,43 @@ int main() {
                     character.dy = 0.f;
                 }
                 else {
-                    if (prevPos.x < platfBounds.position.x) {
-                        character.setPosition({platfBounds.position.x - characterBounds.size.x / 2.f, character.getPosition().y});
-                    }
-                    else if (prevPos.x > platfBounds.position.x + platfBounds.size.x) {
-                        character.setPosition({platfBounds.position.x + platfBounds.size.x + characterBounds.size.x / 2.f, character.getPosition().y});
-                    }
+                    if (prevPos.x < platfBounds.position.x) character.setPosition({platfBounds.position.x - characterBounds.size.x / 2.f, character.getPosition().y});
+                    else if (prevPos.x > platfBounds.position.x + platfBounds.size.x) character.setPosition({platfBounds.position.x + platfBounds.size.x + characterBounds.size.x / 2.f, character.getPosition().y});
                 }
             }
-#else
-            if (characterBounds.intersects(platfBounds)) {
-                if ((*level.platforms[i]).isBroken()) continue;
-                if (character.dy>=0.f && (prevPos.y+characterBounds.height/2.f)<= platfBounds.top+5.f){
-                    float pos_y=platfBounds.top-(characterBounds.height/2.f);
-                    character.setPosition(character.getPosition().x, pos_y);
-                    character.landing();
-                    onPlatform=true;
-                    (*level.platforms[i]).onStepped();
-                    character.move((*level.platforms[i]).getSpeed());
-                }
-
-                else if (character.dy < 0.f && (prevPos.y-characterBounds.height/2.f)>=(platfBounds.top+platfBounds.height-5.f)) {
-                    character.setPosition(character.getPosition().x, prevPos.y);
-                    character.dy=0.f;
-                }
-
-                else {
-                    if (prevPos.x<platfBounds.left){
-                        character.setPosition(platfBounds.left-characterBounds.width/2.f, character.getPosition().y);
-                    }
-
-                    else if (prevPos.x>platfBounds.left+platfBounds.width) {
-                        character.setPosition(platfBounds.left+platfBounds.width+characterBounds.width/2.f, character.getPosition().y);
-                    }
-                }
-            }
-#endif
         }
 
-        if (!onPlatform)
-            character.isJump=true;
+        if (!onPlatform) character.isJump=true;
 
         float cameraX=character.getPosition().x +250.f;
-        if (cameraX<750.f)
-            cameraX=750.f;
-        if (cameraX>3150.f)
-            cameraX=3150.f;
+        if (cameraX<750.f) cameraX=750.f;
+        if (cameraX>3150.f) cameraX=3150.f;
         view.setCenter({cameraX, 450.f});
-
 
         window.clear();
         window.setView(view);
 
-
         window.draw(backk);
         window.draw(background);
 
-        for (int i=0; i<level.platforms.size(); i++) {
-            window.draw(*level.platforms[i]);
+        for (int i=0; i<level.platforms.size(); i++) window.draw(*level.platforms[i]);
+        for (auto& spike : level.spikes) window.draw(spike);
+        
+        for (auto* i: level.checkpoints) {
+            window.draw(*i);
         }
-
-        for (auto& spike : level.spikes) {
-            window.draw(spike);
-        }
-
-        for (auto& i: level.checkpoints) {
-            window.draw(i);
-        }
-
+        
         window.draw(character);
-
-
         window.setView(window.getDefaultView());
         window.draw(health);
+        
+        if (levelCompleted) {
+            window.draw(winPanel);
+            window.draw(winText);
+            window.draw(btnMenu);
+            window.draw(btnRetry);
+            window.draw(btnNext);
+        }
 
         window.display();
     }
