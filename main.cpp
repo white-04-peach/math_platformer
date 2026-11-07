@@ -1,8 +1,9 @@
-#define VERSION 3
+#define VERSION 2
 
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <string>
+#include <functional>
 
 #if VERSION==3
     #include <optional>
@@ -205,7 +206,7 @@ public:
         triangle.setPoint(0, {0.f, 0.f});
         triangle.setPoint(1, {15.f, -25.f});
         triangle.setPoint(2, {30.f, 0.f});
-        triangle.setFillColor(Color(200, 0, 0));
+        triangle.setFillColor(Color(32, 58, 39));
     }
     FloatRect getBounds() const { return getTransform().transformRect(triangle.getGlobalBounds()); }
     void draw(RenderTarget& target, RenderStates states) const override {
@@ -241,68 +242,206 @@ public:
 
 class Checkpoint: public Drawable, public Transformable{
 private:
-    Texture active, unactive, finishTex;
+    Texture textures[2];
     Sprite sprite;
     bool activated=false;
-    bool isFinishFlag;
 public:
 #if VERSION==3
-    Checkpoint(float x, float y, bool isFinish = false): sprite(unactive){
+    Checkpoint(float x, float y): sprite(textures[0]){
 #else
-    Checkpoint(float x, float y, bool isFinish = false){
+    Checkpoint(float x, float y){
 #endif
-        isFinishFlag = isFinish;
-        if (isFinishFlag) {
-            finishTex.loadFromFile("sprites/final_checkpoint.png");
-            sprite.setTexture(finishTex, true);
-            sprite.setScale({0.2f, 0.2f}); // Флаг маленький
-        } else {
-            unactive.loadFromFile("sprites/checkpoint_false.png");
-            active.loadFromFile("sprites/checkpoint_true.png");
-            sprite.setTexture(unactive, true);
-            sprite.setScale({0.5f, 0.5f}); // Чекпоинты нормального размера
-        }
+        textures[0].loadFromFile("sprites/checkpoint_false.png");
+        textures[1].loadFromFile("sprites/checkpoint_true.png");
+        sprite.setTexture(textures[0], true);
+
+
+        sprite.setTexture(textures[0], true);
+        sprite.setScale({0.5f, 0.5f});
         setPosition({x, y});
     }
 
+
     bool activate(){
-        if (!activated){ activated=true; sprite.setTexture(active, true); return true; }
+        if (!activated){
+            activated=true;
+            sprite.setTexture(textures[1], true);
+            return true;
+        }
         return false;
     }
-    bool isFinish() const { return isFinishFlag; }
-    FloatRect getBounds() { return getTransform().transformRect(sprite.getGlobalBounds()); }
+
+    FloatRect getBounds(){
+        return getTransform().transformRect(sprite.getGlobalBounds());}
+
     void draw(RenderTarget& target, RenderStates states) const override {
         states.transform *= getTransform(); target.draw(sprite, states);
     }
 };
 
-// ...................КНОПКИ...........................
+
+//......................COIN...........................................
+
+class Coin: public Drawable, public Transformable {
+private:
+    Sprite sprite;
+    Texture textures[8];
+    Clock animationClock;
+    int current;
+
+public:
+    bool onScreen=true;
+
+    Coin():sprite(textures[0]) {
+        textures[0].loadFromFile("sprites/Coins/coin_01.png");
+        textures[1].loadFromFile("sprites/Coins/coin_02.png");
+        textures[2].loadFromFile("sprites/Coins/coin_03.png");
+        textures[3].loadFromFile("sprites/Coins/coin_04.png");
+        textures[4].loadFromFile("sprites/Coins/coin_05.png");
+        textures[5].loadFromFile("sprites/Coins/coin_06.png");
+        textures[6].loadFromFile("sprites/Coins/coin_07.png");
+        textures[7].loadFromFile("sprites/Coins/coin_08.png");
+        current=0;
+        sprite.setTexture(textures[0], true);
+
+    }
+
+
+    void animation(){
+        if (animationClock.getElapsedTime().asSeconds()>=0.15f) {
+            current=(current+1)%8;
+            sprite.setTexture(textures[current], true);
+            animationClock.restart();
+        }
+    }
+
+
+    FloatRect getBounds() const {
+        return getTransform().transformRect(sprite.getGlobalBounds());
+    }
+
+
+    void draw(RenderTarget& target, RenderStates states) const override {
+        if (onScreen){
+            states.transform *= getTransform();
+            target.draw(sprite, states);
+        }
+    }
+};
+
+
+
+//..........................ENEMY....................................
+
+class Enemy: public Drawable, public Transformable {
+private:
+    Texture textures[4];
+    int current;
+    Clock animationClock;
+    float leftBound;
+    float rightBound;
+    float speed=1.5f;
+    Sprite sprite;
+    float direct=1.f;
+
+public:
+    Enemy(float start_x, float start_y, float distance): sprite(textures[0]){
+        textures[0].loadFromFile("sprites/run1.png");
+        textures[1].loadFromFile("sprites/run2.png");
+        textures[2].loadFromFile("sprites/run3.png");
+        textures[3].loadFromFile("sprites/run4.png");
+        current=0;
+
+        sprite.setTexture(textures[current], true);
+        sprite.setOrigin({textures[current].getSize().x/2.f, textures[current].getSize().y/2.f});
+        sprite.setScale({0.6f, 0.6f});
+
+        setPosition({start_x, start_y});
+        leftBound=start_x-distance/2.f;
+        rightBound=start_x+distance/2.f;
+    }
+
+
+    void animation(){
+        if (animationClock.getElapsedTime().asSeconds()>=0.20f){
+            current=(current+1)%4;
+            sprite.setTexture(textures[current], true);
+            animationClock.restart();
+        }
+    }
+
+
+    void movement(){
+        move({speed*direct, 0.f});
+        animation();
+        if(getPosition().x>=rightBound && direct>0.f){
+            direct=-1.f;
+            sprite.setScale({-0.6f, 0.6f});
+        }
+        else if(getPosition().x<=leftBound && direct<0.f){
+            direct=1.f;
+            sprite.setScale({0.6f, 0.6f});
+        }
+    }
+
+
+    FloatRect getBounds() const {
+        return getTransform().transformRect(sprite.getGlobalBounds());
+    }
+
+
+    void draw(RenderTarget& target, RenderStates states) const override {
+        states.transform *= getTransform();
+        target.draw(sprite, states);
+    }
+};
+
+
+
+
+// ...................Button...........................
 class Button : public Drawable, public Transformable {
 protected:
     RectangleShape rect;
     Text text;
+    function<void()> action;
+
 public:
-    Button(float x, float y, float w, float h, const string& label, Font& font) : text(font) {
+#if VERSION==3
+    Button(float x, float y, float w, float h, const string& label, Font& font, function<void()> action1): text(font){
+#else
+    Button(float x, float y, float w, float h, const string& label, Font& font, function<void()> action1) {
+        text.setFont(font);
+#endif
+        action=action1;
+
         rect.setSize({w, h});
         rect.setFillColor(Color(80, 140, 80));
         setPosition({x, y});
-        
-        text.setString(sf::String::fromUtf8(label.begin(), label.end()));
-        text.setCharacterSize(20);
+
+        text.setString(label);
+        text.setCharacterSize(30);
         text.setFillColor(Color::White);
-       
+
 #if VERSION==3
         text.setOrigin({text.getLocalBounds().size.x / 2.f, text.getLocalBounds().size.y / 2.f});
 #else
-        text.setOrigin({text.getLocalBounds().width / 2.f, text.getLocalBounds().height / 2.f});
+        FloatRect textRect=text.getLocalBounds();
+        text.setOrigin({textRect.left + textRect.width / 2.f, textRect.top + textRect.height / 2.f});
 #endif
         text.setPosition({w / 2.f, h / 2.f});
     }
-    
-    virtual void onClick() = 0;
-    bool isClicked(Vector2f mousePos) {
-        return rect.getGlobalBounds().contains(mousePos) && getTransform().transformRect(rect.getGlobalBounds()).contains(mousePos);
+
+    FloatRect getBounds(){
+        return getTransform().transformRect(rect.getGlobalBounds());
     }
+
+    void pressed(Vector2f mousePos){
+        if(getBounds().contains(mousePos))
+            action();
+    }
+
+
     void draw(RenderTarget& target, RenderStates states) const override {
         states.transform *= getTransform();
         target.draw(rect, states);
@@ -310,23 +449,6 @@ public:
     }
 };
 
-class ButtonMenu : public Button {
-public:
-    ButtonMenu(float x, float y, float w, float h, const string& label, Font& font) : Button(x, y, w, h, label, font) {}
-    void onClick() override { }
-};
-
-class ButtonRetry : public Button {
-public:
-    ButtonRetry(float x, float y, float w, float h, const string& label, Font& font) : Button(x, y, w, h, label, font) {}
-    void onClick() override { }
-};
-
-class ButtonNext : public Button {
-public:
-    ButtonNext(float x, float y, float w, float h, const string& label, Font& font) : Button(x, y, w, h, label, font) {}
-    void onClick() override { }
-};
 
 //.........................LEVELS.......................................
 
@@ -334,16 +456,23 @@ class Level{
 public:
     vector<Platform*> platforms;
     vector<Spike> spikes;
-    vector<Checkpoint*> checkpoints; // Вектор указателей
+    vector<Checkpoint*> checkpoints;
     Vector2f startPos;
+    RectangleShape levelEnd;
+    vector<Coin*> coins;
+    vector<Enemy*> enemies;
 
     Level(){}
     void create(int levelNumber){
         clearLevel();
 
+        levelEnd.setSize({60.f, 100.f});
+        levelEnd.setFillColor(Color(138, 43, 226));
+
         switch(levelNumber){
             case 1:{
                 startPos={50.f, 660.f};
+                levelEnd.setPosition({3800.f, 400.f});
 
                 Platform* plat1=new Platform(); (*plat1).setPosition({0.f, 700.f}); (*plat1).medium_plat();
                 Platform* plat2=new Platform(); (*plat2).setPosition({450.f, 560.f}); (*plat2).small_plat();
@@ -364,12 +493,21 @@ public:
                 Spike s1; s1.setPosition({2100.f, 700.f});
                 Spike s2; s2.setPosition({2350.f, 700.f});
                 Spike s3; s3.setPosition({3600.f, 500.f});
-                spikes.push_back(s1); spikes.push_back(s2); spikes.push_back(s3);
+                Spike s4; s4.setPosition({3565.f, 500.f});
+                spikes.push_back(s1); spikes.push_back(s2); spikes.push_back(s3); spikes.push_back(s4);
 
-                // СОЗДАЕМ ЧЕРЕЗ new
                 checkpoints.push_back(new Checkpoint(610.f, 180.f));
                 checkpoints.push_back(new Checkpoint(2210.f, 615.f));
-                checkpoints.push_back(new Checkpoint(3750.f, 418.f, true));
+
+
+                vector<Vector2f> coin_positions={ {510.f, 500.f},{920.f, 200.f}, {1200.f, 200.f}, {2600.f, 250.f}};
+                for (int i=0; i<coin_positions.size(); i++) {
+                    Coin* c=new Coin();
+                    (*c).setPosition(coin_positions[i]);
+                    coins.push_back(c);
+                }
+
+
                 break;
             }
             case 2:
@@ -380,7 +518,6 @@ public:
                 Platform* plat4=new Platform(); (*plat4).setPosition({530.f, 265.f}); (*plat4).small_plat();
 
                 platforms={plat1, plat2, plat3, plat4};
-                checkpoints.push_back(new Checkpoint(2000.f, 500.f, true));
                 break;
         }
     }
@@ -388,11 +525,17 @@ public:
     void clearLevel(){
         for (int i=0; i<platforms.size(); i++) delete platforms[i];
         platforms.clear();
-        
-        for (int i=0; i<checkpoints.size(); i++) delete checkpoints[i]; // Очистка памяти
+
+        for (int i=0; i<checkpoints.size(); i++) delete checkpoints[i];
         checkpoints.clear();
-        
+
         spikes.clear();
+
+        for (int i=0; i<coins.size(); i++) delete coins[i];
+        coins.clear();
+
+        for (int i=0; i<enemies.size(); i++) delete enemies[i];
+        enemies.clear();
     }
 };
 
@@ -400,6 +543,13 @@ int main() {
     RenderWindow window(VideoMode({1500, 900}), "Platformer");
     window.setFramerateLimit(60);
     View view(FloatRect({0.f, 0.f}, {1500.f, 900.f}));
+
+    Font font;
+#if VERSION==3
+    font.openFromFile("/System/Library/Fonts/Supplemental/Arial.ttf");
+#else
+    font.loadFromFile("pix2.ttf");
+#endif
 
     RectangleShape backk({2850.f, 900.f});
     backk.setFillColor(Color(172, 231, 242));
@@ -421,32 +571,105 @@ int main() {
 
     Health health;
     int damageCount=0;
-    
-    bool levelCompleted = false;
 
-    Font font;
-    font.openFromFile("/System/Library/Fonts/Supplemental/Arial.ttf");
+    int countCoins=0;
+    Texture moneyTex;
+    moneyTex.loadFromFile("sprites/Coins/coin_01.png");
+    Sprite moneySprite(moneyTex);
+    moneySprite.setTexture(moneyTex, true);
+    moneySprite.setPosition({20.f, 70.f});
+    moneySprite.setScale({0.8f, 0.8f});
+
+
+#if VERSION==3
+    Text moneyText(font);
+#else
+    Text moneyText;
+    moneyText.setFont(font);
+#endif
+    moneyText.setString("x 0");
+    moneyText.setCharacterSize(35);
+    moneyText.setFillColor(Color::White);
+    moneyText.setPosition({70.f, 65.f});
+
+
+    bool levelCompleted = false;
 
     RectangleShape winPanel({600.f, 400.f});
     winPanel.setFillColor(Color(200, 230, 200, 220));
     winPanel.setPosition({450.f, 250.f});
 
-    Text winText(font);
-    winText.setString(L"УРОВЕНЬ ПРОЙДЕН!");
-    winText.setCharacterSize(40);
-    winText.setFillColor(Color(20, 40, 20));
-    winText.setPosition({550.f, 300.f});
 
-    // БЕЗ БУКВЫ L
-    ButtonMenu btnMenu(550.f, 400.f, 400.f, 50.f, "В главное меню", font);
-    ButtonRetry btnRetry(550.f, 470.f, 400.f, 50.f, "Пройти уровень еще раз", font);
-    ButtonNext btnNext(550.f, 540.f, 400.f, 50.f, "Следующий уровень", font);
+#if VERSION==3
+    Text winText(font);
+#else
+    Text winText;
+    winText.setFont(font);
+#endif
+
+
+    winText.setString("LEVEL COMPLETED!");
+
+    winText.setCharacterSize(55);
+    winText.setFillColor(Color(20, 40, 20));
+    winText.setPosition({550.f, 270.f});
+
+
+    int totalCoins=0;
+#if VERSION==3
+    Text collectedText(font);
+    Text totalText(font);
+#else
+    Text collectedText;
+    Text totalText;
+    collectedText.setFont(font);
+    totalText.setFont(font);
+#endif
+
+    collectedText.setCharacterSize(30);
+    collectedText.setFillColor(Color(40, 70, 40));
+    collectedText.setPosition({480.f, 350.f});
+
+    totalText.setCharacterSize(30);
+    totalText.setFillColor(Color(40, 70, 40));
+    totalText.setPosition({480.f, 385.f});
+
+
+    Button btnMenu(550.f, 440.f, 400.f, 50.f, "Main menu", font, [&](){totalCoins+=countCoins;
+                                                                        });
+
+    Button btnRetry(550.f, 510.f, 400.f, 50.f, "Retry level", font, [&](){ levelCompleted=false;
+                                                                            level.create(levelNumb);
+                                                                            character.setPosition(level.startPos);
+                                                                            respawn=level.startPos;
+                                                                            damageCount=0;
+                                                                            health.updateHealth(0);
+                                                                            moneyText.setString("x 0");
+                                                                            totalCoins+=countCoins;
+                                                                            countCoins=0;
+                                                                            });
+
+
+    Button btnNext(550.f, 580.f, 400.f, 50.f, "Next level", font, [&](){levelCompleted=false;
+                                                                        levelNumb++;
+                                                                        level.create(levelNumb);
+                                                                        character.setPosition(level.startPos);
+                                                                        respawn=level.startPos;
+                                                                        damageCount=0;
+                                                                        health.updateHealth(0);
+                                                                        moneyText.setString("x 0");
+                                                                        totalCoins+=countCoins;
+                                                                        countCoins=0;
+                                                                        });
+
+
 
     while (window.isOpen())
     {
+#if VERSION==3
         while (const std::optional event = window.pollEvent()) {
             if (event->is<Event::Closed>()) window.close();
-                
+
             if (const auto* keyPressed = event->getIf<Event::KeyPressed>()) {
                 if (keyPressed->code == Keyboard::Key::Space) character.jump();
                 if (keyPressed->code == Keyboard::Key::A || keyPressed->code == Keyboard::Key::Left) character.isMovingLeft = true;
@@ -456,26 +679,58 @@ int main() {
                 if (keyReleased->code == Keyboard::Key::A || keyReleased->code == Keyboard::Key::Left) character.isMovingLeft = false;
                 if (keyReleased->code == Keyboard::Key::D || keyReleased->code == Keyboard::Key::Right) character.isMovingRight = false;
             }
-            
-            if (levelCompleted) {
-                if (const auto* mouse = event->getIf<Event::MouseButtonPressed>()) {
+
+#else
+        Event event;
+        while(window.pollEvent(event)){
+            if(event.type==Event::Closed)
+                window.close();
+
+            if (event.type==Event::KeyPressed){
+                if (event.key.code==Keyboard::Space)
+                    character.jump();
+                if (event.key.code==Keyboard::A || event.key.code==Keyboard::Left)
+                    character.isMovingLeft=true;
+                if (event.key.code==Keyboard::D || event.key.code==Keyboard::Right)
+                    character.isMovingRight=true;
+            }
+            if (event.type==Event::KeyReleased){
+                if (event.key.code==Keyboard::A || event.key.code==Keyboard::Left)
+                    character.isMovingLeft=false;
+                if (event.key.code==Keyboard::D || event.key.code==Keyboard::Right)
+                    character.isMovingRight=false;
+            }
+
+#endif
+
+
+#if VERSION==3
+            if (levelCompleted){
+                if (const auto* mouse = event->getIf<Event::MouseButtonPressed>()){
                     if (mouse->button == Mouse::Button::Left) {
                         Vector2f mousePos = Vector2f(mouse->position);
-                        
-                        if (btnMenu.isClicked(mousePos)) {
-                            levelCompleted = false; levelNumb = 1; level.create(levelNumb); character.setPosition(level.startPos);
-                        }
-                        else if (btnRetry.isClicked(mousePos)) {
-                            levelCompleted = false; level.create(levelNumb); character.setPosition(level.startPos);
-                        }
-                        else if (btnNext.isClicked(mousePos)) {
-                            levelCompleted = false; levelNumb++; if (levelNumb > 2) levelNumb = 1;
-                            level.create(levelNumb); character.setPosition(level.startPos);
-                        }
+                        btnMenu.pressed(mousePos);
+                        btnRetry.pressed(mousePos);
+                        btnNext.pressed(mousePos);
                     }
                 }
             }
+
+#else
+            if (levelCompleted){
+                if (event.type==Event::MouseButtonPressed){
+                    if (event.mouseButton.button==Mouse::Left){
+                        Vector2f mousePos=window.mapPixelToCoords(Mouse::getPosition(window));
+                        btnMenu.pressed(mousePos);
+                        btnRetry.pressed(mousePos);
+                        btnNext.pressed(mousePos);
+                    }
+                }
+            }
+#endif
+
         }
+
 
         Vector2f prevPos=character.getPosition();
         character.movement();
@@ -498,33 +753,88 @@ int main() {
         }
 
         FloatRect characterBounds=character.getBounds();
-        bool hitSpike=false;
-        for (auto& spike: level.spikes) {
-            if (characterBounds.findIntersection(spike.getBounds())) { hitSpike=true; break; }
+         bool hitSpike = false;
+        for (auto& spike : level.spikes) {
+#if VERSION==3
+            if (characterBounds.findIntersection(spike.getBounds())) { hitSpike = true; break; }
+#else
+            if (characterBounds.intersects(spike.getBounds())){
+                    hitSpike = true;
+                    break;}
+#endif
         }
 
         if (hitSpike){
-            if (!character.invuln){ character.getDamage(); damageCount++; health.updateHealth(damageCount); }
+            if (!character.invuln){
+                character.getDamage();
+                damageCount++;
+                health.updateHealth(damageCount);
+            }
         }
 
-        
+
         for (auto* checkpoint: level.checkpoints){
+#if VERSION==3
             if (characterBounds.findIntersection(checkpoint->getBounds())){
-                if (checkpoint->isFinish()) {
-                    levelCompleted = true;
-                }
-                else {
-                    if (checkpoint->activate()){
-                        respawn=checkpoint->getPosition();
-                    }
+#else
+            if (characterBounds.intersects(checkpoint->getBounds())){
+#endif
+                if (checkpoint->activate()) {
+                    respawn=checkpoint->getPosition();
                 }
             }
         }
+
+
+        for (int i=0; i<level.coins.size(); i++) {
+            if (level.coins[i]->onScreen) {
+                level.coins[i]->animation();
+#if VERSION==3
+                if (characterBounds.findIntersection(level.coins[i]->getBounds())){
+#else
+                if (characterBounds.intersects(level.coins[i]->getBounds())){
+#endif
+                    level.coins[i]->onScreen=false;
+                    countCoins++;
+                    moneyText.setString("x " + to_string(countCoins));
+                }
+            }
+        }
+
+
+        for (int i=0; i<level.enemies.size(); i++) {
+#if VERSION==3
+            if (characterBounds.findIntersection(level.enemies[i]->getBounds())){
+#else
+            if (characterBounds.intersects(level.enemies[i]->getBounds())){
+#endif
+                if (!character.invuln) {
+                    character.getDamage();
+                    damageCount++;
+                    health.updateHealth(damageCount);
+                }
+            }
+        }
+
+
+#if VERSION==3
+        if (characterBounds.findIntersection(level.levelEnd.getGlobalBounds()) && !levelCompleted) {
+#else
+        if (characterBounds.intersects(level.levelEnd.getGlobalBounds()) && !levelCompleted){
+#endif
+            levelCompleted=true;
+            collectedText.setString("Collected coins: " + to_string(countCoins));
+            totalText.setString("Total coins: " + to_string(totalCoins+countCoins));
+        }
+
+
 
         bool onPlatform=false;
 
         for (int i=0; i<level.platforms.size(); i++) {
             FloatRect platfBounds=(*level.platforms[i]).getBounds();
+
+#if VERSION==3
             if (characterBounds.findIntersection(platfBounds)) {
                 if ((*level.platforms[i]).isBroken()) continue;
                 if (character.dy >= 0.f && (prevPos.y + characterBounds.size.y / 2.f) <= platfBounds.position.y + 5.f) {
@@ -544,6 +854,28 @@ int main() {
                     else if (prevPos.x > platfBounds.position.x + platfBounds.size.x) character.setPosition({platfBounds.position.x + platfBounds.size.x + characterBounds.size.x / 2.f, character.getPosition().y});
                 }
             }
+#else
+            if (characterBounds.intersects(platfBounds)) {
+                if ((*level.platforms[i]).isBroken())
+                    continue;
+                if (character.dy >= 0.f && (prevPos.y + characterBounds.height / 2.f) <= platfBounds.top + 5.f) {
+                    float pos_y = platfBounds.top - (characterBounds.height / 2.f);
+                    character.setPosition(character.getPosition().x, pos_y);
+                    character.landing();
+                    onPlatform = true;
+                    (*level.platforms[i]).onStepped();
+                    character.move((*level.platforms[i]).getSpeed());
+                }
+                else if (character.dy < 0.f && (prevPos.y - characterBounds.height / 2.f) >= (platfBounds.top + platfBounds.height - 5.f)) {
+                    character.setPosition(character.getPosition().x, prevPos.y);
+                    character.dy = 0.f;
+                }
+                else {
+                    if (prevPos.x < platfBounds.left) character.setPosition(platfBounds.left - characterBounds.width / 2.f, character.getPosition().y);
+                    else if (prevPos.x > platfBounds.left + platfBounds.width) character.setPosition(platfBounds.left + platfBounds.width + characterBounds.width / 2.f, character.getPosition().y);
+                }
+            }
+#endif
         }
 
         if (!onPlatform) character.isJump=true;
@@ -561,22 +893,38 @@ int main() {
 
         for (int i=0; i<level.platforms.size(); i++) window.draw(*level.platforms[i]);
         for (auto& spike : level.spikes) window.draw(spike);
-        
-        for (auto* i: level.checkpoints) {
+
+        for (auto* i: level.checkpoints){
             window.draw(*i);
+
         }
-        
+
+        for (int i=0; i<level.coins.size(); i++) {
+            window.draw(*level.coins[i]);
+        }
+
+        for (int i=0; i<level.enemies.size(); i++) {
+            window.draw(*level.enemies[i]);
+        }
+
+
         window.draw(character);
         window.setView(window.getDefaultView());
         window.draw(health);
-        
+        window.draw(moneySprite);
+        window.draw(moneyText);
+
         if (levelCompleted) {
             window.draw(winPanel);
             window.draw(winText);
             window.draw(btnMenu);
             window.draw(btnRetry);
             window.draw(btnNext);
+            window.draw(collectedText);
+            window.draw(totalText);
         }
+
+        window.draw(level.levelEnd);
 
         window.display();
     }
