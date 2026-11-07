@@ -292,7 +292,7 @@ private:
 public:
     bool onScreen=true;
 
-    Coin() {
+    Coin():sprite(textures[0]) {
         textures[0].loadFromFile("sprites/Coins/coin_01.png");
         textures[1].loadFromFile("sprites/Coins/coin_02.png");
         textures[2].loadFromFile("sprites/Coins/coin_03.png");
@@ -345,7 +345,7 @@ private:
     float direct=1.f;
 
 public:
-    Enemy(float start_x, float start_y, float distance){
+    Enemy(float start_x, float start_y, float distance): sprite(textures[0]){
         textures[0].loadFromFile("sprites/run1.png");
         textures[1].loadFromFile("sprites/run2.png");
         textures[2].loadFromFile("sprites/run3.png");
@@ -399,7 +399,7 @@ public:
 
 
 
-// ................... ÕŒœ »...........................
+// ...................Button...........................
 class Button : public Drawable, public Transformable {
 protected:
     RectangleShape rect;
