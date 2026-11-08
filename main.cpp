@@ -1,4 +1,4 @@
-#define VERSION 2
+#define VERSION 3
 
 #include <SFML/Graphics.hpp>
 #include <vector>
@@ -292,7 +292,7 @@ private:
 public:
     bool onScreen=true;
 
-    Coin():sprite(textures[0]) {
+    Coin():sprite(textures[0]){
         textures[0].loadFromFile("sprites/Coins/coin_01.png");
         textures[1].loadFromFile("sprites/Coins/coin_02.png");
         textures[2].loadFromFile("sprites/Coins/coin_03.png");
@@ -399,7 +399,7 @@ public:
 
 
 
-// ...................Button...........................
+// ...................ÊÍÎÏÊÈ...........................
 class Button : public Drawable, public Transformable {
 protected:
     RectangleShape rect;
@@ -448,7 +448,163 @@ public:
         target.draw(text, states);
     }
 };
+    
+    class ImageButton : public Drawable, public Transformable {
+    private:
+        Texture normalTex;
+        Texture hoverTex;
+        Sprite sprite;
+        function<void()> action;
 
+    public:
+        
+#if VERSION==3
+        ImageButton(const string& normalPath, float x, float y,float scale, function<void()> action1)
+                : sprite(normalTex), action(action1)  {
+#else
+        ImageButton(const string& normalPath, float x, float y,float scale, function<void()> action1)
+                : action(action1)  {
+        sprite.setTexture(normalTex);
+#endif
+
+            normalTex.loadFromFile(normalPath);
+            sprite.setTexture(normalTex, true);
+            sprite.setOrigin({normalTex.getSize().x / 2.f,
+                              normalTex.getSize().y / 2.f});
+            sprite.setScale({scale, scale});
+            setPosition({x, y});
+
+
+        }
+
+
+        FloatRect getBounds() {
+            return getTransform().transformRect(sprite.getGlobalBounds());
+        }
+
+        void pressed(Vector2f mousePos) {
+            if (getBounds().contains(mousePos)) action();
+        }
+
+        void draw(RenderTarget& target, RenderStates states) const override {
+            states.transform *= getTransform();
+            target.draw(sprite, states);
+        }
+    };
+    
+    int runMenu(RenderWindow& window, int unlockedLevel, int startPage = 0) {
+        Texture menuBgTex;
+        menuBgTex.loadFromFile("sprites/menu_background_4.jpg");
+        Sprite menuBg(menuBgTex);
+        
+       // menuBg.setOrigin({menuBgTex.getSize().x / 2.f, menuBgTex.getSize().y / 2.f});
+        menuBg.setPosition({80.f, 90.f}); // Ставим в самый центр экрана
+        menuBg.setScale({0.95f,0.95f});
+        
+        Texture lockTex;
+        lockTex.loadFromFile("sprites/lock.png");
+        Sprite lockSprite(lockTex);
+        lockSprite.setOrigin({lockTex.getSize().x / 2.f, lockTex.getSize().y / 2.f});
+        lockSprite.setScale({0.25f, 0.25f});
+       
+        
+        int page = startPage;
+        int selectedLevel = -1;
+
+        ImageButton startBtn("sprites/start_2.png", 630.f, 280.f, 0.25f, [&](){ page = 1; });
+        ImageButton exitBtn("sprites/exit_2.png", 630.f, 450.f, 0.25f, [&](){ window.close(); });
+
+        ImageButton levelsBtn("sprites/levels.png", 630.f, 190.f, 0.25f, [&](){ page = 2; });
+        ImageButton shopBtn("sprites/shop.png", 630.f, 350.f, 0.25f, [&](){ page = 3; });
+        ImageButton backBtn_play("sprites/back.png", 630.f, 540.f, 0.25f, [&](){ page = 0; });
+
+        ImageButton level1Btn("sprites/level_1.png", 450.f, 320.f, 0.27f, [&](){ selectedLevel = 1; });
+        ImageButton level2Btn("sprites/level_2.png", 820.f, 310.f, 0.29f, [&](){
+            if (unlockedLevel >= 2) selectedLevel = 2;
+        });
+        ImageButton level3Btn("sprites/level_3.png", 740.f, 500.f, 0.25f, [&](){
+            if (unlockedLevel >= 3) selectedLevel = 3;
+        });
+        ImageButton backBtn_levels("sprites/back.png", 630.f, 500.f, 0.25f, [&](){ page = 1; });
+
+        ImageButton backBtn_shop("sprites/back.png", 630.f, 500.f, 0.25f, [&](){ page = 1; });
+
+        
+
+        while (window.isOpen() && selectedLevel == -1) {
+
+    #if VERSION==3
+            while (const std::optional event = window.pollEvent()) {
+                if (event->is<Event::Closed>()) window.close();
+                if (const auto* mouse = event->getIf<Event::MouseButtonPressed>()) {
+                    if (mouse->button == Mouse::Button::Left) {
+                      //  Vector2f mp = Vector2f(mouse->position);
+                        Vector2f mp = window.mapPixelToCoords(mouse->position);
+                        if (page == 0) { startBtn.pressed(mp); exitBtn.pressed(mp); }
+                        else if (page == 1) { levelsBtn.pressed(mp); shopBtn.pressed(mp); backBtn_play.pressed(mp); }
+                        else if (page == 2) { level1Btn.pressed(mp); level2Btn.pressed(mp); level3Btn.pressed(mp); backBtn_levels.pressed(mp); }
+                        else if (page == 3) { backBtn_shop.pressed(mp); }
+                    }
+                }
+            }
+    #else
+            Event event;
+            while (window.pollEvent(event)) {
+                if (event.type == Event::Closed) window.close();
+                if (event.type == Event::MouseButtonPressed) {
+                    if (event.mouseButton.button == Mouse::Left) {
+                        Vector2f mp = window.mapPixelToCoords(Mouse::getPosition(window));
+                        if (page == 0) { startBtn.pressed(mp); exitBtn.pressed(mp); }
+                        else if (page == 1) { levelsBtn.pressed(mp); shopBtn.pressed(mp); backBtn_play.pressed(mp); }
+                        else if (page == 2) { level1Btn.pressed(mp); level2Btn.pressed(mp); level3Btn.pressed(mp); backBtn_levels.pressed(mp); }
+                        else if (page == 3) { backBtn_shop.pressed(mp); }
+                    }
+                }
+            }
+    #endif
+
+            window.clear(Color(205, 220, 210)); // Цвет под клетку тетради
+            
+            window.draw(menuBg);
+           // window.draw(titleText);
+
+            if (page == 0) {
+                window.draw(startBtn);
+                window.draw(exitBtn);
+            } else if (page == 1) {
+                window.draw(levelsBtn);
+                window.draw(shopBtn);
+                window.draw(backBtn_play);
+            } else if (page == 2) {
+                window.draw(level1Btn);
+                window.draw(level2Btn);
+                window.draw(level3Btn);
+                
+                    if (unlockedLevel < 2) {
+                                    
+                        lockSprite.setPosition({820.f, 310.f});
+                        window.draw(lockSprite);
+                }
+                    if (unlockedLevel < 3) {
+                                    
+                        lockSprite.setPosition({750.f, 600.f});
+                       // window.draw(lockSprite);
+                    }
+
+                
+                window.draw(backBtn_levels);
+                
+                
+            } else if (page == 3) {
+               // window.draw(shopPanel);
+                window.draw(backBtn_shop);
+            }
+            
+            window.display();
+        }
+
+        return selectedLevel;
+    }
 
 //.........................LEVELS.......................................
 
@@ -543,6 +699,18 @@ int main() {
     RenderWindow window(VideoMode({1500, 900}), "Platformer");
     window.setFramerateLimit(60);
     View view(FloatRect({0.f, 0.f}, {1500.f, 900.f}));
+    
+    
+    int unlockedLevel = 1;
+        int totalCoins = 0; // Монетки копятся глобально
+        bool goToLevels = false;
+
+        while (window.isOpen()) {
+            // Передаем goToLevels ? 2 : 0. Если true, меню откроется на 2 странице (список уровней)
+            int selectedLevel = runMenu(window, unlockedLevel, goToLevels ? 2 : 0);
+            
+            if (selectedLevel == -1) return 0;
+            goToLevels = false;
 
     Font font;
 #if VERSION==3
@@ -562,7 +730,7 @@ int main() {
     background.setScale({1.5f, 1.5f});
 
     Level level;
-    int levelNumb=1;
+    int levelNumb=selectedLevel;
     level.create(levelNumb);
 
     Character character;
@@ -615,7 +783,6 @@ int main() {
     winText.setPosition({550.f, 270.f});
 
 
-    int totalCoins=0;
 #if VERSION==3
     Text collectedText(font);
     Text totalText(font);
@@ -634,37 +801,46 @@ int main() {
     totalText.setFillColor(Color(40, 70, 40));
     totalText.setPosition({480.f, 385.f});
 
-
-    Button btnMenu(550.f, 440.f, 400.f, 50.f, "Main menu", font, [&](){totalCoins+=countCoins;
-                                                                        });
+    bool returnToMenu = false;
+    Button btnMenu(550.f, 440.f, 400.f, 50.f, "Main menu", font, [&](){
+        totalCoins+=countCoins;
+        returnToMenu = true;
+});
 
     Button btnRetry(550.f, 510.f, 400.f, 50.f, "Retry level", font, [&](){ levelCompleted=false;
-                                                                            level.create(levelNumb);
-                                                                            character.setPosition(level.startPos);
-                                                                            respawn=level.startPos;
-                                                                            damageCount=0;
-                                                                            health.updateHealth(0);
-                                                                            moneyText.setString("x 0");
-                                                                            totalCoins+=countCoins;
-                                                                            countCoins=0;
-                                                                            });
+        level.create(levelNumb);
+        character.setPosition(level.startPos);
+        respawn=level.startPos;
+        damageCount=0;
+        health.updateHealth(0);
+        moneyText.setString("x 0");
+        totalCoins+=countCoins;
+        countCoins=0;
+    });
 
 
     Button btnNext(550.f, 580.f, 400.f, 50.f, "Next level", font, [&](){levelCompleted=false;
-                                                                        levelNumb++;
-                                                                        level.create(levelNumb);
-                                                                        character.setPosition(level.startPos);
-                                                                        respawn=level.startPos;
-                                                                        damageCount=0;
-                                                                        health.updateHealth(0);
-                                                                        moneyText.setString("x 0");
-                                                                        totalCoins+=countCoins;
-                                                                        countCoins=0;
-                                                                        });
+        
+                if (levelNumb + 1 > unlockedLevel) {
+                    unlockedLevel = levelNumb + 1;
+                }
+
+                levelCompleted=false;
+                levelNumb++;
+        
+                level.create(levelNumb);
+                character.setPosition(level.startPos);
+                respawn=level.startPos;
+                damageCount=0;
+                health.updateHealth(0);
+                moneyText.setString("x 0");
+                totalCoins+=countCoins;
+                countCoins=0;
+        });
 
 
 
-    while (window.isOpen())
+    while (window.isOpen() && !returnToMenu)
     {
 #if VERSION==3
         while (const std::optional event = window.pollEvent()) {
@@ -708,7 +884,7 @@ int main() {
             if (levelCompleted){
                 if (const auto* mouse = event->getIf<Event::MouseButtonPressed>()){
                     if (mouse->button == Mouse::Button::Left) {
-                        Vector2f mousePos = Vector2f(mouse->position);
+                        Vector2f mousePos = window.mapPixelToCoords(mouse->position);
                         btnMenu.pressed(mousePos);
                         btnRetry.pressed(mousePos);
                         btnNext.pressed(mousePos);
@@ -802,133 +978,140 @@ int main() {
         }
 
 
-        for (int i=0; i<level.enemies.size(); i++) {
+            for (int i=0; i<level.enemies.size(); i++) {
 #if VERSION==3
-            if (characterBounds.findIntersection(level.enemies[i]->getBounds())){
+                if (characterBounds.findIntersection(level.enemies[i]->getBounds())){
 #else
-            if (characterBounds.intersects(level.enemies[i]->getBounds())){
+                    if (characterBounds.intersects(level.enemies[i]->getBounds())){
 #endif
-                if (!character.invuln) {
-                    character.getDamage();
-                    damageCount++;
-                    health.updateHealth(damageCount);
+                        if (!character.invuln) {
+                            character.getDamage();
+                            damageCount++;
+                            health.updateHealth(damageCount);
+                        }
+                    }
                 }
-            }
-        }
-
-
+                
+                
 #if VERSION==3
-        if (characterBounds.findIntersection(level.levelEnd.getGlobalBounds()) && !levelCompleted) {
+                if (characterBounds.findIntersection(level.levelEnd.getGlobalBounds()) && !levelCompleted) {
 #else
-        if (characterBounds.intersects(level.levelEnd.getGlobalBounds()) && !levelCompleted){
+                    if (characterBounds.intersects(level.levelEnd.getGlobalBounds()) && !levelCompleted){
 #endif
-            levelCompleted=true;
-            collectedText.setString("Collected coins: " + to_string(countCoins));
-            totalText.setString("Total coins: " + to_string(totalCoins+countCoins));
-        }
-
-
-
-        bool onPlatform=false;
-
-        for (int i=0; i<level.platforms.size(); i++) {
-            FloatRect platfBounds=(*level.platforms[i]).getBounds();
-
+                        levelCompleted=true;
+                        collectedText.setString("Collected coins: " + to_string(countCoins));
+                        totalText.setString("Total coins: " + to_string(totalCoins+countCoins));
+                    }
+                    
+                    
+                    
+                    bool onPlatform=false;
+                    
+                    for (int i=0; i<level.platforms.size(); i++) {
+                        FloatRect platfBounds=(*level.platforms[i]).getBounds();
+                        
 #if VERSION==3
-            if (characterBounds.findIntersection(platfBounds)) {
-                if ((*level.platforms[i]).isBroken()) continue;
-                if (character.dy >= 0.f && (prevPos.y + characterBounds.size.y / 2.f) <= platfBounds.position.y + 5.f) {
-                    float pos_y = platfBounds.position.y - (characterBounds.size.y / 2.f);
-                    character.setPosition({character.getPosition().x, pos_y});
-                    character.landing();
-                    onPlatform = true;
-                    (*level.platforms[i]).onStepped();
-                    character.move((*level.platforms[i]).getSpeed());
-                }
-                else if (character.dy < 0.f && (prevPos.y - characterBounds.size.y / 2.f) >= (platfBounds.position.y + platfBounds.size.y - 5.f)) {
-                    character.setPosition({character.getPosition().x, prevPos.y});
-                    character.dy = 0.f;
-                }
-                else {
-                    if (prevPos.x < platfBounds.position.x) character.setPosition({platfBounds.position.x - characterBounds.size.x / 2.f, character.getPosition().y});
-                    else if (prevPos.x > platfBounds.position.x + platfBounds.size.x) character.setPosition({platfBounds.position.x + platfBounds.size.x + characterBounds.size.x / 2.f, character.getPosition().y});
-                }
-            }
+                        if (characterBounds.findIntersection(platfBounds)) {
+                            if ((*level.platforms[i]).isBroken()) continue;
+                            if (character.dy >= 0.f && (prevPos.y + characterBounds.size.y / 2.f) <= platfBounds.position.y + 5.f) {
+                                float pos_y = platfBounds.position.y - (characterBounds.size.y / 2.f);
+                                character.setPosition({character.getPosition().x, pos_y});
+                                character.landing();
+                                onPlatform = true;
+                                (*level.platforms[i]).onStepped();
+                                character.move((*level.platforms[i]).getSpeed());
+                            }
+                            else if (character.dy < 0.f && (prevPos.y - characterBounds.size.y / 2.f) >= (platfBounds.position.y + platfBounds.size.y - 5.f)) {
+                                character.setPosition({character.getPosition().x, prevPos.y});
+                                character.dy = 0.f;
+                            }
+                            else {
+                                if (prevPos.x < platfBounds.position.x) character.setPosition({platfBounds.position.x - characterBounds.size.x / 2.f, character.getPosition().y});
+                                else if (prevPos.x > platfBounds.position.x + platfBounds.size.x) character.setPosition({platfBounds.position.x + platfBounds.size.x + characterBounds.size.x / 2.f, character.getPosition().y});
+                            }
+                        }
 #else
-            if (characterBounds.intersects(platfBounds)) {
-                if ((*level.platforms[i]).isBroken())
-                    continue;
-                if (character.dy >= 0.f && (prevPos.y + characterBounds.height / 2.f) <= platfBounds.top + 5.f) {
-                    float pos_y = platfBounds.top - (characterBounds.height / 2.f);
-                    character.setPosition(character.getPosition().x, pos_y);
-                    character.landing();
-                    onPlatform = true;
-                    (*level.platforms[i]).onStepped();
-                    character.move((*level.platforms[i]).getSpeed());
-                }
-                else if (character.dy < 0.f && (prevPos.y - characterBounds.height / 2.f) >= (platfBounds.top + platfBounds.height - 5.f)) {
-                    character.setPosition(character.getPosition().x, prevPos.y);
-                    character.dy = 0.f;
-                }
-                else {
-                    if (prevPos.x < platfBounds.left) character.setPosition(platfBounds.left - characterBounds.width / 2.f, character.getPosition().y);
-                    else if (prevPos.x > platfBounds.left + platfBounds.width) character.setPosition(platfBounds.left + platfBounds.width + characterBounds.width / 2.f, character.getPosition().y);
-                }
-            }
+                        if (characterBounds.intersects(platfBounds)) {
+                            if ((*level.platforms[i]).isBroken())
+                                continue;
+                            if (character.dy >= 0.f && (prevPos.y + characterBounds.height / 2.f) <= platfBounds.top + 5.f) {
+                                float pos_y = platfBounds.top - (characterBounds.height / 2.f);
+                                character.setPosition(character.getPosition().x, pos_y);
+                                character.landing();
+                                onPlatform = true;
+                                (*level.platforms[i]).onStepped();
+                                character.move((*level.platforms[i]).getSpeed());
+                            }
+                            else if (character.dy < 0.f && (prevPos.y - characterBounds.height / 2.f) >= (platfBounds.top + platfBounds.height - 5.f)) {
+                                character.setPosition(character.getPosition().x, prevPos.y);
+                                character.dy = 0.f;
+                            }
+                            else {
+                                if (prevPos.x < platfBounds.left) character.setPosition(platfBounds.left - characterBounds.width / 2.f, character.getPosition().y);
+                                else if (prevPos.x > platfBounds.left + platfBounds.width) character.setPosition(platfBounds.left + platfBounds.width + characterBounds.width / 2.f, character.getPosition().y);
+                            }
+                        }
 #endif
-        }
+                    }
+                    
+                    if (!onPlatform) character.isJump=true;
+                    
+                    float cameraX=character.getPosition().x +250.f;
+                    if (cameraX<750.f) cameraX=750.f;
+                    if (cameraX>3150.f) cameraX=3150.f;
+                    view.setCenter({cameraX, 450.f});
+                    
+                    window.clear();
+                    window.setView(view);
+                    
+                    window.draw(backk);
+                    window.draw(background);
+                    
+                    for (int i=0; i<level.platforms.size(); i++) window.draw(*level.platforms[i]);
+                    for (auto& spike : level.spikes) window.draw(spike);
+                    
+                    for (auto* i: level.checkpoints){
+                        window.draw(*i);
+                        
+                    }
+                    
+                    for (int i=0; i<level.coins.size(); i++) {
+                        window.draw(*level.coins[i]);
+                    }
+                    
+                    for (int i=0; i<level.enemies.size(); i++) {
+                        window.draw(*level.enemies[i]);
+                    }
+                    
+                    
+                    window.draw(character);
+                    window.setView(window.getDefaultView());
+                    window.draw(health);
+                    window.draw(moneySprite);
+                    window.draw(moneyText);
+                    
+                    if (levelCompleted) {
+                        window.draw(winPanel);
+                        window.draw(winText);
+                        window.draw(btnMenu);
+                        window.draw(btnRetry);
+                        window.draw(btnNext);
+                        window.draw(collectedText);
+                        window.draw(totalText);
+                    }
+                    
+                    window.draw(level.levelEnd);
+                    
+                    window.display();
+                }
+                
+                // Если игрок нажал "Main menu", при следующем запуске откроется список уровней
+                if (returnToMenu) {
+                    goToLevels = true;
+                }
+                
+                level.clearLevel();
+            }
 
-        if (!onPlatform) character.isJump=true;
-
-        float cameraX=character.getPosition().x +250.f;
-        if (cameraX<750.f) cameraX=750.f;
-        if (cameraX>3150.f) cameraX=3150.f;
-        view.setCenter({cameraX, 450.f});
-
-        window.clear();
-        window.setView(view);
-
-        window.draw(backk);
-        window.draw(background);
-
-        for (int i=0; i<level.platforms.size(); i++) window.draw(*level.platforms[i]);
-        for (auto& spike : level.spikes) window.draw(spike);
-
-        for (auto* i: level.checkpoints){
-            window.draw(*i);
-
-        }
-
-        for (int i=0; i<level.coins.size(); i++) {
-            window.draw(*level.coins[i]);
-        }
-
-        for (int i=0; i<level.enemies.size(); i++) {
-            window.draw(*level.enemies[i]);
-        }
-
-
-        window.draw(character);
-        window.setView(window.getDefaultView());
-        window.draw(health);
-        window.draw(moneySprite);
-        window.draw(moneyText);
-
-        if (levelCompleted) {
-            window.draw(winPanel);
-            window.draw(winText);
-            window.draw(btnMenu);
-            window.draw(btnRetry);
-            window.draw(btnNext);
-            window.draw(collectedText);
-            window.draw(totalText);
-        }
-
-        window.draw(level.levelEnd);
-
-        window.display();
-    }
-
-    level.clearLevel();
     return 0;
 }
