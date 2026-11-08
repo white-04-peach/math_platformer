@@ -706,7 +706,8 @@ int main() {
         bool goToLevels = false;
 
         while (window.isOpen()) {
-            int selectedLevel = runMenu(window, unlockedLevel, goToLevels ? 1 : 0);
+            // Передаем goToLevels ? 2 : 0. Если true, меню откроется на 2 странице (список уровней)
+            int selectedLevel = runMenu(window, unlockedLevel, goToLevels ? 2 : 0);
             
             if (selectedLevel == -1) return 0;
             goToLevels = false;
@@ -939,6 +940,7 @@ int main() {
 #endif
         }
 
+
         if (hitSpike){
             if (!character.invuln){
                 character.getDamage();
@@ -998,6 +1000,10 @@ int main() {
                     if (characterBounds.intersects(level.levelEnd.getGlobalBounds()) && !levelCompleted){
 #endif
                         levelCompleted=true;
+                        
+                        if (levelNumb + 1 > unlockedLevel) {
+                                unlockedLevel = levelNumb + 1;
+                        }
                         collectedText.setString("Collected coins: " + to_string(countCoins));
                         totalText.setString("Total coins: " + to_string(totalCoins+countCoins));
                     }
