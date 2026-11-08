@@ -707,7 +707,7 @@ int main() {
 
         while (window.isOpen()) {
             // Передаем goToLevels ? 2 : 0. Если true, меню откроется на 2 странице (список уровней)
-            int selectedLevel = runMenu(window, unlockedLevel, goToLevels ? 2 : 0);
+            int selectedLevel = runMenu(window, unlockedLevel, goToLevels ? 1 : 0);
             
             if (selectedLevel == -1) return 0;
             goToLevels = false;
