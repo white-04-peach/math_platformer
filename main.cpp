@@ -346,15 +346,15 @@ private:
 
 public:
     Enemy(float start_x, float start_y, float distance): sprite(textures[0]){
-        textures[0].loadFromFile("sprites/run1.png");
-        textures[1].loadFromFile("sprites/run2.png");
-        textures[2].loadFromFile("sprites/run3.png");
-        textures[3].loadFromFile("sprites/run4.png");
+        textures[0].loadFromFile("sprites/enemy/run_1.png");
+        textures[1].loadFromFile("sprites/enemy/run_2.png");
+        textures[2].loadFromFile("sprites/enemy/run_3.png");
+        textures[3].loadFromFile("sprites/enemy/run_2.png");
         current=0;
 
         sprite.setTexture(textures[current], true);
         sprite.setOrigin({textures[current].getSize().x/2.f, textures[current].getSize().y/2.f});
-        sprite.setScale({0.6f, 0.6f});
+        sprite.setScale({0.4f, 0.4f});
 
         setPosition({start_x, start_y});
         leftBound=start_x-distance/2.f;
@@ -376,11 +376,11 @@ public:
         animation();
         if(getPosition().x>=rightBound && direct>0.f){
             direct=-1.f;
-            sprite.setScale({-0.6f, 0.6f});
+            sprite.setScale({-0.4f, 0.4f});
         }
         else if(getPosition().x<=leftBound && direct<0.f){
             direct=1.f;
-            sprite.setScale({0.6f, 0.6f});
+            sprite.setScale({0.4f, 0.4f});
         }
     }
 
@@ -667,15 +667,54 @@ public:
 
                 break;
             }
-            case 2:
-                startPos={50.f, 660.f};
-                Platform* plat1=new Platform(); (*plat1).setPosition({0.f, 700.f}); (*plat1).medium_plat();
-                Platform* plat2=new Platform(); (*plat2).setPosition({450.f, 560.f}); (*plat2).small_plat();
-                Platform* plat3=new Platform(); (*plat3).setPosition({250.f, 420.f}); (*plat3).small_plat();
-                Platform* plat4=new Platform(); (*plat4).setPosition({530.f, 265.f}); (*plat4).small_plat();
+            case 2:{
+                startPos={50.f, 550.f};
+                levelEnd.setPosition({3400.f, 700.f});
 
-                platforms={plat1, plat2, plat3, plat4};
-                break;
+                Platform* plat1=new Platform(); (*plat1).setPosition({0.f, 600.f}); (*plat1).medium_plat();
+                Platform* plat2=new Platform(); (*plat2).setPosition({590.f, 600.f}); (*plat2).medium_plat();
+                Platform* plat31=new Platform(); (*plat31).setPosition({1080.f, 450.f}); (*plat31).small_plat();
+                Platform* plat41=new Platform(); (*plat41).setPosition({1310.f, 320.f}); (*plat41).small_plat();
+                Platform* plat51=new Platform(); (*plat51).setPosition({1600.f, 320.f}); (*plat51).small_plat();
+
+                FragilePlatform* plat32=new FragilePlatform();
+                (*plat32).setStartPos({1150.f, 700.f}); (*plat32).small_plat();
+                FragilePlatform* plat42=new FragilePlatform();
+                (*plat42).setStartPos({1350.f, 700.f}); (*plat42).small_plat();
+                FragilePlatform* plat52=new FragilePlatform();
+                (*plat52).setStartPos({1550.f, 700.f}); (*plat52).small_plat();
+
+
+                MovingPlatform* plat6=new MovingPlatform(1750.f, 550.f, 400.f); (*plat6).small_plat();
+                Platform* plat7=new Platform(); (*plat7).setPosition({2400.f, 550.f});
+                Platform* plat8=new Platform(); (*plat8).setPosition({3200.f, 800.f});
+                Platform* plat9=new Platform(); (*plat9).setPosition({3200.f, 200.f}); (*plat9).small_plat();
+                Platform* plat10=new Platform(); (*plat10).setPosition({3500.f, 200.f}); (*plat10).medium_plat();
+
+
+                platforms={plat1, plat2, plat31, plat32, plat41, plat42, plat51, plat52, plat6, plat7, plat8, plat9, plat10};
+
+                Spike s1; s1.setPosition({130.f, 600.f});
+                Spike s2; s2.setPosition({330.f, 600.f});
+                Spike s3; s3.setPosition({1380.f, 320.f});
+                Spike s4; s4.setPosition({2550.f, 550.f});
+                Spike s5; s5.setPosition({2750.f, 550.f});
+                Spike s6; s6.setPosition({2950.f, 550.f});
+
+                spikes={s1, s2, s3, s4, s5, s6};
+
+                checkpoints.push_back(new Checkpoint(2460.f, 467.f));
+
+
+                vector<Vector2f> coin_positions={{950.f, 540.f},{1200.f, 640.f}, {1390.f, 640.f}, {1450.f, 640.f}, {1610.f, 640.f}, {3260.f, 140.f}};
+                for (int i=0; i<coin_positions.size(); i++) {
+                    Coin* c=new Coin();
+                    (*c).setPosition(coin_positions[i]);
+                    coins.push_back(c);
+                }
+
+                Enemy* hunter=new Enemy(750.f, 560.f, 200.f); enemies.push_back(hunter);
+            }
         }
     }
 
@@ -914,6 +953,11 @@ int main() {
 
         for (int i=0; i<level.platforms.size(); i++)
             (*level.platforms[i]).movement();
+
+
+        for (int i = 0; i < level.enemies.size(); i++) {
+            (*level.enemies[i]).movement();
+        }
 
         if (character.getPosition().y>900.f) {
             damageCount++;
