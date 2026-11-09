@@ -1,4 +1,4 @@
-#define VERSION 3
+#define VERSION 2
 
 #include <SFML/Graphics.hpp>
 #include <vector>
@@ -448,7 +448,8 @@ public:
         target.draw(text, states);
     }
 };
-    
+
+
     class ImageButton : public Drawable, public Transformable {
     private:
         Texture normalTex;
@@ -457,7 +458,7 @@ public:
         function<void()> action;
 
     public:
-        
+
 #if VERSION==3
         ImageButton(const string& normalPath, float x, float y,float scale, function<void()> action1)
                 : sprite(normalTex), action(action1)  {
@@ -491,45 +492,45 @@ public:
             target.draw(sprite, states);
         }
     };
-    
+
     int runMenu(RenderWindow& window, int unlockedLevel, int startPage = 0) {
         Texture menuBgTex;
         menuBgTex.loadFromFile("sprites/menu_background_4.jpg");
         Sprite menuBg(menuBgTex);
-        
+
        // menuBg.setOrigin({menuBgTex.getSize().x / 2.f, menuBgTex.getSize().y / 2.f});
         menuBg.setPosition({80.f, 90.f}); // Ставим в самый центр экрана
         menuBg.setScale({0.95f,0.95f});
-        
+
         Texture lockTex;
         lockTex.loadFromFile("sprites/lock.png");
         Sprite lockSprite(lockTex);
         lockSprite.setOrigin({lockTex.getSize().x / 2.f, lockTex.getSize().y / 2.f});
-        lockSprite.setScale({0.25f, 0.25f});
-       
-        
+        lockSprite.setScale({0.2f, 0.2f});
+
+
         int page = startPage;
         int selectedLevel = -1;
 
-        ImageButton startBtn("sprites/start_2.png", 630.f, 280.f, 0.25f, [&](){ page = 1; });
-        ImageButton exitBtn("sprites/exit_2.png", 630.f, 450.f, 0.25f, [&](){ window.close(); });
+        ImageButton startBtn("sprites/buttons/play.png", 630.f, 280.f, 0.25f, [&](){ page = 1; });
+        ImageButton exitBtn("sprites/buttons/exit2.png", 630.f, 450.f, 0.25f, [&](){ window.close(); });
 
-        ImageButton levelsBtn("sprites/levels.png", 630.f, 190.f, 0.25f, [&](){ page = 2; });
-        ImageButton shopBtn("sprites/shop.png", 630.f, 350.f, 0.25f, [&](){ page = 3; });
-        ImageButton backBtn_play("sprites/back.png", 630.f, 540.f, 0.25f, [&](){ page = 0; });
+        ImageButton levelsBtn("sprites/buttons/levels.png", 630.f, 190.f, 0.25f, [&](){ page = 2; });
+        ImageButton shopBtn("sprites/buttons/shop.png", 630.f, 350.f, 0.25f, [&](){ page = 3; });
+        ImageButton backBtn_play("sprites/buttons/back.png", 630.f, 540.f, 0.25f, [&](){ page = 0; });
 
-        ImageButton level1Btn("sprites/level_1.png", 450.f, 320.f, 0.27f, [&](){ selectedLevel = 1; });
-        ImageButton level2Btn("sprites/level_2.png", 820.f, 310.f, 0.29f, [&](){
+        ImageButton level1Btn("sprites/buttons/level_1.png", 450.f, 320.f, 0.25f, [&](){ selectedLevel = 1; });
+        ImageButton level2Btn("sprites/buttons/level_2.png", 820.f, 320.f, 0.25f, [&](){
             if (unlockedLevel >= 2) selectedLevel = 2;
         });
-        ImageButton level3Btn("sprites/level_3.png", 740.f, 500.f, 0.25f, [&](){
+        ImageButton level3Btn("sprites/buttons/level_3.png", 740.f, 500.f, 0.25f, [&](){
             if (unlockedLevel >= 3) selectedLevel = 3;
         });
-        ImageButton backBtn_levels("sprites/back.png", 630.f, 500.f, 0.25f, [&](){ page = 1; });
+        ImageButton backBtn_levels("sprites/buttons/back.png", 630.f, 500.f, 0.25f, [&](){ page = 1; });
 
-        ImageButton backBtn_shop("sprites/back.png", 630.f, 500.f, 0.25f, [&](){ page = 1; });
+        ImageButton backBtn_shop("sprites/buttons/back.png", 630.f, 500.f, 0.25f, [&](){ page = 1; });
 
-        
+
 
         while (window.isOpen() && selectedLevel == -1) {
 
@@ -564,7 +565,7 @@ public:
     #endif
 
             window.clear(Color(205, 220, 210)); // Цвет под клетку тетради
-            
+
             window.draw(menuBg);
            // window.draw(titleText);
 
@@ -578,28 +579,28 @@ public:
             } else if (page == 2) {
                 window.draw(level1Btn);
                 window.draw(level2Btn);
-                window.draw(level3Btn);
-                
+                /*window.draw(level3Btn);*/
+
                     if (unlockedLevel < 2) {
-                                    
+
                         lockSprite.setPosition({820.f, 310.f});
                         window.draw(lockSprite);
                 }
                     if (unlockedLevel < 3) {
-                                    
+
                         lockSprite.setPosition({750.f, 600.f});
                        // window.draw(lockSprite);
                     }
 
-                
+
                 window.draw(backBtn_levels);
-                
-                
+
+
             } else if (page == 3) {
                // window.draw(shopPanel);
                 window.draw(backBtn_shop);
             }
-            
+
             window.display();
         }
 
@@ -699,16 +700,16 @@ int main() {
     RenderWindow window(VideoMode({1500, 900}), "Platformer");
     window.setFramerateLimit(60);
     View view(FloatRect({0.f, 0.f}, {1500.f, 900.f}));
-    
-    
+
+
     int unlockedLevel = 1;
-        int totalCoins = 0; // Монетки копятся глобально
+        int totalCoins = 0;
         bool goToLevels = false;
 
         while (window.isOpen()) {
             // Передаем goToLevels ? 2 : 0. Если true, меню откроется на 2 странице (список уровней)
             int selectedLevel = runMenu(window, unlockedLevel, goToLevels ? 1 : 0);
-            
+
             if (selectedLevel == -1) return 0;
             goToLevels = false;
 
@@ -820,14 +821,14 @@ int main() {
 
 
     Button btnNext(550.f, 580.f, 400.f, 50.f, "Next level", font, [&](){levelCompleted=false;
-        
+
                 if (levelNumb + 1 > unlockedLevel) {
                     unlockedLevel = levelNumb + 1;
                 }
 
                 levelCompleted=false;
                 levelNumb++;
-        
+
                 level.create(levelNumb);
                 character.setPosition(level.startPos);
                 respawn=level.startPos;
@@ -992,29 +993,29 @@ int main() {
                         }
                     }
                 }
-                
-                
+
+
 #if VERSION==3
                 if (characterBounds.findIntersection(level.levelEnd.getGlobalBounds()) && !levelCompleted) {
 #else
                     if (characterBounds.intersects(level.levelEnd.getGlobalBounds()) && !levelCompleted){
 #endif
                         levelCompleted=true;
-                        
+
                         if (levelNumb + 1 > unlockedLevel) {
                                 unlockedLevel = levelNumb + 1;
                         }
                         collectedText.setString("Collected coins: " + to_string(countCoins));
                         totalText.setString("Total coins: " + to_string(totalCoins+countCoins));
                     }
-                    
-                    
-                    
+
+
+
                     bool onPlatform=false;
-                    
+
                     for (int i=0; i<level.platforms.size(); i++) {
                         FloatRect platfBounds=(*level.platforms[i]).getBounds();
-                        
+
 #if VERSION==3
                         if (characterBounds.findIntersection(platfBounds)) {
                             if ((*level.platforms[i]).isBroken()) continue;
@@ -1058,43 +1059,43 @@ int main() {
                         }
 #endif
                     }
-                    
+
                     if (!onPlatform) character.isJump=true;
-                    
+
                     float cameraX=character.getPosition().x +250.f;
                     if (cameraX<750.f) cameraX=750.f;
                     if (cameraX>3150.f) cameraX=3150.f;
                     view.setCenter({cameraX, 450.f});
-                    
+
                     window.clear();
                     window.setView(view);
-                    
+
                     window.draw(backk);
                     window.draw(background);
-                    
+
                     for (int i=0; i<level.platforms.size(); i++) window.draw(*level.platforms[i]);
                     for (auto& spike : level.spikes) window.draw(spike);
-                    
+
                     for (auto* i: level.checkpoints){
                         window.draw(*i);
-                        
+
                     }
-                    
+
                     for (int i=0; i<level.coins.size(); i++) {
                         window.draw(*level.coins[i]);
                     }
-                    
+
                     for (int i=0; i<level.enemies.size(); i++) {
                         window.draw(*level.enemies[i]);
                     }
-                    
-                    
+
+
                     window.draw(character);
                     window.setView(window.getDefaultView());
                     window.draw(health);
                     window.draw(moneySprite);
                     window.draw(moneyText);
-                    
+
                     if (levelCompleted) {
                         window.draw(winPanel);
                         window.draw(winText);
@@ -1104,17 +1105,16 @@ int main() {
                         window.draw(collectedText);
                         window.draw(totalText);
                     }
-                    
+
                     window.draw(level.levelEnd);
-                    
+
                     window.display();
                 }
-                
-                // Если игрок нажал "Main menu", при следующем запуске откроется список уровней
+
                 if (returnToMenu) {
                     goToLevels = true;
                 }
-                
+
                 level.clearLevel();
             }
 
