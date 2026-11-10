@@ -656,6 +656,90 @@ public:
         return selectedLevel;
     }
 
+
+
+class MathTask: public Drawable, public Transformable{
+public:
+    Texture texture;
+    Sprite sprite;
+    string answer;
+
+
+    MathTask(string path, string ans): answer(ans), sprite(texture){
+        texture.loadFromFile(path);
+        sprite.setTexture(texture);
+        sprite.setScale({0.5f, 0.5f});
+    }
+
+    void draw(RenderTarget& target, RenderStates states) const override {
+        states.transform *= getTransform();
+        target.draw(sprite, states);
+    }
+};
+
+
+//.........................MATH_TASK.......................................
+
+class Math: public Drawable, public Transformable {
+private:
+    RectangleShape wall;
+    Sprite sprite;
+    Texture texture;
+
+public:
+    bool isWindowOpen=false;
+    bool isSolved=false;
+
+    Math(float x, float y): sprite(texture){
+
+        wall.setPosition({x, 0.f});
+        wall.setSize({10.f, 900.f});
+        wall.setFillColor(Color(150, 50, 200, 100));
+
+        texture.loadFromFile("sprites/math.png");
+        sprite.setTexture(texture);
+        sprite.setPosition({x, y});
+    }
+
+    void setWallHeight(float h){
+        wall.setSize({wall.getSize().x, h});
+    }
+
+
+    FloatRect getWallBounds() const {
+        return wall.getGlobalBounds();}
+
+    FloatRect getMathBounds() const {
+        return sprite.getGlobalBounds();}
+
+
+    bool activation(FloatRect charBounds){
+        if (!isSolved && !isWindowOpen) {
+#if VERSION == 3
+            if (sprite.getGlobalBounds().findIntersection(charBounds)) {
+                return true;
+            }
+#else
+            if (sprite.getGlobalBounds().intersects(charBounds)) {
+                return true;
+            }
+#endif
+        }
+        return false;
+    }
+
+
+    void draw(RenderTarget& target, RenderStates states) const override {
+        if (!isSolved){
+            states.transform *= getTransform();
+            target.draw(wall, states);
+            target.draw(sprite, states);
+        }
+    }
+};
+
+
+
 //.........................LEVELS.......................................
 
 class Level{
@@ -696,8 +780,9 @@ public:
                 MovingPlatform* plat7=new MovingPlatform(2330.f, 550.f, 250.f); (*plat7).small_plat();
                 MovingPlatform* plat8=new MovingPlatform(2600.f, 400.f, 250.f); (*plat8).small_plat();
                 Platform* plat9=new Platform(); (*plat9).setPosition({3000.f, 750.f});(*plat9).medium_plat();
+
                 Enemy* hunter=new Enemy(3250.f, 710.f, 300.f); enemies.push_back(hunter);
-                
+
                 FragilePlatform* plat10=new FragilePlatform(); (*plat10).setStartPos({3100.f, 350.f}); (*plat10).small_plat();
                 Platform* plat11=new Platform(); (*plat11).setPosition({3400.f, 500.f}); (*plat11).medium_plat();
 
@@ -890,6 +975,33 @@ int main() {
         int totalCoins = 0;
         bool goToLevels = false;
 
+
+
+
+    // Level 1
+    MathTask l1_easy1("tasks/lvl1_easy1.png", "1");
+    MathTask l1_easy2("tasks/lvl1_easy2.png", "1");
+    MathTask l1_med1("tasks/lvl1_med1.png", "1");
+    MathTask l1_hard1("tasks/lvl1_hard1.png", "1");
+
+    vector<MathTask*> level1_easy={&l1_easy1, &l1_easy2};
+    vector<MathTask*> level1_med={&l1_med1};
+    vector<MathTask*> level1_hard={&l1_hard1};
+
+
+    // Level 2
+    MathTask l2_easy1("tasks/lvl2_easy1.png", "1");
+    MathTask l2_med1("tasks/lvl2_med1.png", "1");
+    MathTask l2_hard1("tasks/lvl2_hard1.png", "1");
+
+    vector<MathTask*> level2_easy={&l2_easy1};
+    vector<MathTask*> level2_med={&l2_med1};
+    vector<MathTask*> level2_hard={&l2_hard1};
+
+    // это для вида, остальное потом закинем
+
+
+
         while (window.isOpen()) {
             // Передаем goToLevels ? 2 : 0. Если true, меню откроется на 2 странице (список уровней)
             int selectedLevel = runMenu(window, unlockedLevel, goToLevels ? 1 : 0);
@@ -1035,6 +1147,69 @@ int main() {
                                                                         moneyText.setString("x 0");
                                                                         countCoins=0;
                                                                 });
+
+
+    Math math(1500.f, 500.f);
+
+    bool showMathMenu=false;
+    bool showMathTask=false;
+    MathTask* currentTask=nullptr;
+    string userInput="";
+
+    RectangleShape mathWindow({600.f, 450.f});
+    mathWindow.setPosition({450.f, 200.f});
+    mathWindow.setFillColor(Color(240, 240, 240));
+
+    RectangleShape input({300.f, 60.f});
+    input.setPosition({600.f, 500.f});
+    input.setFillColor(Color::White);
+    input.setOutlineThickness(2.f);
+    input.setOutlineColor(Color::Black);
+
+    Text inputText;
+#if VERSION==3
+    inputText = Text(font);
+#endif
+    inputText.setFont(font);
+    inputText.setCharacterSize(40);
+    inputText.setFillColor(Color::Black);
+    inputText.setPosition({615.f, 505.f});
+
+
+    Button btnEasy(600.f, 250.f, 300.f, 50.f, "Easy(1)", font, [&](){
+
+                                                if (levelNumb==1)
+                                                    currentTask=level1_easy[rand()%level1_easy.size()];
+                                                else if (levelNumb==2)
+                                                    currentTask=level2_easy[rand()%level2_easy.size()];
+                                                    (*currentTask).setPosition({450.f, 250.f});
+
+                                                showMathMenu=false;
+                                                showMathTask=true;
+                                                });
+
+    Button btnMed(600.f, 320.f, 300.f, 50.f, "Meduim (3)", font, [&](){
+
+                                                if (levelNumb==1)
+                                                    currentTask=level1_med[rand()%level1_med.size()];
+                                                else if (levelNumb==2)
+                                                    currentTask = level2_med[rand()%level2_med.size()];
+                                                    (*currentTask).setPosition({450.f, 250.f});
+
+                                                showMathMenu=false;
+                                                showMathTask=true;
+                                                });
+
+    Button btnHard(600.f, 390.f, 300.f, 50.f, "Hard (5)", font, [&](){
+                                                if (levelNumb==1)
+                                                    currentTask=level1_hard[rand()%level1_hard.size()];
+                                                else if (levelNumb==2)
+                                                    currentTask=level2_hard[rand()%level2_hard.size()];
+                                                    (*currentTask).setPosition({450.f, 250.f});
+
+                                                showMathMenu=false;
+                                                showMathTask=true;
+                                                });
 
 
 
@@ -1336,6 +1511,10 @@ int main() {
                     window.draw(level.levelEnd);
                     window.draw(character);
 
+
+
+
+
                     window.setView(window.getDefaultView());
                     window.draw(health);
                     window.draw(moneySprite);
@@ -1351,6 +1530,22 @@ int main() {
                         window.draw(hpBonusText);
                         window.draw(coinsBonusText);
                         window.draw(totalText);
+                    }
+
+
+
+                    if (showMathMenu){
+                        window.draw(mathWindow);
+                        window.draw(btnEasy);
+                        window.draw(btnMed);
+                        window.draw(btnHard);
+                    }
+
+                    if (showMathTask){
+                        window.draw(mathWindow);
+                        window.draw(*currentTask);
+                        window.draw(input);
+                        window.draw(inputText);
                     }
 
 
