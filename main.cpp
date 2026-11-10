@@ -675,7 +675,7 @@ public:
     vector<JumpBonus*> bonuses;
     float levelWidth = 4000.f;
 
-    Level(){}
+    Level():levelEnd(levelEndTex) {}
     void create(int levelNumber){
         clearLevel();
 
