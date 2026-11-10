@@ -668,7 +668,8 @@ public:
     vector<Spike> spikes;
     vector<Checkpoint*> checkpoints;
     Vector2f startPos;
-    RectangleShape levelEnd;
+    Sprite levelEnd;
+    Texture levelEndTex;
     vector<Coin*> coins;
     vector<Enemy*> enemies;
     vector<JumpBonus*> bonuses;
@@ -678,13 +679,15 @@ public:
     void create(int levelNumber){
         clearLevel();
 
-        levelEnd.setSize({60.f, 100.f});
-        levelEnd.setFillColor(Color(138, 43, 226));
+        levelEndTex.loadFromFile("sprites/portal_1.png");
+        levelEnd.setTexture(levelEndTex, true);
+        levelEnd.setOrigin({levelEndTex.getSize().x/2.f, levelEndTex.getSize().y/2.f+10.f});
+        levelEnd.setScale({0.2f, 0.2f});
 
         switch(levelNumber){
             case 1:{
                 startPos={50.f, 660.f};
-                levelEnd.setPosition({3800.f, 400.f});
+                levelEnd.setPosition({3770.f, 445.f});
 
                 Platform* plat1=new Platform(); (*plat1).setPosition({0.f, 700.f}); (*plat1).medium_plat();
                 Platform* plat2=new Platform(); (*plat2).setPosition({450.f, 560.f}); (*plat2).small_plat();
@@ -724,7 +727,7 @@ public:
             }
             case 2:{
                 startPos={50.f, 550.f};
-                levelEnd.setPosition({3800.f, 200.f});
+                levelEnd.setPosition({3850.f, 147.f});
 
                 Platform* plat1=new Platform(); (*plat1).setPosition({0.f, 600.f}); (*plat1).medium_plat();
                 Platform* plat2=new Platform(); (*plat2).setPosition({590.f, 600.f}); (*plat2).medium_plat();
@@ -781,7 +784,7 @@ public:
 
                 startPos={50.f, 360.f};
                 levelWidth = 4920.f;
-                levelEnd.setPosition({4870.f, 400.f});
+                levelEnd.setPosition({4840.f, 345.f});
 
 
                 Platform* plat1=new Platform(); (*plat1).setPosition({0.f, 400.f}); (*plat1).medium_plat();
@@ -1126,6 +1129,10 @@ int main() {
             for(int i=0; i<level.platforms.size(); i++)
                 (*level.platforms[i]).reset();
 
+            for (int i=0; i<level.bonuses.size(); i++) {
+                (*level.bonuses[i]).onScreen=true;
+}
+
             prevPos=character.getPosition();
             continue;
         }
@@ -1209,11 +1216,7 @@ int main() {
                 }
 
 
-#if VERSION==3
-                if (characterBounds.findIntersection(level.levelEnd.getGlobalBounds()) && !levelCompleted) {
-#else
-                    if (characterBounds.intersects(level.levelEnd.getGlobalBounds()) && !levelCompleted){
-#endif
+                    if (characterBounds.contains(level.levelEnd.getPosition()) && !levelCompleted){
                         levelCompleted=true;
 
                         if (levelNumb + 1 > unlockedLevel) {
@@ -1332,7 +1335,9 @@ int main() {
                     }
 
 
+                    window.draw(level.levelEnd);
                     window.draw(character);
+
                     window.setView(window.getDefaultView());
                     window.draw(health);
                     window.draw(moneySprite);
@@ -1350,7 +1355,6 @@ int main() {
                         window.draw(totalText);
                     }
 
-                    window.draw(level.levelEnd);
 
                     window.display();
                 }
