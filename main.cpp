@@ -69,7 +69,7 @@ public:
         if (!isJump) {
             isJump=true;
 
-            if (bonusEffect && bonusClock.getElapsedTime().asSeconds()<=4.f){
+            if (bonusEffect && bonusClock.getElapsedTime().asSeconds()<=5.f){
                 dy=-22.f;
             }
             else{
@@ -947,9 +947,9 @@ int main() {
 
     bool levelCompleted = false;
 
-    RectangleShape winPanel({600.f, 400.f});
+    RectangleShape winPanel({540.f, 460.f});
     winPanel.setFillColor(Color(200, 230, 200, 220));
-    winPanel.setPosition({450.f, 250.f});
+    winPanel.setPosition({480.f, 230.f});
 
 
 #if VERSION==3
@@ -964,63 +964,76 @@ int main() {
 
     winText.setCharacterSize(55);
     winText.setFillColor(Color(20, 40, 20));
-    winText.setPosition({550.f, 270.f});
+    winText.setPosition({550.f, 250.f});
 
 
 #if VERSION==3
     Text collectedText(font);
     Text totalText(font);
+    Text hpBonusText(font);
+    Text coinsBonusText(font);
+
 #else
     Text collectedText;
     Text totalText;
+    Text hpBonusText;
+    Text coinsBonusText;
     collectedText.setFont(font);
     totalText.setFont(font);
+    hpBonusText.setFont(font);
+    coinsBonusText.setFont(font);
+
 #endif
 
     collectedText.setCharacterSize(30);
     collectedText.setFillColor(Color(40, 70, 40));
-    collectedText.setPosition({480.f, 350.f});
+    collectedText.setPosition({550.f, 330.f});
+
+    hpBonusText.setCharacterSize(30);
+    hpBonusText.setFillColor(Color(40, 70, 40));
+    hpBonusText.setPosition({550.f, 365.f});
+
+    coinsBonusText.setCharacterSize(30);
+    coinsBonusText.setFillColor(Color(40, 70, 40));
+    coinsBonusText.setPosition({550.f, 400.f});
 
     totalText.setCharacterSize(30);
     totalText.setFillColor(Color(40, 70, 40));
-    totalText.setPosition({480.f, 385.f});
+    totalText.setPosition({550.f, 435.f});
+
 
     bool returnToMenu = false;
-    Button btnMenu(550.f, 440.f, 400.f, 50.f, "Main menu", font, [&](){
-        totalCoins+=countCoins;
-        returnToMenu = true;
-});
+    Button btnMenu(550.f, 490.f, 400.f, 50.f, "Main menu", font, [&](){
+                                                                        returnToMenu = true;
+                                                                });
 
-    Button btnRetry(550.f, 510.f, 400.f, 50.f, "Retry level", font, [&](){ levelCompleted=false;
-        level.create(levelNumb);
-        character.setPosition(level.startPos);
-        respawn=level.startPos;
-        damageCount=0;
-        health.updateHealth(0);
-        moneyText.setString("x 0");
-        totalCoins+=countCoins;
-        countCoins=0;
-    });
+    Button btnRetry(550.f, 560.f, 400.f, 50.f, "Retry level", font, [&](){ levelCompleted=false;
+                                                                            level.create(levelNumb);
+                                                                            character.setPosition(level.startPos);
+                                                                            respawn=level.startPos;
+                                                                            damageCount=0;
+                                                                            health.updateHealth(0);
+                                                                            moneyText.setString("x 0");
+                                                                            countCoins=0;
+                                                                        });
 
 
-    Button btnNext(550.f, 580.f, 400.f, 50.f, "Next level", font, [&](){levelCompleted=false;
+    Button btnNext(550.f, 630.f, 400.f, 50.f, "Next level", font, [&](){levelCompleted=false;
+                                                                        if (levelNumb + 1 > unlockedLevel) {
+                                                                            unlockedLevel = levelNumb + 1;
+                                                                        }
 
-                if (levelNumb + 1 > unlockedLevel) {
-                    unlockedLevel = levelNumb + 1;
-                }
+                                                                        levelCompleted=false;
+                                                                        levelNumb++;
 
-                levelCompleted=false;
-                levelNumb++;
-
-                level.create(levelNumb);
-                character.setPosition(level.startPos);
-                respawn=level.startPos;
-                damageCount=0;
-                health.updateHealth(0);
-                moneyText.setString("x 0");
-                totalCoins+=countCoins;
-                countCoins=0;
-        });
+                                                                        level.create(levelNumb);
+                                                                        character.setPosition(level.startPos);
+                                                                        respawn=level.startPos;
+                                                                        damageCount=0;
+                                                                        health.updateHealth(0);
+                                                                        moneyText.setString("x 0");
+                                                                        countCoins=0;
+                                                                });
 
 
 
@@ -1099,7 +1112,7 @@ int main() {
             (*level.platforms[i]).movement();
 
 
-        for (int i = 0; i < level.enemies.size(); i++) {
+        for (int i=0; i<level.enemies.size(); i++) {
             (*level.enemies[i]).movement();
         }
 
@@ -1166,8 +1179,8 @@ int main() {
 
 
         for (int i=0; i<level.coins.size(); i++) {
-            if (level.coins[i]->onScreen) {
-                level.coins[i]->animation();
+            if ((*level.coins[i]).onScreen) {
+                (*level.coins[i]).animation();
 #if VERSION==3
                 if (characterBounds.findIntersection(level.coins[i]->getBounds())){
 #else
@@ -1206,8 +1219,29 @@ int main() {
                         if (levelNumb + 1 > unlockedLevel) {
                                 unlockedLevel = levelNumb + 1;
                         }
+
+                        totalCoins+=countCoins;
+
+                        if(countCoins==level.coins.size()){
+                            totalCoins+=10;
+                            coinsBonusText.setString("All coins bonus: +10");
+                        }
+                        else{
+                            coinsBonusText.setString("All coins bonus: --");
+                        }
+
+
+                        if(damageCount==0){
+                            totalCoins+=10;
+                            hpBonusText.setString("Full HP bonus: +10");
+                        }
+                        else{
+                            hpBonusText.setString("Full HP bonus: --");
+                        }
+
                         collectedText.setString("Collected coins: " + to_string(countCoins));
-                        totalText.setString("Total coins: " + to_string(totalCoins+countCoins));
+                        totalText.setString("Total coins: " + to_string(totalCoins));
+                        countCoins=0;
                     }
 
 
@@ -1311,6 +1345,8 @@ int main() {
                         window.draw(btnRetry);
                         window.draw(btnNext);
                         window.draw(collectedText);
+                        window.draw(hpBonusText);
+                        window.draw(coinsBonusText);
                         window.draw(totalText);
                     }
 
