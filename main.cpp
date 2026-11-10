@@ -32,10 +32,17 @@ public:
     bool isMovingLeft = false;
     bool isMovingRight = false;
 
+    //штуки для получения урона
     bool invuln=false;
     Clock invulnClock;
     Clock blinkClock;
     bool isBlink=false;
+
+    //штуки для бонуса
+    bool bonusEffect=false;
+    Clock bonusClock;
+
+
 
     Character(): sprite(textures[0]){
         textures[0].loadFromFile("sprites/characters/panda/run_1.png");
@@ -61,10 +68,24 @@ public:
     void jump() {
         if (!isJump) {
             isJump=true;
-            dy=-14.f;
+
+            if (bonusEffect && bonusClock.getElapsedTime().asSeconds()<=4.f){
+                dy=-22.f;
+            }
+            else{
+                dy=-14.f;
+                bonusEffect=false;
+            }
+
             sprite.setTexture(jumpTexture, true);
             sprite.setScale({direct*0.4f, 0.4f});
         }
+    }
+
+
+    void activateBonus(){
+        bonusEffect=true;
+        bonusClock.restart();
     }
 
     void movement() {
@@ -323,6 +344,38 @@ public:
 
     void draw(RenderTarget& target, RenderStates states) const override {
         if (onScreen){
+            states.transform *= getTransform();
+            target.draw(sprite, states);
+        }
+    }
+};
+
+
+
+//......................BONUS...........................................
+
+class JumpBonus: public Drawable, public Transformable{
+private:
+    Sprite sprite;
+    Texture texture;
+
+public:
+    bool onScreen=true;
+
+    JumpBonus(): sprite(texture){
+        texture.loadFromFile("sprites/jump_bonus.png");
+        sprite.setTexture(texture, true);
+        sprite.setOrigin({texture.getSize().x/2.f, texture.getSize().y/2.f});
+        sprite.setScale({0.3f, 0.3f});
+    }
+
+    FloatRect getBounds() const{
+        return getTransform().transformRect(sprite.getGlobalBounds());
+    }
+
+
+    void draw(RenderTarget& target, RenderStates states) const override {
+        if (onScreen) {
             states.transform *= getTransform();
             target.draw(sprite, states);
         }
@@ -618,6 +671,7 @@ public:
     RectangleShape levelEnd;
     vector<Coin*> coins;
     vector<Enemy*> enemies;
+    vector<JumpBonus*> bonuses;
     float levelWidth = 4000.f;
 
     Level(){}
@@ -670,7 +724,7 @@ public:
             }
             case 2:{
                 startPos={50.f, 550.f};
-                levelEnd.setPosition({3400.f, 700.f});
+                levelEnd.setPosition({3800.f, 200.f});
 
                 Platform* plat1=new Platform(); (*plat1).setPosition({0.f, 600.f}); (*plat1).medium_plat();
                 Platform* plat2=new Platform(); (*plat2).setPosition({590.f, 600.f}); (*plat2).medium_plat();
@@ -715,6 +769,10 @@ public:
                 }
 
                 Enemy* hunter=new Enemy(750.f, 560.f, 200.f); enemies.push_back(hunter);
+
+                JumpBonus* jumpBonus=new JumpBonus();
+                (*jumpBonus).setPosition({3800.f, 750.f});
+                bonuses.push_back(jumpBonus);
 
                 break;
             }
@@ -815,6 +873,9 @@ public:
 
         for (int i=0; i<enemies.size(); i++) delete enemies[i];
         enemies.clear();
+
+        for (int i=0; i<bonuses.size(); i++) delete bonuses[i];
+        bonuses.clear();
     }
 };
 
@@ -1077,6 +1138,19 @@ int main() {
             }
         }
 
+        for (int i=0; i<level.bonuses.size(); i++){
+            if ((*level.bonuses[i]).onScreen) {
+#if VERSION == 3
+                if (character.getBounds().findIntersection((*level.bonuses[i]).getBounds())) {
+#else
+                if (character.getBounds().intersects((*level.bonuses[i]).getBounds())){
+#endif
+                    (*level.bonuses[i]).onScreen=false;
+                    character.activateBonus();
+                }
+            }
+        }
+
 
         for (auto* checkpoint: level.checkpoints){
 #if VERSION==3
@@ -1217,6 +1291,10 @@ int main() {
 
                     for (int i=0; i<level.enemies.size(); i++) {
                         window.draw(*level.enemies[i]);
+                    }
+
+                    for (int i=0; i<level.bonuses.size(); i++) {
+                        window.draw(*level.bonuses[i]);
                     }
 
 
