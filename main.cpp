@@ -548,12 +548,8 @@ public:
 
     int runMenu(RenderWindow& window, int unlockedLevel, int startPage = 0) {
         Texture menuBgTex;
-        menuBgTex.loadFromFile("sprites/menu_background_4.jpg");
+        menuBgTex.loadFromFile("sprites/background_new.png");
         Sprite menuBg(menuBgTex);
-
-       // menuBg.setOrigin({menuBgTex.getSize().x / 2.f, menuBgTex.getSize().y / 2.f});
-        menuBg.setPosition({80.f, 90.f}); // Ставим в самый центр экрана
-        menuBg.setScale({0.95f,0.95f});
 
         Texture lockTex;
         lockTex.loadFromFile("sprites/lock.png");
@@ -700,6 +696,8 @@ public:
                 MovingPlatform* plat7=new MovingPlatform(2330.f, 550.f, 250.f); (*plat7).small_plat();
                 MovingPlatform* plat8=new MovingPlatform(2600.f, 400.f, 250.f); (*plat8).small_plat();
                 Platform* plat9=new Platform(); (*plat9).setPosition({3000.f, 750.f});(*plat9).medium_plat();
+                Enemy* hunter=new Enemy(3250.f, 710.f, 300.f); enemies.push_back(hunter);
+                
                 FragilePlatform* plat10=new FragilePlatform(); (*plat10).setStartPos({3100.f, 350.f}); (*plat10).small_plat();
                 Platform* plat11=new Platform(); (*plat11).setPosition({3400.f, 500.f}); (*plat11).medium_plat();
 
