@@ -1199,11 +1199,13 @@ int main(){
     input.setOutlineThickness(2.f);
     input.setOutlineColor(Color::Black);
 
+    #if VERSION==3
+    Text inputText(font);
+#else
     Text inputText;
-#if VERSION==3
-    inputText = Text(font);
-#endif
     inputText.setFont(font);
+#endif
+
     inputText.setCharacterSize(30);
     inputText.setFillColor(Color::Black);
     inputText.setPosition({515.f, 605.f});
@@ -1293,9 +1295,62 @@ int main(){
 
     while (window.isOpen() && !returnToMenu)
     {
+
+         if (showMathMenu || showMathTask){
+            character.isMovingLeft=false;
+            character.isMovingRight=false;
+        }
 #if VERSION==3
         while (const std::optional event = window.pollEvent()) {
             if (event->is<Event::Closed>()) window.close();
+
+
+            if (showMathTask) {
+                if (const auto* text = event->getIf<Event::TextEntered>()) {
+                    char c = (char)text->unicode;
+                    if (c == '\b') {
+                        if (!userInput.empty()) userInput.pop_back();
+                    } else if ((c >= '0' && c <= '9') || c == '.' || c == '-') {
+                        userInput += c;
+                    }
+                    inputText.setString(userInput);
+                }
+
+                if (const auto* key = event->getIf<Event::KeyPressed>()) {
+                    if (key->code == Keyboard::Key::Enter) {
+                        if (userInput == currentTask->answer) {
+                            for (int i = 0; i < level.maths.size(); i++) {
+                                if (level.maths[i]->activation(character.getBounds())) {
+                                    level.maths[i]->isSolved = true;
+                                }
+                            }
+                            showMathTask = false;
+                            showMathMenu = false;
+                            countCoins += coinsForMath;
+                            moneyText.setString("x " + to_string(countCoins));
+                        } else {
+                            damageCount++;
+                            health.updateHealth(damageCount);
+                            showMathTask = false;
+                            showMathMenu = false;
+                        }
+                        userInput = "";
+                        inputText.setString("");
+                    }
+                }
+                continue;
+            }
+            else if (showMathMenu) {
+                if (const auto* mouse = event->getIf<Event::MouseButtonPressed>()) {
+                    if (mouse->button == Mouse::Button::Left) {
+                        Vector2f mousePos = window.mapPixelToCoords(mouse->position);
+                        btnEasy.pressed(mousePos);
+                        btnMed.pressed(mousePos);
+                        btnHard.pressed(mousePos);
+                    }
+                }
+                continue;
+            }
 
             if (const auto* keyPressed = event->getIf<Event::KeyPressed>()) {
                 if (keyPressed->code == Keyboard::Key::Space) character.jump();
@@ -1309,11 +1364,6 @@ int main(){
 
 #else
 
-
-        if (showMathMenu || showMathTask){
-            character.isMovingLeft=false;
-            character.isMovingRight=false;
-        }
 
 
         Event event;
