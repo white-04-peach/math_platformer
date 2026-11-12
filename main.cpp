@@ -1,4 +1,4 @@
-#define VERSION 2
+#define VERSION 3
 
 #include <SFML/Graphics.hpp>
 #include <vector>
@@ -44,12 +44,29 @@ public:
 
 
 
-    Character(): sprite(textures[0]){
+    
+    Character(int skinID = 1): sprite(textures[0]) {
+        // Если выбран скин 1 (Панда)
+        if (skinID == 1) {
+        textures[0].loadFromFile("sprites/characters/dog/run_1.png");
+        textures[1].loadFromFile("sprites/characters/dog/run_2.png");
+        textures[2].loadFromFile("sprites/characters/dog/run_3.png");
+        textures[3].loadFromFile("sprites/characters/dog/run_4.png");
+        jumpTexture.loadFromFile("sprites/characters/dog/jump.png");
+        }
+        
+        else if (skinID == 2) {
+
         textures[0].loadFromFile("sprites/characters/panda/run_1.png");
         textures[1].loadFromFile("sprites/characters/panda/run_2.png");
         textures[2].loadFromFile("sprites/characters/panda/run_3.png");
         textures[3].loadFromFile("sprites/characters/panda/run_4.png");
         jumpTexture.loadFromFile("sprites/characters/panda/jump_2.png");
+        }
+
+        
+        // Сюда потом добавить else if (skinID == 3) { ... }
+    
 
         current=0;
         sprite.setTexture(textures[current], true);
@@ -545,12 +562,12 @@ public:
             target.draw(sprite, states);
         }
     };
-
-    int runMenu(RenderWindow& window, int unlockedLevel, int startPage = 0) {
+    
+    int runMenu(RenderWindow& window, int& unlockedLevel, int& totalCoins, int& extraLives, int& extraTime, int& selectedSkin, bool& hasPanda, int startPage = 0) {
+        
         Texture menuBgTex;
-        menuBgTex.loadFromFile("sprites/back_math.jpg");
+        menuBgTex.loadFromFile("sprites/background_new.png");
         Sprite menuBg(menuBgTex);
-        menuBg.setScale({1.15f, 1.12f});
 
         Texture lockTex;
         lockTex.loadFromFile("sprites/lock.png");
@@ -561,25 +578,97 @@ public:
 
         int page = startPage;
         int selectedLevel = -1;
+        int previewSkin = 1;
+        int selectedBonus = 0;
+        
+        Font menuFont;
+    #if VERSION==3
+        menuFont.openFromFile("/System/Library/Fonts/Supplemental/Arial.ttf");
+        Text coinsText(menuFont);
+        Text potionsText(menuFont);
+    #else
+        menuFont.loadFromFile("pix2.ttf");
+        Text coinsText; coinsText.setFont(menuFont);
+        Text potionsText; potionsText.setFont(menuFont);
+    #endif
+        coinsText.setCharacterSize(48); coinsText.setFillColor(Color(40, 70, 40)); coinsText.setPosition({550.f, 40.f});
+        potionsText.setCharacterSize(48); potionsText.setFillColor(Color(40, 70, 40)); potionsText.setPosition({490.f, 100.f});
 
-        ImageButton startBtn("sprites/buttons/play.png", 630.f, 280.f, 0.25f, [&](){ page = 1; });
-        ImageButton exitBtn("sprites/buttons/exit2.png", 630.f, 450.f, 0.25f, [&](){ window.close(); });
+        ImageButton startBtn("sprites/buttons/play.png", 630.f, 280.f, 0.3f, [&](){ page = 1; });
+        ImageButton exitBtn("sprites/buttons/exit2.png", 630.f, 450.f, 0.3f, [&](){ window.close(); });
+        
+        
 
-        ImageButton levelsBtn("sprites/buttons/levels.png", 630.f, 190.f, 0.25f, [&](){ page = 2; });
-        ImageButton shopBtn("sprites/buttons/shop.png", 630.f, 350.f, 0.25f, [&](){ page = 3; });
-        ImageButton backBtn_play("sprites/buttons/back.png", 630.f, 540.f, 0.25f, [&](){ page = 0; });
+        ImageButton levelsBtn("sprites/buttons/levels.png", 470.f, 200.f, 0.3f, [&](){ page = 2; });
+        ImageButton shopBtn("sprites/buttons/shop.png", 830.f, 200.f, 0.3f, [&](){ page = 3; });
+        ImageButton wardrobeBtn("sprites/buttons/wardrobe.png", 635.f, 390.f, 0.5f, [&](){ page = 4; });
+    
+        ImageButton backBtn_play("sprites/buttons/back.png", 630.f, 600.f, 0.3f, [&](){ page = 0; });
 
-        ImageButton level1Btn("sprites/buttons/level_1.png", 450.f, 320.f, 0.25f, [&](){ selectedLevel = 1; });
-        ImageButton level2Btn("sprites/buttons/level_2.png", 820.f, 320.f, 0.25f, [&](){
-            if (unlockedLevel >= 2) selectedLevel = 2;
-        });
-        ImageButton level3Btn("sprites/buttons/level_3.png", 740.f, 500.f, 0.25f, [&](){
-            if (unlockedLevel >= 3) selectedLevel = 3;
-        });
-        ImageButton backBtn_levels("sprites/buttons/back.png", 630.f, 500.f, 0.25f, [&](){ page = 1; });
+        // уровни
+        ImageButton level1Btn("sprites/buttons/level_1.png", 450.f, 200.f, 0.3f, [&](){ selectedLevel = 1; });
+        ImageButton level2Btn("sprites/buttons/level_2.png", 820.f, 200.f, 0.3f, [&](){
+                    if (unlockedLevel >= 2) selectedLevel = 2;
+                });
+        ImageButton level3Btn("sprites/buttons/level_3.png", 455.f, 350.f, 0.31f, [&](){
+                    if (unlockedLevel >= 3) selectedLevel = 3;
+                });
+        ImageButton backBtn_levels("sprites/buttons/back.png", 630.f, 600.f, 0.25f, [&](){ page = 1; });
 
-        ImageButton backBtn_shop("sprites/buttons/back.png", 630.f, 500.f, 0.25f, [&](){ page = 1; });
-
+        
+        
+        // --- МАГАЗИН
+        ImageButton bonusesBtn("sprites/buttons/bonuses.png", 400.f, 350.f, 0.45f, [&](){ page = 5; });
+        ImageButton skinsBtn("sprites/buttons/skins.png", 870.f, 350.f, 0.45f, [&](){ page = 6; });
+        ImageButton backBtn_shop("sprites/buttons/back.png", 630.f, 550.f, 0.25f, [&](){ page = 1; });
+    
+        // --- БОНУСЫ
+        ImageButton lifePotionBtn("sprites/buttons/life_potion.png", 400.f, 350.f, 0.45f, [&](){ selectedBonus = 1; });
+        ImageButton timePotionBtn("sprites/buttons/time_potion.png", 870.f, 350.f, 0.45f, [&](){ selectedBonus = 2; });
+                
+        // Кнопка покупки (появляется только когда выбрано зелье)
+        Button buyBonusBtn(530.f, 430.f, 200.f, 60.f, "BUY", menuFont, [&](){
+            if (selectedBonus == 1 && totalCoins >= 50) { totalCoins -= 50; extraLives++; }
+            if (selectedBonus == 2 && totalCoins >= 30) { totalCoins -= 30; extraTime++; }
+                });
+                
+            ImageButton backBtn_bonuses("sprites/buttons/back.png", 630.f, 600.f, 0.25f, [&](){ page = 3; });
+        
+        // --- СКИНЫ
+           
+        ImageButton leftArrowShop("sprites/buttons/left_2.png", 400.f, 350.f, 0.1f, [&](){
+                    previewSkin = (previewSkin == 1) ? 2 : 1;
+                });
+        ImageButton rightArrowShop("sprites/buttons/right.png", 900.f, 350.f, 0.1f, [&](){
+                    previewSkin = (previewSkin == 1) ? 2 : 1;
+                });
+                
+                Button buySkinBtn(550.f, 500.f, 200.f, 60.f, "BUY", menuFont, [&](){
+                    if (previewSkin == 2 && !hasPanda && totalCoins >= 100) {
+                        totalCoins -= 100;
+                        hasPanda = true;
+                        selectedSkin = 2;
+                    }
+                });
+            ImageButton backBtn_skins("sprites/buttons/back.png", 650.f, 650.f, 0.25f, [&](){ page = 3; });
+        
+        
+        // --- ГАРДЕРОБ (page 4)
+    ImageButton leftArrowBtn("sprites/buttons/left_2.png", 400.f, 400.f, 0.1f, [&](){
+                    previewSkin = (previewSkin == 1) ? 2 : 1;
+                });
+    ImageButton rightArrowBtn("sprites/buttons/right.png", 950.f, 400.f, 0.1f, [&](){
+                    previewSkin = (previewSkin == 1) ? 2 : 1;
+                });
+        
+        // Текстовая кнопка "Надеть"
+                Button equipBtn(550.f, 500.f, 200.f, 60.f, "PUT ON", menuFont, [&](){
+                    if (previewSkin == 1 || (previewSkin == 2 && hasPanda)) {
+                        selectedSkin = previewSkin; // Надеваем ТОЛЬКО если куплено
+                    }
+                });
+        
+        ImageButton backBtn_wardrobe("sprites/buttons/back.png", 650.f, 620.f, 0.25f, [&](){ page = 1; });
 
 
         while (window.isOpen() && selectedLevel == -1) {
@@ -592,9 +681,12 @@ public:
                       //  Vector2f mp = Vector2f(mouse->position);
                         Vector2f mp = window.mapPixelToCoords(mouse->position);
                         if (page == 0) { startBtn.pressed(mp); exitBtn.pressed(mp); }
-                        else if (page == 1) { levelsBtn.pressed(mp); shopBtn.pressed(mp); backBtn_play.pressed(mp); }
+                        else if (page == 1) { levelsBtn.pressed(mp); shopBtn.pressed(mp); wardrobeBtn.pressed(mp); backBtn_play.pressed(mp); }
                         else if (page == 2) { level1Btn.pressed(mp); level2Btn.pressed(mp); level3Btn.pressed(mp); backBtn_levels.pressed(mp); }
-                        else if (page == 3) { backBtn_shop.pressed(mp); }
+                        else if (page == 3) { bonusesBtn.pressed(mp); skinsBtn.pressed(mp); backBtn_shop.pressed(mp); }
+                        else if (page == 4) { leftArrowBtn.pressed(mp); rightArrowBtn.pressed(mp); equipBtn.pressed(mp); backBtn_wardrobe.pressed(mp); }
+                        else if (page == 5) { lifePotionBtn.pressed(mp); timePotionBtn.pressed(mp); buyBonusBtn.pressed(mp); backBtn_bonuses.pressed(mp); }
+                        else if (page == 6) { leftArrowShop.pressed(mp); rightArrowShop.pressed(mp); buySkinBtn.pressed(mp); backBtn_skins.pressed(mp); }
                     }
                 }
             }
@@ -606,9 +698,12 @@ public:
                     if (event.mouseButton.button == Mouse::Left) {
                         Vector2f mp = window.mapPixelToCoords(Mouse::getPosition(window));
                         if (page == 0) { startBtn.pressed(mp); exitBtn.pressed(mp); }
-                        else if (page == 1) { levelsBtn.pressed(mp); shopBtn.pressed(mp); backBtn_play.pressed(mp); }
+                        else if (page == 1) { levelsBtn.pressed(mp); shopBtn.pressed(mp); wardrobeBtn.pressed(mp); backBtn_play.pressed(mp); }
                         else if (page == 2) { level1Btn.pressed(mp); level2Btn.pressed(mp); level3Btn.pressed(mp); backBtn_levels.pressed(mp); }
-                        else if (page == 3) { backBtn_shop.pressed(mp); }
+                        else if (page == 3) { bonusesBtn.pressed(mp); skinsBtn.pressed(mp); backBtn_shop.pressed(mp); }
+                        else if (page == 4) { leftArrowBtn.pressed(mp); rightArrowBtn.pressed(mp); equipBtn.pressed(mp); backBtn_wardrobe.pressed(mp); }
+                        else if (page == 5) { lifePotionBtn.pressed(mp); timePotionBtn.pressed(mp); buyBonusBtn.pressed(mp); backBtn_bonuses.pressed(mp); }
+                        else if (page == 6) { leftArrowShop.pressed(mp); rightArrowShop.pressed(mp); buySkinBtn.pressed(mp); backBtn_skins.pressed(mp); }
                     }
                 }
             }
@@ -617,7 +712,8 @@ public:
             window.clear(Color(205, 220, 210)); // Цвет под клетку тетради
 
             window.draw(menuBg);
-           // window.draw(titleText);
+            coinsText.setString("Coins: " + to_string(totalCoins));
+            potionsText.setString("Life: " + to_string(extraLives) + "  Time: " + to_string(extraTime));
 
             if (page == 0) {
                 window.draw(startBtn);
@@ -625,132 +721,150 @@ public:
             } else if (page == 1) {
                 window.draw(levelsBtn);
                 window.draw(shopBtn);
+                window.draw(wardrobeBtn);
                 window.draw(backBtn_play);
             } else if (page == 2) {
                 window.draw(level1Btn);
                 window.draw(level2Btn);
-                /*window.draw(level3Btn);*/
+                window.draw(level3Btn);
+                    if (unlockedLevel < 2) { lockSprite.setPosition({820.f, 200.f}); window.draw(lockSprite); }
+                    if (unlockedLevel < 3) { lockSprite.setPosition({455.f, 350.f}); window.draw(lockSprite); }
+                        window.draw(backBtn_levels);
+                   } else if (page == 3) {
+                       window.draw(coinsText);
+                       window.draw(bonusesBtn);
+                       window.draw(skinsBtn);
+                       window.draw(backBtn_shop);
+                   } else if (page == 4) {
+                       window.draw(leftArrowBtn);
+                       window.draw(rightArrowBtn);
+                       window.draw(backBtn_wardrobe);
+                       
+                       if (previewSkin == 1) {
+                           Texture t;
+                           t.loadFromFile("sprites/characters/dog/run_1.png");
+                           Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
+                           s.setPosition({690.f, 350.f}); s.setScale({1.5f, 1.5f});
+                           window.draw(s);
+                           window.draw(equipBtn);
+                       } else if (previewSkin == 2) {
+                           if (hasPanda) {
+                               Texture t;
+                               t.loadFromFile("sprites/characters/panda/run_1.png");
+                               Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
+                               s.setPosition({750.f, 350.f}); s.setScale({1.5f, 1.5f});
+                               window.draw(s);
+                               window.draw(equipBtn);
+                           } else {
+                               RectangleShape emptyBox({200.f, 200.f});
+                              // emptyBox.setFillColor(Color(0, 0, 0, 100));
+                               emptyBox.setPosition({650.f, 250.f});
+                             //  window.draw(emptyBox);
+                               
+                              
+#if VERSION==3
+                               Text lockedText(menuFont);
+#else
+                               Text lockedText;
+                               lockedText.setFont(menuFont);
+#endif
+                               lockedText.setString("NOT PURCHASED");
+                               lockedText.setCharacterSize(30);
+                               lockedText.setFillColor(Color::Red);
+                               lockedText.setPosition({550.f, 480.f});
+                               window.draw(lockedText);
+                           }
+                       }
+                       // ВОТ ЗДЕСЬ БЫЛА ПРОПУЩЕНА СКОБКА, КОТОРАЯ ЗАКРЫВАЕТ page == 4
+                   } else if (page == 5) {
+                       window.draw(coinsText);
+                       window.draw(potionsText);
+                       window.draw(lifePotionBtn);
+                       window.draw(timePotionBtn);
+                       window.draw(backBtn_bonuses);
+                       
+                       // Рисуем цены под зельями (УНИВЕРСАЛЬНЫЙ КОД)
+                           #if VERSION==3
+                               Text priceText(menuFont);
+                           #else
+                               Text priceText;
+                               priceText.setFont(menuFont);
+                           #endif
+                       
+                       // Рисуем цены под зельями
+                        priceText.setCharacterSize(30);
+                        priceText.setFillColor(Color::Black);
+                                              
+                        priceText.setString("50 COINS");
+                        priceText.setPosition({340.f, 400.f});
+                        window.draw(priceText);
+                                              
+                        priceText.setString("30 COINS");
+                        priceText.setPosition({810.f, 400.f});
+                        window.draw(priceText);
+                                              
+                        // Если выбрано зелье, показываем кнопку КУПИТЬ
+                        if (selectedBonus != 0) {
+                        window.draw(buyBonusBtn);
+                        }
+                   } else if (page == 6) {
+                       window.draw(coinsText);
+                       window.draw(leftArrowShop);
+                       window.draw(rightArrowShop);
+                       window.draw(backBtn_skins);
+                        
+                       if (previewSkin == 1) {
+                Texture t; t.loadFromFile("sprites/characters/dog/run_1.png");
+                           Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
+                           s.setPosition({660.f, 300.f}); s.setScale({1.5f, 1.5f});
+                           window.draw(s);
+                           
+#if VERSION==3
+                           Text t1(menuFont);
+#else
+                           Text t1;
+                           t1.setFont(menuFont);
+#endif
+                           t1.setString("DEFAULT");
+                           t1.setCharacterSize(30); t1.setFillColor(Color::Black); t1.setPosition({580.f, 450.f});
+                           window.draw(t1);
 
-                    if (unlockedLevel < 2) {
-
-                        lockSprite.setPosition({820.f, 310.f});
-                        window.draw(lockSprite);
-                }
-                    if (unlockedLevel < 3) {
-
-                        lockSprite.setPosition({750.f, 600.f});
-                       // window.draw(lockSprite);
-                    }
-
-
-                window.draw(backBtn_levels);
-
-
-            } else if (page == 3) {
-               // window.draw(shopPanel);
-                window.draw(backBtn_shop);
-            }
+                       } else if (previewSkin == 2) {
+                           Texture t; t.loadFromFile("sprites/characters/panda/run_1.png");
+                           Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
+                           s.setPosition({660.f, 300.f}); s.setScale({1.5f, 1.5f});
+                           window.draw(s);
+                           
+                           if (hasPanda) {
+#if VERSION==3
+                               Text t2(menuFont);
+#else
+                               Text t2;
+                               t2.setFont(menuFont);
+#endif
+                               t2.setString("ALREADY OWNED");
+                               t2.setCharacterSize(30); t2.setFillColor(Color::Green); t2.setPosition({680.f, 480.f});
+                               window.draw(t2);
+                           } else {
+#if VERSION==3
+                               Text t3(menuFont);
+#else
+                               Text t3;
+                               t3.setFont(menuFont);
+#endif
+                               t3.setString("100 COINS");
+                               t3.setCharacterSize(30); t3.setFillColor(Color::Black); t3.setPosition({580.f, 450.f});
+                               window.draw(t3);
+                               window.draw(buySkinBtn);
+                           }
+                       }
+                   }
 
             window.display();
         }
 
         return selectedLevel;
     }
-
-
-
-class MathTask: public Drawable, public Transformable{
-public:
-    Texture texture;
-    Sprite sprite;
-    string answer;
-
-
-    MathTask(string path, string ans): answer(ans)
-#if VERSION == 3
-        , sprite(texture)
-#endif
-    {
-        texture.loadFromFile(path);
-        sprite.setTexture(texture);
-        sprite.setScale({0.9f, 0.9f});
-    }
-
-    void draw(RenderTarget& target, RenderStates states) const override {
-        states.transform *= getTransform();
-        target.draw(sprite, states);
-    }
-};
-
-
-//.........................MATH_TASK.......................................
-
-class Math: public Drawable, public Transformable {
-private:
-    RectangleShape wall;
-    Texture texture;
-    Sprite sprite;
-
-public:
-    bool isWindowOpen=false;
-    bool isSolved=false;
-
-    Math(float x, float y)
-#if VERSION == 3
-        : sprite(texture)
-#endif
-    {
-
-        wall.setPosition({x+30.f, 0.f});
-        wall.setSize({10.f, 900.f});
-        wall.setFillColor(Color(18, 47, 170, 100));
-
-        texture.loadFromFile("sprites/math.png");
-        sprite.setTexture(texture);
-        sprite.setOrigin({texture.getSize().x/2.f, texture.getSize().y/2.f});
-        sprite.setScale({0.2f, 0.2f});
-        sprite.setPosition({x, y});
-    }
-
-    void setWallHeight(float h){
-        wall.setSize({wall.getSize().x, h});
-    }
-
-
-    FloatRect getWallBounds() const {
-        return wall.getGlobalBounds();}
-
-    FloatRect getMathBounds() const {
-        return sprite.getGlobalBounds();}
-
-
-    bool activation(FloatRect charBounds){
-        if (!isSolved && !isWindowOpen){
-#if VERSION == 3
-            if (sprite.getGlobalBounds().findIntersection(charBounds)) {
-                return true;
-            }
-#else
-            if (sprite.getGlobalBounds().intersects(charBounds)) {
-                return true;
-            }
-#endif
-        }
-        return false;
-    }
-
-
-    void draw(RenderTarget& target, RenderStates states) const override {
-        states.transform *= getTransform();
-        target.draw(sprite, states);
-
-        if (!isSolved){
-            target.draw(wall, states);
-        }
-    }
-};
-
-
 
 //.........................LEVELS.......................................
 
@@ -765,7 +879,6 @@ public:
     vector<Coin*> coins;
     vector<Enemy*> enemies;
     vector<JumpBonus*> bonuses;
-    vector<Math*> maths;
     float levelWidth = 4000.f;
 
     Level():levelEnd(levelEndTex) {}
@@ -781,8 +894,6 @@ public:
             case 1:{
                 startPos={50.f, 660.f};
                 levelEnd.setPosition({3770.f, 445.f});
-                Math* math1=new Math(250.f, 650.f);
-                maths.push_back(math1);
 
                 Platform* plat1=new Platform(); (*plat1).setPosition({0.f, 700.f}); (*plat1).medium_plat();
                 Platform* plat2=new Platform(); (*plat2).setPosition({450.f, 560.f}); (*plat2).small_plat();
@@ -795,9 +906,8 @@ public:
                 MovingPlatform* plat7=new MovingPlatform(2330.f, 550.f, 250.f); (*plat7).small_plat();
                 MovingPlatform* plat8=new MovingPlatform(2600.f, 400.f, 250.f); (*plat8).small_plat();
                 Platform* plat9=new Platform(); (*plat9).setPosition({3000.f, 750.f});(*plat9).medium_plat();
-
                 Enemy* hunter=new Enemy(3250.f, 710.f, 300.f); enemies.push_back(hunter);
-
+                
                 FragilePlatform* plat10=new FragilePlatform(); (*plat10).setStartPos({3100.f, 350.f}); (*plat10).small_plat();
                 Platform* plat11=new Platform(); (*plat11).setPosition({3400.f, 500.f}); (*plat11).medium_plat();
 
@@ -826,8 +936,6 @@ public:
             case 2:{
                 startPos={50.f, 550.f};
                 levelEnd.setPosition({3850.f, 147.f});
-                Math* math1=new Math(3300.f, 750.f);
-                maths.push_back(math1);
 
                 Platform* plat1=new Platform(); (*plat1).setPosition({0.f, 600.f}); (*plat1).medium_plat();
                 Platform* plat2=new Platform(); (*plat2).setPosition({590.f, 600.f}); (*plat2).medium_plat();
@@ -885,8 +993,6 @@ public:
                 startPos={50.f, 360.f};
                 levelWidth = 4920.f;
                 levelEnd.setPosition({4840.f, 345.f});
-                //Math* math1=new Math(2500.f, 500.f);
-                //maths.push_back(math1);
 
 
                 Platform* plat1=new Platform(); (*plat1).setPosition({0.f, 400.f}); (*plat1).medium_plat();
@@ -981,13 +1087,10 @@ public:
 
         for (int i=0; i<bonuses.size(); i++) delete bonuses[i];
         bonuses.clear();
-
-        for (int i=0; i<maths.size(); i++) delete maths[i];
-        maths.clear();
     }
 };
 
-int main(){
+int main() {
     RenderWindow window(VideoMode({1500, 900}), "Platformer");
     window.setFramerateLimit(60);
     View view(FloatRect({0.f, 0.f}, {1500.f, 900.f}));
@@ -995,50 +1098,16 @@ int main(){
 
     int unlockedLevel = 1;
         int totalCoins = 0;
+        int extraLives = 0;       // Купленные зелья жизни
+        int extraTime = 0;        // Купленные зелья времени
+        int selectedSkin = 1; // выбранный скил (собака 1, панда 2, и тд)
+        bool hasPandaSkin = false;
         bool goToLevels = false;
 
-
-
-
-    // Level 1
-    MathTask l1_easy1("sprites/tasks/l1_easy1.jpg", "-3");
-    MathTask l1_easy2("sprites/tasks/l1_easy2.jpg", "9.7");
-    MathTask l1_easy3("sprites/tasks/l1_easy3.jpg", "7");
-    MathTask l1_med1("sprites/tasks/l1_med1.jpg", "1");
-    MathTask l1_med2("sprites/tasks/l1_med2.jpg", "1");
-    MathTask l1_med3("sprites/tasks/l1_med3.jpg", "1");
-    MathTask l1_hard1("sprites/tasks/l1_hard1.jpg", "1");
-
-    vector<MathTask*> level1_easy={&l1_easy1, &l1_easy2, &l1_easy3};
-    vector<MathTask*> level1_med={&l1_med1};
-    vector<MathTask*> level1_hard={&l1_hard1};
-
-
-    // Level 2
-    MathTask l2_easy1("sprites/tasks/l1_easy1.jpg", "-3");
-    MathTask l2_easy2("sprites/tasks/l1_easy2.jpg", "9.7");
-    MathTask l2_easy3("sprites/tasks/l1_easy3.jpg", "7");
-    MathTask l2_med1("sprites/tasks/l1_med1.jpg", "1");
-    MathTask l2_med2("sprites/tasks/l1_med2.jpg", "1");
-    MathTask l2_med3("sprites/tasks/l1_med3.jpg", "1");
-    MathTask l2_hard1("sprites/tasks/l1_hard1.jpg", "1");
-
-    vector<MathTask*> level2_easy={&l2_easy1, &l2_easy2, &l2_easy3};
-    vector<MathTask*> level2_med={&l2_med1, &l2_med2, &l2_med3};
-    vector<MathTask*> level2_hard={&l2_hard1};
-
-    // это для вида, остальное потом закинем
-
-
-    vector<MathTask*> level3_easy={&l2_easy1, &l2_easy2, &l2_easy3};
-    vector<MathTask*> level3_med={&l2_med1, &l2_med2, &l2_med3};
-    vector<MathTask*> level3_hard={&l2_hard1};
-
-
-
         while (window.isOpen()) {
-            // Передаем goToLevels ? 2 : 0. Если true, меню откроется на 2 странице (список уровней)
-            int selectedLevel = runMenu(window, unlockedLevel, goToLevels ? 1 : 0);
+            // Передаем goToLevels ? 2 : 0. Если true, меню откроется на 1 странице
+            int selectedLevel = runMenu(window, unlockedLevel, totalCoins, extraLives, extraTime, selectedSkin, hasPandaSkin, goToLevels ? 1 : 0);
+        
 
             if (selectedLevel == -1) return 0;
             goToLevels = false;
@@ -1064,7 +1133,7 @@ int main(){
     int levelNumb=selectedLevel;
     level.create(levelNumb);
 
-    Character character;
+    Character character(selectedSkin);
     character.setPosition(level.startPos);
     Vector2f respawn=level.startPos;
 
@@ -1093,7 +1162,6 @@ int main(){
 
 
     bool levelCompleted = false;
-    bool isGameOver=false;
 
     RectangleShape winPanel({540.f, 460.f});
     winPanel.setFillColor(Color(200, 230, 200, 220));
@@ -1113,23 +1181,6 @@ int main(){
     winText.setCharacterSize(55);
     winText.setFillColor(Color(20, 40, 20));
     winText.setPosition({550.f, 250.f});
-
-
-
-    RectangleShape losePanel({540.f, 400.f});
-    losePanel.setFillColor(Color(230, 200, 200, 220));
-    losePanel.setPosition({480.f, 260.f});
-
-#if VERSION==3
-    Text loseText(font);
-#else
-    Text loseText;
-    loseText.setFont(font);
-#endif
-    loseText.setString("GAME OVER");
-    loseText.setCharacterSize(60);
-    loseText.setFillColor(Color(139, 0, 0));
-    loseText.setPosition({580.f, 300.f});
 
 
 #if VERSION==3
@@ -1201,223 +1252,12 @@ int main(){
                                                                 });
 
 
-    bool isPaused=false;
-    ImageButton pauseBtn("sprites/buttons/pause.png", 35.f, 140.f, 0.25f, [&](){ isPaused=true; });
-
-    RectangleShape pausePanel({540.f, 400.f});
-    pausePanel.setFillColor(Color(200, 230, 200, 220));
-    pausePanel.setPosition({480.f, 250.f});
-
-
-    Button btnResume(550.f, 350.f, 400.f, 50.f, "Resume", font, [&](){ isPaused=false; });
-
-
-    Button btnRestartPause(550.f, 420.f, 400.f, 50.f, "Restart Level", font, [&](){
-                                                                                isPaused=false;
-                                                                                levelCompleted=false;
-                                                                                isGameOver=false;
-                                                                                level.create(levelNumb);
-                                                                                character.setPosition(level.startPos);
-                                                                                respawn=level.startPos;
-                                                                                damageCount=0;
-                                                                                health.updateHealth(0);
-                                                                                moneyText.setString("x 0");
-                                                                                countCoins=0;
-                                                                            });
-
-    Button btnMenuPause(550.f, 490.f, 400.f, 50.f, "Main Menu", font, [&](){ returnToMenu=true; isGameOver=false;});
-
-
-    bool showMathMenu=false;
-    bool showMathTask=false;
-    MathTask* currentTask=nullptr;
-    string userInput="";
-    int coinsForMath=0;
-
-    RectangleShape mathWindow({600.f, 450.f});
-    mathWindow.setPosition({450.f, 200.f});
-    mathWindow.setFillColor(Color(200, 230, 200));
-
-    RectangleShape input({500.f, 40.f});
-    input.setPosition({500.f, 600.f});
-    input.setFillColor(Color::White);
-    input.setOutlineThickness(2.f);
-    input.setOutlineColor(Color::Black);
-
-    #if VERSION==3
-    Text inputText(font);
-#else
-    Text inputText;
-    inputText.setFont(font);
-#endif
-
-    inputText.setCharacterSize(30);
-    inputText.setFillColor(Color::Black);
-    inputText.setPosition({515.f, 605.f});
-
-
-    Button btnEasy(600.f, 300.f, 300.f, 50.f, "Easy (1)", font, [&](){
-
-                                                if(levelNumb==1){
-                                                    currentTask=level1_easy[rand()%level1_easy.size()];
-                                                }
-                                                if(levelNumb==2){
-                                                    currentTask=level2_easy[rand()%level2_easy.size()];
-                                                }
-                                                if(levelNumb==3){
-                                                    currentTask=level3_easy[rand()%level3_easy.size()];
-                                                }
-                                                if(levelNumb==4){
-                                                    currentTask=level3_easy[rand()%level3_easy.size()];
-                                                }
-                                                if(levelNumb==5){
-                                                    currentTask=level3_easy[rand()%level3_easy.size()];
-                                                }
-                                                if(levelNumb==6){
-                                                    currentTask=level3_easy[rand()%level3_easy.size()];
-                                                }
-
-                                                (*currentTask).setPosition({500.f, 350.f});
-                                                showMathMenu=false;
-                                                showMathTask=true;
-                                                coinsForMath=1;
-                                                });
-
-    Button btnMed(600.f, 370.f, 300.f, 50.f, "Meduim (3)", font, [&](){
-
-                                                if(levelNumb==1){
-                                                    currentTask=level1_med[rand()%level1_med.size()];
-                                                }
-                                                if(levelNumb==2){
-                                                    currentTask=level2_med[rand()%level2_med.size()];
-                                                }
-                                                if(levelNumb==3){
-                                                    currentTask=level3_med[rand()%level3_med.size()];
-                                                }
-                                                if(levelNumb==4){
-                                                    currentTask=level3_med[rand()%level3_med.size()];
-                                                }
-                                                if(levelNumb==5){
-                                                   currentTask=level3_med[rand()%level3_med.size()];
-                                                }
-                                                if(levelNumb==6){
-                                                    currentTask=level3_med[rand()%level3_med.size()];
-                                                }
-
-                                                (*currentTask).setPosition({500.f, 350.f});
-                                                showMathMenu=false;
-                                                showMathTask=true;
-                                                coinsForMath=3;
-                                                });
-
-    Button btnHard(600.f, 440.f, 300.f, 50.f, "Hard (5)", font, [&](){
-                                                if(levelNumb==1){
-                                                    currentTask=level1_hard[rand()%level1_hard.size()];
-                                                }
-                                                if(levelNumb==2){
-                                                    currentTask=level2_hard[rand()%level2_hard.size()];
-                                                }
-                                                if(levelNumb==3){
-                                                    currentTask=level3_hard[rand()%level3_hard.size()];
-                                                }
-                                                if(levelNumb==4){
-                                                    currentTask=level3_hard[rand()%level3_hard.size()];
-                                                }
-                                                if(levelNumb==5){
-                                                    currentTask=level3_hard[rand()%level3_hard.size()];
-                                                }
-                                                if(levelNumb==6){
-                                                    currentTask=level3_hard[rand()%level3_hard.size()];
-                                                }
-
-                                                (*currentTask).setPosition({500.f, 350.f});
-                                                showMathMenu=false;
-                                                showMathTask=true;
-                                                coinsForMath=5;
-                                                });
-
-
 
     while (window.isOpen() && !returnToMenu)
     {
-
-         if (showMathMenu || showMathTask){
-            character.isMovingLeft=false;
-            character.isMovingRight=false;
-        }
 #if VERSION==3
         while (const std::optional event = window.pollEvent()) {
             if (event->is<Event::Closed>()) window.close();
-
-
-            if (isPaused) {
-                if (const auto* mouse = event->getIf<Event::MouseButtonPressed>()) {
-                    if (mouse->button == Mouse::Button::Left) {
-                        Vector2f mousePos = window.mapPixelToCoords(mouse->position);
-                        btnResume.pressed(mousePos);
-                        btnRestartPause.pressed(mousePos);
-                        btnMenuPause.pressed(mousePos);
-                    }
-                }
-                continue;
-            }
-
-            if (showMathTask) {
-                if (const auto* text = event->getIf<Event::TextEntered>()) {
-                    char c = (char)text->unicode;
-                    if (c == '\b') {
-                        if (!userInput.empty()) userInput.pop_back();
-                    } else if ((c >= '0' && c <= '9') || c == '.' || c == '-') {
-                        userInput += c;
-                    }
-                    inputText.setString(userInput);
-                }
-
-                if (const auto* key = event->getIf<Event::KeyPressed>()) {
-                    if (key->code == Keyboard::Key::Enter) {
-                        if (userInput == currentTask->answer) {
-                            for (int i = 0; i < level.maths.size(); i++) {
-                                if (level.maths[i]->activation(character.getBounds())) {
-                                    level.maths[i]->isSolved = true;
-                                }
-                            }
-                            showMathTask = false;
-                            showMathMenu = false;
-                            countCoins += coinsForMath;
-                            moneyText.setString("x " + to_string(countCoins));
-                        } else {
-                            damageCount++;
-                            health.updateHealth(damageCount);
-                            showMathTask = false;
-                            showMathMenu = false;
-                        }
-                        userInput = "";
-                        inputText.setString("");
-                    }
-                }
-                continue;
-            }
-            else if (showMathMenu) {
-                if (const auto* mouse = event->getIf<Event::MouseButtonPressed>()) {
-                    if (mouse->button == Mouse::Button::Left) {
-                        Vector2f mousePos = window.mapPixelToCoords(mouse->position);
-                        btnEasy.pressed(mousePos);
-                        btnMed.pressed(mousePos);
-                        btnHard.pressed(mousePos);
-                    }
-                }
-                continue;
-            }
-
-            if (!isPaused && !showMathMenu && !showMathTask && !levelCompleted) {
-                if (const auto* mouse = event->getIf<Event::MouseButtonPressed>()) {
-                    if (mouse->button == Mouse::Button::Left) {
-                        Vector2f mousePos = window.mapPixelToCoords(mouse->position);
-                        pauseBtn.pressed(mousePos);
-                    }
-                }
-            }
-
 
             if (const auto* keyPressed = event->getIf<Event::KeyPressed>()) {
                 if (keyPressed->code == Keyboard::Key::Space) character.jump();
@@ -1430,89 +1270,10 @@ int main(){
             }
 
 #else
-
-
-
         Event event;
         while(window.pollEvent(event)){
             if(event.type==Event::Closed)
                 window.close();
-
-            if(isPaused){
-                if (event.type==Event::MouseButtonPressed && event.mouseButton.button==Mouse::Left){
-                    Vector2f mousePos=window.mapPixelToCoords(Mouse::getPosition(window));
-                    btnResume.pressed(mousePos);
-                    btnRestartPause.pressed(mousePos);
-                    btnMenuPause.pressed(mousePos);
-                }
-                continue;
-            }
-
-             if (showMathTask){
-                if (event.type==Event::TextEntered){
-                    char c=(char)event.text.unicode;
-                    if (c=='\b'){
-                        if (!userInput.empty()) userInput.pop_back();
-                    }
-
-                    else if ((c>='0'&&c<='9') || c=='.' || c=='-'){
-                        userInput+=c;
-                    }
-                    inputText.setString(userInput);
-                }
-
-                if (event.type==Event::KeyPressed && event.key.code==Keyboard::Enter){
-                    if (userInput==(*currentTask).answer){
-
-                        for (int i=0; i<level.maths.size(); i++){
-                            if((*level.maths[i]).activation(character.getBounds()))
-                                (*level.maths[i]).isSolved=true;
-                        }
-                        showMathTask=false;
-                        showMathMenu=false;
-                        countCoins+=coinsForMath;
-                        moneyText.setString("x " + to_string(countCoins));
-                    }
-                    else {
-                        damageCount++;
-                        health.updateHealth(damageCount);
-                        showMathTask=false;
-                        showMathMenu=false;
-                    }
-                    userInput= "";
-                    inputText.setString("");
-
-                    for (int i=0; i<level.maths.size(); i++){
-                            if ((*level.maths[i]).activation(character.getBounds())) {
-                                (*level.maths[i]).isSolved=true;
-                            }
-                    }
-                }
-
-                continue;
-            }
-
-
-            else if (showMathMenu){
-                if(event.type==Event::MouseButtonPressed && event.mouseButton.button==Mouse::Left){
-                   if(event.mouseButton.button==Mouse::Left){
-                        Vector2f mousePos=window.mapPixelToCoords(Mouse::getPosition(window));
-                        btnEasy.pressed(mousePos);
-                        btnMed.pressed(mousePos);
-                        btnHard.pressed(mousePos);
-                   }
-                }
-                continue;
-            }
-
-
-            if(!showMathMenu && !showMathTask && !levelCompleted){
-                if (event.type==Event::MouseButtonPressed && event.mouseButton.button==Mouse::Left){
-                    Vector2f mousePos=window.mapPixelToCoords(Mouse::getPosition(window));
-                    pauseBtn.pressed(mousePos);
-                }
-            }
-
 
             if (event.type==Event::KeyPressed){
                 if (event.key.code==Keyboard::Space)
@@ -1533,37 +1294,25 @@ int main(){
 
 
 #if VERSION==3
-            if (levelCompleted || isGameOver){
+            if (levelCompleted){
                 if (const auto* mouse = event->getIf<Event::MouseButtonPressed>()){
-                    if (mouse->button == Mouse::Button::Left){
-                        Vector2f mousePos=window.mapPixelToCoords(mouse->position);
-                        if (levelCompleted){
-                            btnMenu.pressed(mousePos);
-                            btnRetry.pressed(mousePos);
-                            btnNext.pressed(mousePos);
-                        }
-                        else if (isGameOver){
-                            btnMenuPause.pressed(mousePos);
-                            btnRestartPause.pressed(mousePos);
-                        }
+                    if (mouse->button == Mouse::Button::Left) {
+                        Vector2f mousePos = window.mapPixelToCoords(mouse->position);
+                        btnMenu.pressed(mousePos);
+                        btnRetry.pressed(mousePos);
+                        btnNext.pressed(mousePos);
                     }
                 }
             }
 
 #else
-            if (levelCompleted || isGameOver){
+            if (levelCompleted){
                 if (event.type==Event::MouseButtonPressed){
                     if (event.mouseButton.button==Mouse::Left){
                         Vector2f mousePos=window.mapPixelToCoords(Mouse::getPosition(window));
-                        if (levelCompleted){
-                            btnMenu.pressed(mousePos);
-                            btnRetry.pressed(mousePos);
-                            btnNext.pressed(mousePos);
-                        }
-                        else if (isGameOver){
-                            btnMenuPause.pressed(mousePos);
-                            btnRestartPause.pressed(mousePos);
-                        }
+                        btnMenu.pressed(mousePos);
+                        btnRetry.pressed(mousePos);
+                        btnNext.pressed(mousePos);
                     }
                 }
             }
@@ -1571,330 +1320,264 @@ int main(){
 
         }
 
-        if(!isPaused && !isGameOver && !levelCompleted){
 
-            Vector2f prevPos=character.getPosition();
-            character.movement();
+        Vector2f prevPos=character.getPosition();
+        character.movement();
 
-
-            if (damageCount>=3 && !isGameOver){
-                isGameOver=true;
-            }
-
-            for (int i=0; i<level.platforms.size(); i++)
-                (*level.platforms[i]).movement();
+        for (int i=0; i<level.platforms.size(); i++)
+            (*level.platforms[i]).movement();
 
 
-            for (int i=0; i<level.enemies.size(); i++) {
-                (*level.enemies[i]).movement();
-            }
+        for (int i=0; i<level.enemies.size(); i++) {
+            (*level.enemies[i]).movement();
+        }
 
-            if (character.getPosition().y>900.f) {
+        if (character.getPosition().y>900.f) {
+            damageCount++;
+            health.updateHealth(damageCount);
+            character.setPosition(respawn);
+            character.direct=1.f;
+            character.landing();
+
+            for(int i=0; i<level.platforms.size(); i++)
+                (*level.platforms[i]).reset();
+
+            for (int i=0; i<level.bonuses.size(); i++) {
+                (*level.bonuses[i]).onScreen=true;
+}
+
+            prevPos=character.getPosition();
+            continue;
+        }
+
+        FloatRect characterBounds=character.getBounds();
+         bool hitSpike = false;
+        for (auto& spike : level.spikes) {
+#if VERSION==3
+            if (characterBounds.findIntersection(spike.getBounds())) { hitSpike = true; break; }
+#else
+            if (characterBounds.intersects(spike.getBounds())){
+                    hitSpike = true;
+                    break;}
+#endif
+        }
+
+
+        if (hitSpike){
+            if (!character.invuln){
+                character.getDamage();
                 damageCount++;
                 health.updateHealth(damageCount);
-                character.setPosition(respawn);
-                character.direct=1.f;
-                character.landing();
-
-                for(int i=0; i<level.platforms.size(); i++)
-                    (*level.platforms[i]).reset();
-
-                for (int i=0; i<level.bonuses.size(); i++) {
-                    (*level.bonuses[i]).onScreen=true;
             }
+        }
 
-                prevPos=character.getPosition();
-                continue;
-            }
-
-            FloatRect characterBounds=character.getBounds();
-             bool hitSpike = false;
-            for (auto& spike : level.spikes) {
-#if VERSION==3
-                if (characterBounds.findIntersection(spike.getBounds())) { hitSpike = true; break; }
-#else
-                if (characterBounds.intersects(spike.getBounds())){
-                        hitSpike = true;
-                        break;}
-#endif
-            }
-
-
-            if (hitSpike){
-                if (!character.invuln){
-                    character.getDamage();
-                    damageCount++;
-                    health.updateHealth(damageCount);
-                }
-            }
-
-            for (int i=0; i<level.bonuses.size(); i++){
-                if ((*level.bonuses[i]).onScreen) {
+        for (int i=0; i<level.bonuses.size(); i++){
+            if ((*level.bonuses[i]).onScreen) {
 #if VERSION == 3
-                    if (character.getBounds().findIntersection((*level.bonuses[i]).getBounds())) {
+                if (character.getBounds().findIntersection((*level.bonuses[i]).getBounds())) {
 #else
-                    if (character.getBounds().intersects((*level.bonuses[i]).getBounds())){
+                if (character.getBounds().intersects((*level.bonuses[i]).getBounds())){
 #endif
-                        (*level.bonuses[i]).onScreen=false;
-                        character.activateBonus();
-                    }
+                    (*level.bonuses[i]).onScreen=false;
+                    character.activateBonus();
                 }
             }
+        }
 
 
-            for (auto* checkpoint: level.checkpoints){
+        for (auto* checkpoint: level.checkpoints){
 #if VERSION==3
-                if (characterBounds.findIntersection(checkpoint->getBounds())){
+            if (characterBounds.findIntersection(checkpoint->getBounds())){
 #else
-                if (characterBounds.intersects(checkpoint->getBounds())){
+            if (characterBounds.intersects(checkpoint->getBounds())){
 #endif
-                    if (checkpoint->activate()) {
-                        respawn=checkpoint->getPosition();
-                    }
+                if (checkpoint->activate()) {
+                    respawn=checkpoint->getPosition();
                 }
             }
+        }
 
 
-            for (int i=0; i<level.coins.size(); i++) {
-                if ((*level.coins[i]).onScreen) {
-                    (*level.coins[i]).animation();
+        for (int i=0; i<level.coins.size(); i++) {
+            if ((*level.coins[i]).onScreen) {
+                (*level.coins[i]).animation();
 #if VERSION==3
-                    if (characterBounds.findIntersection(level.coins[i]->getBounds())){
+                if (characterBounds.findIntersection(level.coins[i]->getBounds())){
 #else
-                    if (characterBounds.intersects(level.coins[i]->getBounds())){
+                if (characterBounds.intersects(level.coins[i]->getBounds())){
 #endif
-                        level.coins[i]->onScreen=false;
-                        countCoins++;
-                        moneyText.setString("x " + to_string(countCoins));
-                    }
+                    level.coins[i]->onScreen=false;
+                    countCoins++;
+                    moneyText.setString("x " + to_string(countCoins));
                 }
             }
+        }
 
 
             for (int i=0; i<level.enemies.size(); i++) {
 #if VERSION==3
                 if (characterBounds.findIntersection(level.enemies[i]->getBounds())){
 #else
-                if (characterBounds.intersects(level.enemies[i]->getBounds())){
+                    if (characterBounds.intersects(level.enemies[i]->getBounds())){
 #endif
-                    if (!character.invuln) {
-                        character.getDamage();
-                        damageCount++;
-                        health.updateHealth(damageCount);
+                        if (!character.invuln) {
+                            character.getDamage();
+                            damageCount++;
+                            health.updateHealth(damageCount);
+                        }
                     }
                 }
-            }
 
 
-            for(int i=0; i<level.maths.size(); i++){
-                if((*level.maths[i]).activation(characterBounds)){
-                    showMathMenu=true;
-                }
+                    if (characterBounds.contains(level.levelEnd.getPosition()) && !levelCompleted){
+                        levelCompleted=true;
 
-                if(!(*level.maths[i]).isSolved){
-#if VERSION == 3
-                    if (characterBounds.findIntersection((*level.maths[i]).getWallBounds())){
-#else
-                    if (characterBounds.intersects((*level.maths[i]).getWallBounds())){
-#endif
-                        if(character.direct>0)
-                            character.setPosition(character.getPosition().x-5.f, character.getPosition().y);
-                        else
-                            character.setPosition(character.getPosition().x+5.f, character.getPosition().y);
+                        if (levelNumb + 1 > unlockedLevel) {
+                                unlockedLevel = levelNumb + 1;
+                        }
+
+                        totalCoins+=countCoins;
+
+                        if(countCoins==level.coins.size()){
+                            totalCoins+=10;
+                            coinsBonusText.setString("All coins bonus: +10");
+                        }
+                        else{
+                            coinsBonusText.setString("All coins bonus: --");
+                        }
+
+
+                        if(damageCount==0){
+                            totalCoins+=10;
+                            hpBonusText.setString("Full HP bonus: +10");
+                        }
+                        else{
+                            hpBonusText.setString("Full HP bonus: --");
+                        }
+
+                        collectedText.setString("Collected coins: " + to_string(countCoins));
+                        totalText.setString("Total coins: " + to_string(totalCoins));
+                        countCoins=0;
                     }
-                }
-            }
 
 
 
-            if (characterBounds.contains(level.levelEnd.getPosition()) && !levelCompleted){
-                levelCompleted=true;
+                    bool onPlatform=false;
 
-                if (levelNumb + 1 > unlockedLevel) {
-                        unlockedLevel = levelNumb + 1;
-                }
-
-                totalCoins+=countCoins;
-
-                if(countCoins==level.coins.size()){
-                    totalCoins+=10;
-                    coinsBonusText.setString("All coins bonus: +10");
-                }
-                else{
-                    coinsBonusText.setString("All coins bonus: --");
-                }
-
-
-                if(damageCount==0){
-                    totalCoins+=10;
-                    hpBonusText.setString("Full HP bonus: +10");
-                }
-                else{
-                    hpBonusText.setString("Full HP bonus: --");
-                }
-
-                collectedText.setString("Collected coins: " + to_string(countCoins));
-                totalText.setString("Total coins: " + to_string(totalCoins));
-                countCoins=0;
-            }
-
-
-
-                bool onPlatform=false;
-
-                for (int i=0; i<level.platforms.size(); i++) {
-                    FloatRect platfBounds=(*level.platforms[i]).getBounds();
+                    for (int i=0; i<level.platforms.size(); i++) {
+                        FloatRect platfBounds=(*level.platforms[i]).getBounds();
 
 #if VERSION==3
-                    if (characterBounds.findIntersection(platfBounds)) {
-                        if ((*level.platforms[i]).isBroken()) continue;
-                        if (character.dy >= 0.f && (prevPos.y + characterBounds.size.y / 2.f) <= platfBounds.position.y + 5.f) {
-                            float pos_y = platfBounds.position.y - (characterBounds.size.y / 2.f);
-                            character.setPosition({character.getPosition().x, pos_y});
-                            character.landing();
-                            onPlatform = true;
-                            (*level.platforms[i]).onStepped();
-                            character.move((*level.platforms[i]).getSpeed());
+                        if (characterBounds.findIntersection(platfBounds)) {
+                            if ((*level.platforms[i]).isBroken()) continue;
+                            if (character.dy >= 0.f && (prevPos.y + characterBounds.size.y / 2.f) <= platfBounds.position.y + 5.f) {
+                                float pos_y = platfBounds.position.y - (characterBounds.size.y / 2.f);
+                                character.setPosition({character.getPosition().x, pos_y});
+                                character.landing();
+                                onPlatform = true;
+                                (*level.platforms[i]).onStepped();
+                                character.move((*level.platforms[i]).getSpeed());
+                            }
+                            else if (character.dy < 0.f && (prevPos.y - characterBounds.size.y / 2.f) >= (platfBounds.position.y + platfBounds.size.y - 5.f)) {
+                                character.setPosition({character.getPosition().x, prevPos.y});
+                                character.dy = 0.f;
+                            }
+                            else {
+                                if (prevPos.x < platfBounds.position.x) character.setPosition({platfBounds.position.x - characterBounds.size.x / 2.f, character.getPosition().y});
+                                else if (prevPos.x > platfBounds.position.x + platfBounds.size.x) character.setPosition({platfBounds.position.x + platfBounds.size.x + characterBounds.size.x / 2.f, character.getPosition().y});
+                            }
                         }
-                        else if (character.dy < 0.f && (prevPos.y - characterBounds.size.y / 2.f) >= (platfBounds.position.y + platfBounds.size.y - 5.f)) {
-                            character.setPosition({character.getPosition().x, prevPos.y});
-                            character.dy = 0.f;
-                        }
-                        else {
-                            if (prevPos.x < platfBounds.position.x) character.setPosition({platfBounds.position.x - characterBounds.size.x / 2.f, character.getPosition().y});
-                            else if (prevPos.x > platfBounds.position.x + platfBounds.size.x) character.setPosition({platfBounds.position.x + platfBounds.size.x + characterBounds.size.x / 2.f, character.getPosition().y});
-                        }
-                    }
 #else
-                    if (characterBounds.intersects(platfBounds)) {
-                        if ((*level.platforms[i]).isBroken())
-                            continue;
-                        if (character.dy >= 0.f && (prevPos.y + characterBounds.height / 2.f) <= platfBounds.top + 5.f) {
-                            float pos_y = platfBounds.top - (characterBounds.height / 2.f);
-                            character.setPosition(character.getPosition().x, pos_y);
-                            character.landing();
-                            onPlatform = true;
-                            (*level.platforms[i]).onStepped();
-                            character.move((*level.platforms[i]).getSpeed());
+                        if (characterBounds.intersects(platfBounds)) {
+                            if ((*level.platforms[i]).isBroken())
+                                continue;
+                            if (character.dy >= 0.f && (prevPos.y + characterBounds.height / 2.f) <= platfBounds.top + 5.f) {
+                                float pos_y = platfBounds.top - (characterBounds.height / 2.f);
+                                character.setPosition(character.getPosition().x, pos_y);
+                                character.landing();
+                                onPlatform = true;
+                                (*level.platforms[i]).onStepped();
+                                character.move((*level.platforms[i]).getSpeed());
+                            }
+                            else if (character.dy < 0.f && (prevPos.y - characterBounds.height / 2.f) >= (platfBounds.top + platfBounds.height - 5.f)) {
+                                character.setPosition(character.getPosition().x, prevPos.y);
+                                character.dy = 0.f;
+                            }
+                            else {
+                                if (prevPos.x < platfBounds.left) character.setPosition(platfBounds.left - characterBounds.width / 2.f, character.getPosition().y);
+                                else if (prevPos.x > platfBounds.left + platfBounds.width) character.setPosition(platfBounds.left + platfBounds.width + characterBounds.width / 2.f, character.getPosition().y);
+                            }
                         }
-                        else if (character.dy < 0.f && (prevPos.y - characterBounds.height / 2.f) >= (platfBounds.top + platfBounds.height - 5.f)) {
-                            character.setPosition(character.getPosition().x, prevPos.y);
-                            character.dy = 0.f;
-                        }
-                        else {
-                            if (prevPos.x < platfBounds.left) character.setPosition(platfBounds.left - characterBounds.width / 2.f, character.getPosition().y);
-                            else if (prevPos.x > platfBounds.left + platfBounds.width) character.setPosition(platfBounds.left + platfBounds.width + characterBounds.width / 2.f, character.getPosition().y);
-                        }
-                    }
 #endif
+                    }
+
+                    if (!onPlatform) character.isJump=true;
+
+                    float cameraX=character.getPosition().x +250.f;
+                    if (cameraX<750.f) cameraX=750.f;
+                  //  if (cameraX>3150.f) cameraX=3150.f;
+                    if (cameraX > level.levelWidth - 750.f) {
+                        cameraX = level.levelWidth - 750.f;
+                    }
+                    view.setCenter({cameraX, 450.f});
+
+                    window.clear();
+                    window.setView(view);
+
+                    window.draw(backk);
+                    window.draw(background);
+
+                    for (int i=0; i<level.platforms.size(); i++) window.draw(*level.platforms[i]);
+                    for (auto& spike : level.spikes) window.draw(spike);
+
+                    for (auto* i: level.checkpoints){
+                        window.draw(*i);
+
+                    }
+
+                    for (int i=0; i<level.coins.size(); i++) {
+                        window.draw(*level.coins[i]);
+                    }
+
+                    for (int i=0; i<level.enemies.size(); i++) {
+                        window.draw(*level.enemies[i]);
+                    }
+
+                    for (int i=0; i<level.bonuses.size(); i++) {
+                        window.draw(*level.bonuses[i]);
+                    }
+
+
+                    window.draw(level.levelEnd);
+                    window.draw(character);
+
+                    window.setView(window.getDefaultView());
+                    window.draw(health);
+                    window.draw(moneySprite);
+                    window.draw(moneyText);
+
+                    if (levelCompleted) {
+                        window.draw(winPanel);
+                        window.draw(winText);
+                        window.draw(btnMenu);
+                        window.draw(btnRetry);
+                        window.draw(btnNext);
+                        window.draw(collectedText);
+                        window.draw(hpBonusText);
+                        window.draw(coinsBonusText);
+                        window.draw(totalText);
+                    }
+
+
+                    window.display();
                 }
 
-                if (!onPlatform) character.isJump=true;
-        }
+                if (returnToMenu) {
+                    goToLevels = true;
+                }
 
-            float cameraX=character.getPosition().x +250.f;
-            if (cameraX<750.f) cameraX=750.f;
-          //  if (cameraX>3150.f) cameraX=3150.f;
-            if (cameraX > level.levelWidth - 750.f) {
-                cameraX = level.levelWidth - 750.f;
+                level.clearLevel();
             }
-            view.setCenter({cameraX, 450.f});
-
-            window.clear();
-            window.setView(view);
-
-            window.draw(backk);
-            window.draw(background);
-
-            for (int i=0; i<level.platforms.size(); i++) window.draw(*level.platforms[i]);
-            for (auto& spike : level.spikes) window.draw(spike);
-
-            for (auto* i: level.checkpoints){
-                window.draw(*i);
-
-            }
-
-            for (int i=0; i<level.coins.size(); i++) {
-                window.draw(*level.coins[i]);
-            }
-
-            for (int i=0; i<level.enemies.size(); i++) {
-                window.draw(*level.enemies[i]);
-            }
-
-            for (int i=0; i<level.bonuses.size(); i++) {
-                window.draw(*level.bonuses[i]);
-            }
-
-
-            window.draw(level.levelEnd);
-
-            for (int i=0; i<level.maths.size(); i++){
-                window.draw(*level.maths[i]);
-            }
-
-            window.draw(character);
-
-
-            window.setView(window.getDefaultView());
-            window.draw(health);
-            window.draw(moneySprite);
-            window.draw(moneyText);
-
-            window.draw(pauseBtn);
-            if(isPaused){
-                window.draw(pausePanel);
-                window.draw(btnResume);
-                window.draw(btnRestartPause);
-                window.draw(btnMenuPause);
-            }
-
-
-            if (levelCompleted) {
-                window.draw(winPanel);
-                window.draw(winText);
-                window.draw(btnMenu);
-                window.draw(btnRetry);
-                window.draw(btnNext);
-                window.draw(collectedText);
-                window.draw(hpBonusText);
-                window.draw(coinsBonusText);
-                window.draw(totalText);
-            }
-
-            if (isGameOver){
-                window.draw(losePanel);
-                window.draw(loseText);
-                window.draw(btnMenuPause);
-                window.draw(btnRestartPause);
-            }
-
-
-
-            if (showMathMenu){
-                window.draw(mathWindow);
-                window.draw(btnEasy);
-                window.draw(btnMed);
-                window.draw(btnHard);
-            }
-
-            if (showMathTask){
-                window.draw(mathWindow);
-                window.draw(*currentTask);
-                window.draw(input);
-                window.draw(inputText);
-            }
-
-
-            window.display();
-    }
-
-    if (returnToMenu) {
-        goToLevels = true;
-    }
-
-    level.clearLevel();
-    }
 
     return 0;
 }
