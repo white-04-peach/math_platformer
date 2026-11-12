@@ -703,7 +703,7 @@ public:
 
         wall.setPosition({x+30.f, 0.f});
         wall.setSize({10.f, 900.f});
-        wall.setFillColor(Color(150, 50, 200, 100));
+        wall.setFillColor(Color(18, 47, 170, 100));
 
         texture.loadFromFile("sprites/math.png");
         sprite.setTexture(texture);
@@ -725,7 +725,7 @@ public:
 
 
     bool activation(FloatRect charBounds){
-        if (!isSolved && !isWindowOpen) {
+        if (!isSolved && !isWindowOpen){
 #if VERSION == 3
             if (sprite.getGlobalBounds().findIntersection(charBounds)) {
                 return true;
@@ -885,8 +885,8 @@ public:
                 startPos={50.f, 360.f};
                 levelWidth = 4920.f;
                 levelEnd.setPosition({4840.f, 345.f});
-                Math* math1=new Math(2500.f, 500.f);
-                maths.push_back(math1);
+                //Math* math1=new Math(2500.f, 500.f);
+                //maths.push_back(math1);
 
 
                 Platform* plat1=new Platform(); (*plat1).setPosition({0.f, 400.f}); (*plat1).medium_plat();
@@ -1093,6 +1093,7 @@ int main(){
 
 
     bool levelCompleted = false;
+    bool isGameOver=false;
 
     RectangleShape winPanel({540.f, 460.f});
     winPanel.setFillColor(Color(200, 230, 200, 220));
@@ -1112,6 +1113,23 @@ int main(){
     winText.setCharacterSize(55);
     winText.setFillColor(Color(20, 40, 20));
     winText.setPosition({550.f, 250.f});
+
+
+
+    RectangleShape losePanel({540.f, 400.f});
+    losePanel.setFillColor(Color(230, 200, 200, 220));
+    losePanel.setPosition({480.f, 260.f});
+
+#if VERSION==3
+    Text loseText(font);
+#else
+    Text loseText;
+    loseText.setFont(font);
+#endif
+    loseText.setString("GAME OVER");
+    loseText.setCharacterSize(60);
+    loseText.setFillColor(Color(139, 0, 0));
+    loseText.setPosition({580.f, 300.f});
 
 
 #if VERSION==3
@@ -1197,6 +1215,7 @@ int main(){
     Button btnRestartPause(550.f, 420.f, 400.f, 50.f, "Restart Level", font, [&](){
                                                                                 isPaused=false;
                                                                                 levelCompleted=false;
+                                                                                isGameOver=false;
                                                                                 level.create(levelNumb);
                                                                                 character.setPosition(level.startPos);
                                                                                 respawn=level.startPos;
@@ -1206,7 +1225,7 @@ int main(){
                                                                                 countCoins=0;
                                                                             });
 
-    Button btnMenuPause(550.f, 490.f, 400.f, 50.f, "Main Menu", font, [&](){ returnToMenu=true; });
+    Button btnMenuPause(550.f, 490.f, 400.f, 50.f, "Main Menu", font, [&](){ returnToMenu=true; isGameOver=false;});
 
 
     bool showMathMenu=false;
@@ -1462,7 +1481,14 @@ int main(){
                     }
                     userInput= "";
                     inputText.setString("");
+
+                    for (int i=0; i<level.maths.size(); i++){
+                            if ((*level.maths[i]).activation(character.getBounds())) {
+                                (*level.maths[i]).isSolved=true;
+                            }
+                    }
                 }
+
                 continue;
             }
 
@@ -1507,25 +1533,37 @@ int main(){
 
 
 #if VERSION==3
-            if (levelCompleted){
+            if (levelCompleted || isGameOver){
                 if (const auto* mouse = event->getIf<Event::MouseButtonPressed>()){
-                    if (mouse->button == Mouse::Button::Left) {
-                        Vector2f mousePos = window.mapPixelToCoords(mouse->position);
-                        btnMenu.pressed(mousePos);
-                        btnRetry.pressed(mousePos);
-                        btnNext.pressed(mousePos);
+                    if (mouse->button == Mouse::Button::Left){
+                        Vector2f mousePos=window.mapPixelToCoords(mouse->position);
+                        if (levelCompleted){
+                            btnMenu.pressed(mousePos);
+                            btnRetry.pressed(mousePos);
+                            btnNext.pressed(mousePos);
+                        }
+                        else if (isGameOver){
+                            btnMenuPause.pressed(mousePos);
+                            btnRestartPause.pressed(mousePos);
+                        }
                     }
                 }
             }
 
 #else
-            if (levelCompleted){
+            if (levelCompleted || isGameOver){
                 if (event.type==Event::MouseButtonPressed){
                     if (event.mouseButton.button==Mouse::Left){
                         Vector2f mousePos=window.mapPixelToCoords(Mouse::getPosition(window));
-                        btnMenu.pressed(mousePos);
-                        btnRetry.pressed(mousePos);
-                        btnNext.pressed(mousePos);
+                        if (levelCompleted){
+                            btnMenu.pressed(mousePos);
+                            btnRetry.pressed(mousePos);
+                            btnNext.pressed(mousePos);
+                        }
+                        else if (isGameOver){
+                            btnMenuPause.pressed(mousePos);
+                            btnRestartPause.pressed(mousePos);
+                        }
                     }
                 }
             }
@@ -1533,10 +1571,15 @@ int main(){
 
         }
 
-        if(!isPaused){
+        if(!isPaused && !isGameOver && !levelCompleted){
 
             Vector2f prevPos=character.getPosition();
             character.movement();
+
+
+            if (damageCount>=3 && !isGameOver){
+                isGameOver=true;
+            }
 
             for (int i=0; i<level.platforms.size(); i++)
                 (*level.platforms[i]).movement();
@@ -1817,6 +1860,13 @@ int main(){
                 window.draw(hpBonusText);
                 window.draw(coinsBonusText);
                 window.draw(totalText);
+            }
+
+            if (isGameOver){
+                window.draw(losePanel);
+                window.draw(loseText);
+                window.draw(btnMenuPause);
+                window.draw(btnRestartPause);
             }
 
 
