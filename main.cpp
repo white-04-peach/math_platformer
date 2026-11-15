@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <functional>
+#include <ctime>
 
 #if VERSION==3
     #include <optional>
@@ -673,7 +674,7 @@ public:
     {
         texture.loadFromFile(path);
         sprite.setTexture(texture);
-        sprite.setScale({0.9f, 0.9f});
+        sprite.setScale({0.5f, 0.5f});
     }
 
     void draw(RenderTarget& target, RenderStates states) const override {
@@ -885,15 +886,15 @@ public:
                 startPos={50.f, 360.f};
                 levelWidth = 4920.f;
                 levelEnd.setPosition({4840.f, 345.f});
-                //Math* math1=new Math(2500.f, 500.f);
-                //maths.push_back(math1);
+                Math* math1=new Math(1400.f, 530.f);
+                maths.push_back(math1);
 
 
                 Platform* plat1=new Platform(); (*plat1).setPosition({0.f, 400.f}); (*plat1).medium_plat();
                 MovingPlatform* plat2=new MovingPlatform(420.f, 250.f, 300.f); (*plat2).small_plat();
                 MovingPlatform* plat3=new MovingPlatform(450.f, 550.f, 250.f); (*plat3).small_plat();
                 Platform* plat4=new Platform(); (*plat4).setPosition({870.f, 400.f}); (*plat4).medium_plat();
-                Enemy* enemy1 = new Enemy(1100.f, 370.f, 400.f);
+                Enemy* enemy1 = new Enemy(1100.f, 360.f, 400.f);
                                enemies.push_back(enemy1);
 
                 FragilePlatform* plat5=new FragilePlatform(); (*plat5).setStartPos({790.f, 700.f}); (*plat5).small_plat();
@@ -1001,41 +1002,78 @@ int main(){
 
 
     // Level 1
-    MathTask l1_easy1("sprites/tasks/l1_easy1.jpg", "-3");
-    MathTask l1_easy2("sprites/tasks/l1_easy2.jpg", "9.7");
-    MathTask l1_easy3("sprites/tasks/l1_easy3.jpg", "7");
-    MathTask l1_med1("sprites/tasks/l1_med1.jpg", "1");
-    MathTask l1_med2("sprites/tasks/l1_med2.jpg", "1");
-    MathTask l1_med3("sprites/tasks/l1_med3.jpg", "1");
-    MathTask l1_hard1("sprites/tasks/l1_hard1.jpg", "1");
+    MathTask l1_easy1("sprites/tasks/level1/l1_easy1.jpg", "-3");
+    MathTask l1_easy2("sprites/tasks/level1/l1_easy2.jpg", "9.7");
+    MathTask l1_easy3("sprites/tasks/level1/l1_easy3.jpg", "7");
+    MathTask l1_easy4("sprites/tasks/level1/l1_easy4.jpg", "-2.5");
+    MathTask l1_easy5("sprites/tasks/level1/l1_easy5.jpg", "-0.7");
 
-    vector<MathTask*> level1_easy={&l1_easy1, &l1_easy2, &l1_easy3};
-    vector<MathTask*> level1_med={&l1_med1};
-    vector<MathTask*> level1_hard={&l1_hard1};
+    MathTask l1_med1("sprites/tasks/level1/l1_med1.jpg", "-44");
+    MathTask l1_med2("sprites/tasks/level1/l1_med2.jpg", "-8");
+    MathTask l1_med3("sprites/tasks/level1/l1_med3.jpg", "-1");
+    MathTask l1_med4("sprites/tasks/level1/l1_med4.jpg", "-1");
+    MathTask l1_med5("sprites/tasks/level1/l1_med5.jpg", "4");
+
+    MathTask l1_hard1("sprites/tasks/level1/l1_hard1.jpg", "14");
+    MathTask l1_hard2("sprites/tasks/level1/l1_hard2.jpg", "06");
+    MathTask l1_hard3("sprites/tasks/level1/l1_hard3.jpg", "0.5");
+    MathTask l1_hard4("sprites/tasks/level1/l1_hard4.jpg", "8");
+    MathTask l1_hard5("sprites/tasks/level1/l1_hard5.jpg", "0.6");
+
+    vector<MathTask*> level1_easy={&l1_easy1, &l1_easy2, &l1_easy3, &l1_easy4, &l1_easy5};
+    vector<MathTask*> level1_med={&l1_med1, &l1_med2, &l1_med3, &l1_med4, &l1_med5};
+    vector<MathTask*> level1_hard={&l1_hard1, &l1_hard2, &l1_hard3, &l1_hard4, &l1_hard5};
 
 
     // Level 2
-    MathTask l2_easy1("sprites/tasks/l1_easy1.jpg", "-3");
-    MathTask l2_easy2("sprites/tasks/l1_easy2.jpg", "9.7");
-    MathTask l2_easy3("sprites/tasks/l1_easy3.jpg", "7");
-    MathTask l2_med1("sprites/tasks/l1_med1.jpg", "1");
-    MathTask l2_med2("sprites/tasks/l1_med2.jpg", "1");
-    MathTask l2_med3("sprites/tasks/l1_med3.jpg", "1");
-    MathTask l2_hard1("sprites/tasks/l1_hard1.jpg", "1");
+    MathTask l2_easy1("sprites/tasks/level2/l2_easy1.jpg", "-3");
+    MathTask l2_easy2("sprites/tasks/level2/l2_easy2.jpg", "9.7");
+    MathTask l2_easy3("sprites/tasks/level2/l2_easy3.jpg", "7");
+    MathTask l2_easy4("sprites/tasks/level2/l2_easy4.jpg", "7");
+    MathTask l2_easy5("sprites/tasks/level2/l2_easy5.jpg", "7");
 
-    vector<MathTask*> level2_easy={&l2_easy1, &l2_easy2, &l2_easy3};
-    vector<MathTask*> level2_med={&l2_med1, &l2_med2, &l2_med3};
-    vector<MathTask*> level2_hard={&l2_hard1};
+    MathTask l2_med1("sprites/tasks/level2/l2_med1.jpg", "1");
+    MathTask l2_med2("sprites/tasks/level2/l2_med2.jpg", "1");
+    MathTask l2_med3("sprites/tasks/level2/l2_med3.jpg", "1");
+    MathTask l2_med4("sprites/tasks/level2/l2_med4.jpg", "1");
+    MathTask l2_med5("sprites/tasks/level2/l2_med5.jpg", "1");
 
-    // это для вида, остальное потом закинем
+    MathTask l2_hard1("sprites/tasks/level2/l2_hard1.jpg", "1");
+    MathTask l2_hard2("sprites/tasks/level2/l2_hard2.jpg", "1");
+    MathTask l2_hard3("sprites/tasks/level2/l2_hard3.jpg", "1");
+    MathTask l2_hard4("sprites/tasks/level2/l2_hard4.jpg", "1");
+    MathTask l2_hard5("sprites/tasks/level2/l2_hard5.jpg", "1");
+
+    vector<MathTask*> level2_easy={&l2_easy1, &l2_easy2, &l2_easy3, &l2_easy4, &l2_easy5};
+    vector<MathTask*> level2_med={&l2_med1, &l2_med2, &l2_med3, &l2_med4, &l2_med5};
+    vector<MathTask*> level2_hard={&l2_hard1, &l2_hard2, &l2_hard3, &l2_hard4, &l2_hard5};
 
 
-    vector<MathTask*> level3_easy={&l2_easy1, &l2_easy2, &l2_easy3};
-    vector<MathTask*> level3_med={&l2_med1, &l2_med2, &l2_med3};
-    vector<MathTask*> level3_hard={&l2_hard1};
+    // Level 3
+    MathTask l3_easy1("sprites/tasks/level3/l3_easy1.jpg", "-3");
+    MathTask l3_easy2("sprites/tasks/level3/l3_easy2.jpg", "9.7");
+    MathTask l3_easy3("sprites/tasks/level3/l3_easy3.jpg", "7");
+    MathTask l3_easy4("sprites/tasks/level3/l3_easy4.jpg", "7");
+    MathTask l3_easy5("sprites/tasks/level3/l3_easy5.jpg", "7");
+
+    MathTask l3_med1("sprites/tasks/level3/l3_med1.jpg", "1");
+    MathTask l3_med2("sprites/tasks/level3/l3_med2.jpg", "1");
+    MathTask l3_med3("sprites/tasks/level3/l3_med3.jpg", "1");
+    MathTask l3_med4("sprites/tasks/level3/l3_med4.jpg", "1");
+    MathTask l3_med5("sprites/tasks/level3/l3_med5.jpg", "1");
+
+    MathTask l3_hard1("sprites/tasks/level3/l3_hard1.jpg", "1");
+    MathTask l3_hard2("sprites/tasks/level3/l3_hard2.jpg", "1");
+    MathTask l3_hard3("sprites/tasks/level3/l3_hard3.jpg", "1");
+    MathTask l3_hard4("sprites/tasks/level3/l3_hard4.jpg", "1");
+    MathTask l3_hard5("sprites/tasks/level3/l3_hard5.jpg", "1");
+
+    vector<MathTask*> level3_easy={&l3_easy1, &l3_easy2, &l3_easy3, &l3_easy4, &l3_easy5};
+    vector<MathTask*> level3_med={&l3_med1, &l3_med2, &l3_med3, &l3_med4, &l3_med5};
+    vector<MathTask*> level3_hard={&l3_hard1, &l3_hard2, &l3_hard3, &l3_hard4, &l3_hard5};
 
 
-
+    srand(time(0));
         while (window.isOpen()) {
             // Передаем goToLevels ? 2 : 0. Если true, меню откроется на 2 странице (список уровней)
             int selectedLevel = runMenu(window, unlockedLevel, goToLevels ? 1 : 0);
@@ -1277,7 +1315,7 @@ int main(){
                                                     currentTask=level3_easy[rand()%level3_easy.size()];
                                                 }
 
-                                                (*currentTask).setPosition({500.f, 350.f});
+                                                (*currentTask).setPosition({470.f, 300.f});
                                                 showMathMenu=false;
                                                 showMathTask=true;
                                                 coinsForMath=1;
@@ -1304,7 +1342,7 @@ int main(){
                                                     currentTask=level3_med[rand()%level3_med.size()];
                                                 }
 
-                                                (*currentTask).setPosition({500.f, 350.f});
+                                                (*currentTask).setPosition({470.f, 300.f});
                                                 showMathMenu=false;
                                                 showMathTask=true;
                                                 coinsForMath=3;
@@ -1330,7 +1368,7 @@ int main(){
                                                     currentTask=level3_hard[rand()%level3_hard.size()];
                                                 }
 
-                                                (*currentTask).setPosition({500.f, 350.f});
+                                                (*currentTask).setPosition({470.f, 300.f});
                                                 showMathMenu=false;
                                                 showMathTask=true;
                                                 coinsForMath=5;
