@@ -1,4 +1,4 @@
-#define VERSION 2
+#define VERSION 3
 
 #include <SFML/Graphics.hpp>
 #include <vector>
@@ -45,12 +45,28 @@ public:
 
 
 
-    Character(): sprite(textures[0]){
-        textures[0].loadFromFile("sprites/characters/panda/run_1.png");
-        textures[1].loadFromFile("sprites/characters/panda/run_2.png");
-        textures[2].loadFromFile("sprites/characters/panda/run_3.png");
-        textures[3].loadFromFile("sprites/characters/panda/run_4.png");
-        jumpTexture.loadFromFile("sprites/characters/panda/jump_2.png");
+    Character(int skinID = 1): sprite(textures[0]) {
+            // Если выбран скин 1 (собака)
+            if (skinID == 1) {
+            textures[0].loadFromFile("sprites/characters/dog/run_1.png");
+            textures[1].loadFromFile("sprites/characters/dog/run_2.png");
+            textures[2].loadFromFile("sprites/characters/dog/run_3.png");
+            textures[3].loadFromFile("sprites/characters/dog/run_4.png");
+            jumpTexture.loadFromFile("sprites/characters/dog/jump.png");
+            }
+            
+            else if (skinID == 2) {
+
+            textures[0].loadFromFile("sprites/characters/panda/run_1.png");
+            textures[1].loadFromFile("sprites/characters/panda/run_2.png");
+            textures[2].loadFromFile("sprites/characters/panda/run_3.png");
+            textures[3].loadFromFile("sprites/characters/panda/run_4.png");
+            jumpTexture.loadFromFile("sprites/characters/panda/jump_2.png");
+            }
+
+            
+            // Сюда потом добавить else if (skinID == 3) { ... }
+
 
         current=0;
         sprite.setTexture(textures[current], true);
@@ -547,11 +563,11 @@ public:
         }
     };
 
-    int runMenu(RenderWindow& window, int unlockedLevel, int startPage = 0) {
+        int runMenu(RenderWindow& window, int& unlockedLevel, int& totalCoins, int& extraLives, int& extraTime, int& selectedSkin, bool& hasPanda, int startPage = 0) {
         Texture menuBgTex;
         menuBgTex.loadFromFile("sprites/back_math.jpg");
         Sprite menuBg(menuBgTex);
-        menuBg.setScale({1.15f, 1.12f});
+      //  menuBg.setScale({1.15f, 1.12f});
 
         Texture lockTex;
         lockTex.loadFromFile("sprites/lock.png");
@@ -562,30 +578,92 @@ public:
 
         int page = startPage;
         int selectedLevel = -1;
+        int previewSkin = 1;
+        int selectedBonus = 0;
 
-        ImageButton startBtn("sprites/buttons/play.png", 630.f, 280.f, 0.25f, [&](){ page = 1; });
-        ImageButton exitBtn("sprites/buttons/exit2.png", 630.f, 450.f, 0.25f, [&](){ window.close(); });
+        Font menuFont;
+        #if VERSION==3
+        menuFont.openFromFile("/System/Library/Fonts/Supplemental/Arial.ttf");
+        Text coinsText(menuFont);
+        Text potionsText(menuFont);
+        #else
+            menuFont.loadFromFile("pix2.ttf");
+            Text coinsText; coinsText.setFont(menuFont);
+            Text potionsText; potionsText.setFont(menuFont);
+        #endif
+            coinsText.setCharacterSize(48);
+            coinsText.setFillColor(Color(40, 70, 40));
+            coinsText.setPosition({550.f, 40.f});
+            potionsText.setCharacterSize(48);
+            potionsText.setFillColor(Color(40, 70, 40));
+            potionsText.setPosition({490.f, 100.f});
 
-        ImageButton levelsBtn("sprites/buttons/levels.png", 630.f, 190.f, 0.25f, [&](){ page = 2; });
-        ImageButton shopBtn("sprites/buttons/shop.png", 630.f, 350.f, 0.25f, [&](){ page = 3; });
-        ImageButton backBtn_play("sprites/buttons/back.png", 630.f, 540.f, 0.25f, [&](){ page = 0; });
+        ImageButton startBtn("sprites/buttons/play.png", 630.f, 280.f, 0.3f, [&](){ page = 1; });
+        ImageButton exitBtn("sprites/buttons/exit2.png", 630.f, 450.f, 0.3f, [&](){ window.close(); });
 
-        ImageButton level1Btn("sprites/buttons/level_1.png", 450.f, 320.f, 0.25f, [&](){ selectedLevel = 1; });
-        ImageButton level2Btn("sprites/buttons/level_2.png", 820.f, 320.f, 0.25f, [&](){
-            if (unlockedLevel >= 2) selectedLevel = 2;
-        });
-        ImageButton level3Btn("sprites/buttons/level_3.png", 740.f, 500.f, 0.25f, [&](){
-            if (unlockedLevel >= 3) selectedLevel = 3;
-        });
-        ImageButton backBtn_levels("sprites/buttons/back.png", 630.f, 500.f, 0.25f, [&](){ page = 1; });
+        ImageButton levelsBtn("sprites/buttons/levels.png", 470.f, 200.f, 0.3f, [&](){ page = 2; });
+        ImageButton shopBtn("sprites/buttons/shop.png", 830.f, 200.f, 0.3f, [&](){ page = 3; });
+        ImageButton wardrobeBtn("sprites/buttons/wardrobe.png", 635.f, 390.f, 0.5f, [&](){ page = 4; });
+              
+        ImageButton backBtn_play("sprites/buttons/back.png", 630.f, 600.f, 0.3f, [&](){ page = 0; });
 
-        ImageButton backBtn_shop("sprites/buttons/back.png", 630.f, 500.f, 0.25f, [&](){ page = 1; });
+        // уровни
+        ImageButton level1Btn("sprites/buttons/level_1.png", 450.f, 200.f, 0.3f, [&](){ selectedLevel = 1; });
+        ImageButton level2Btn("sprites/buttons/level_2.png", 820.f, 200.f, 0.3f, [&](){ if (unlockedLevel >= 2) selectedLevel = 2;});
+        ImageButton level3Btn("sprites/buttons/level_3.png", 455.f, 350.f, 0.31f, [&](){ if (unlockedLevel >= 3) selectedLevel = 3;});
+        ImageButton backBtn_levels("sprites/buttons/back.png", 630.f, 600.f, 0.25f, [&](){ page = 1; });
 
+                
+        // --- МАГАЗИН
+        ImageButton bonusesBtn("sprites/buttons/bonuses.png", 400.f, 350.f, 0.45f, [&](){ page = 5; });
+        ImageButton skinsBtn("sprites/buttons/skins.png", 870.f, 350.f, 0.45f, [&](){ page = 6; });
+        ImageButton backBtn_shop("sprites/buttons/back.png", 630.f, 550.f, 0.25f, [&](){ page = 1; });
+              
+        // --- БОНУСЫ
+        ImageButton lifePotionBtn("sprites/buttons/life_potion.png", 400.f, 350.f, 0.45f, [&](){ selectedBonus = 1; });
+        ImageButton timePotionBtn("sprites/buttons/time_potion.png", 870.f, 350.f, 0.45f, [&](){ selectedBonus = 2; });
+                          
+            // Кнопка покупки (появляется только когда выбрано зелье)
+        Button buyBonusBtn(530.f, 430.f, 200.f, 60.f, "BUY", menuFont, [&](){
+                      if (selectedBonus == 1 && totalCoins >= 50) { totalCoins -= 50; extraLives++; }
+                      if (selectedBonus == 2 && totalCoins >= 30) { totalCoins -= 30; extraTime++; }
+                    });
+                          
+        ImageButton backBtn_bonuses("sprites/buttons/back.png", 630.f, 600.f, 0.25f, [&](){ page = 3; });
+                  
+            // --- СКИНЫ
+                     
+    ImageButton leftArrowShop("sprites/buttons/left_2.png", 400.f, 350.f, 0.1f, [&](){previewSkin = (previewSkin == 1) ? 2 : 1; });
+    ImageButton rightArrowShop("sprites/buttons/right.png", 900.f, 350.f, 0.1f, [&](){previewSkin = (previewSkin == 1) ? 2 : 1;
+                          });
+                          
+    Button buySkinBtn(550.f, 500.f, 200.f, 60.f, "BUY", menuFont, [&](){
+                              if (previewSkin == 2 && !hasPanda && totalCoins >= 100) {
+                                  totalCoins -= 100;
+                                  hasPanda = true;
+                                  selectedSkin = 2;
+                              }
+                          });
+    ImageButton backBtn_skins("sprites/buttons/back.png", 650.f, 650.f, 0.25f, [&](){ page = 3; });
+                  
+                  
+    // --- ГАРДЕРОБ (page 4)
+    ImageButton leftArrowBtn("sprites/buttons/left_2.png", 400.f, 400.f, 0.1f, [&](){ previewSkin = (previewSkin == 1) ? 2 : 1; });
+    ImageButton rightArrowBtn("sprites/buttons/right.png", 950.f, 400.f, 0.1f, [&](){ previewSkin = (previewSkin == 1) ? 2 : 1; });
+                  
+        // Текстовая кнопка "Надеть"
+    Button equipBtn(550.f, 500.f, 200.f, 60.f, "PUT ON", menuFont, [&](){
+                              if (previewSkin == 1 || (previewSkin == 2 && hasPanda)) {
+                                  selectedSkin = previewSkin; // Надеваем ТОЛЬКО если куплено
+                              }
+                          });
+                  
+    ImageButton backBtn_wardrobe("sprites/buttons/back.png", 650.f, 620.f, 0.25f, [&](){ page = 1; });
 
+            
+    while (window.isOpen() && selectedLevel == -1) {
 
-        while (window.isOpen() && selectedLevel == -1) {
-
-    #if VERSION==3
+#if VERSION==3
             while (const std::optional event = window.pollEvent()) {
                 if (event->is<Event::Closed>()) window.close();
                 if (const auto* mouse = event->getIf<Event::MouseButtonPressed>()) {
@@ -593,9 +671,12 @@ public:
                       //  Vector2f mp = Vector2f(mouse->position);
                         Vector2f mp = window.mapPixelToCoords(mouse->position);
                         if (page == 0) { startBtn.pressed(mp); exitBtn.pressed(mp); }
-                        else if (page == 1) { levelsBtn.pressed(mp); shopBtn.pressed(mp); backBtn_play.pressed(mp); }
+                        else if (page == 1) { levelsBtn.pressed(mp); shopBtn.pressed(mp); wardrobeBtn.pressed(mp); backBtn_play.pressed(mp); }
                         else if (page == 2) { level1Btn.pressed(mp); level2Btn.pressed(mp); level3Btn.pressed(mp); backBtn_levels.pressed(mp); }
-                        else if (page == 3) { backBtn_shop.pressed(mp); }
+                        else if (page == 3) { bonusesBtn.pressed(mp); skinsBtn.pressed(mp); backBtn_shop.pressed(mp); }
+                        else if (page == 4) { leftArrowBtn.pressed(mp); rightArrowBtn.pressed(mp); equipBtn.pressed(mp); backBtn_wardrobe.pressed(mp); }
+                        else if (page == 5) { lifePotionBtn.pressed(mp); timePotionBtn.pressed(mp); buyBonusBtn.pressed(mp); backBtn_bonuses.pressed(mp); }
+                        else if (page == 6) { leftArrowShop.pressed(mp); rightArrowShop.pressed(mp); buySkinBtn.pressed(mp); backBtn_skins.pressed(mp); }
                     }
                 }
             }
@@ -607,55 +688,175 @@ public:
                     if (event.mouseButton.button == Mouse::Left) {
                         Vector2f mp = window.mapPixelToCoords(Mouse::getPosition(window));
                         if (page == 0) { startBtn.pressed(mp); exitBtn.pressed(mp); }
-                        else if (page == 1) { levelsBtn.pressed(mp); shopBtn.pressed(mp); backBtn_play.pressed(mp); }
+                        else if (page == 1) { levelsBtn.pressed(mp); shopBtn.pressed(mp); wardrobeBtn.pressed(mp); backBtn_play.pressed(mp); }
                         else if (page == 2) { level1Btn.pressed(mp); level2Btn.pressed(mp); level3Btn.pressed(mp); backBtn_levels.pressed(mp); }
-                        else if (page == 3) { backBtn_shop.pressed(mp); }
+                        else if (page == 3) { bonusesBtn.pressed(mp); skinsBtn.pressed(mp); backBtn_shop.pressed(mp); }
+                        else if (page == 4) { leftArrowBtn.pressed(mp); rightArrowBtn.pressed(mp); equipBtn.pressed(mp); backBtn_wardrobe.pressed(mp); }
+                        else if (page == 5) { lifePotionBtn.pressed(mp); timePotionBtn.pressed(mp); buyBonusBtn.pressed(mp); backBtn_bonuses.pressed(mp); }
+                        else if (page == 6) { leftArrowShop.pressed(mp); rightArrowShop.pressed(mp); buySkinBtn.pressed(mp); backBtn_skins.pressed(mp); }
                     }
                 }
             }
     #endif
 
+
             window.clear(Color(205, 220, 210)); // Цвет под клетку тетради
 
             window.draw(menuBg);
-           // window.draw(titleText);
+            coinsText.setString("Coins: " + to_string(totalCoins));
+            potionsText.setString("Life: " + to_string(extraLives) + "  Time: " + to_string(extraTime));
+        if (page == 0) {
+            window.draw(startBtn);
+            window.draw(exitBtn);
+        } else if (page == 1) {
+            window.draw(levelsBtn);
+            window.draw(shopBtn);
+            window.draw(wardrobeBtn);
+            window.draw(backBtn_play);
+        } else if (page == 2) {
+            window.draw(level1Btn);
+            window.draw(level2Btn);
+            window.draw(level3Btn);
+                if (unlockedLevel < 2) { lockSprite.setPosition({820.f, 200.f}); window.draw(lockSprite); }
+                if (unlockedLevel < 3) { lockSprite.setPosition({455.f, 350.f}); window.draw(lockSprite); }
+                               window.draw(backBtn_levels);
+        } else if (page == 3) {
+            window.draw(coinsText);
+            window.draw(bonusesBtn);
+            window.draw(skinsBtn);
+            window.draw(backBtn_shop);
+        } else if (page == 4) {
+            window.draw(leftArrowBtn);
+            window.draw(rightArrowBtn);
+            window.draw(backBtn_wardrobe);
+                              
+            if (previewSkin == 1) {
+                Texture t;
+                t.loadFromFile("sprites/characters/dog/run_1.png");
+                Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
+                s.setPosition({690.f, 350.f}); s.setScale({1.5f, 1.5f});
+                    window.draw(s);
+                    window.draw(equipBtn);
+                } else if (previewSkin == 2) {
+                    if (hasPanda) {
+                    Texture t;
+                t.loadFromFile("sprites/characters/panda/run_1.png");
+                    Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
+                    s.setPosition({750.f, 350.f}); s.setScale({1.5f, 1.5f});
+                        window.draw(s);
+                        window.draw(equipBtn);
+                    } else {
+                    RectangleShape emptyBox({200.f, 200.f});
+                    // emptyBox.setFillColor(Color(0, 0, 0, 100));
+                    emptyBox.setPosition({650.f, 250.f});
+                    //  window.draw(emptyBox);
+                                      
+                                     
+       #if VERSION==3
+                                      Text lockedText(menuFont);
+       #else
+                                      Text lockedText;
+                                      lockedText.setFont(menuFont);
+       #endif
+                                      lockedText.setString("NOT PURCHASED");
+                                      lockedText.setCharacterSize(30);
+                                      lockedText.setFillColor(Color::Red);
+                                      lockedText.setPosition({550.f, 480.f});
+                                      window.draw(lockedText);
+                                  }
+                              }
+            } else if (page == 5) {
+                window.draw(coinsText);
+                window.draw(potionsText);
+                window.draw(lifePotionBtn);
+                window.draw(timePotionBtn);
+                window.draw(backBtn_bonuses);
+                              
+            // Рисуем цены под зельями (УНИВЕРСАЛЬНЫЙ КОД)
+        #if VERSION==3
+            Text priceText(menuFont);
+        #else
+            Text priceText;
+            priceText.setFont(menuFont);
+    #endif
+                              
+            // Рисуем цены под зельями
+            priceText.setCharacterSize(30);
+            priceText.setFillColor(Color::Black);
+                                                     
+            priceText.setString("50 COINS");
+            priceText.setPosition({340.f, 400.f});
+            window.draw(priceText);
+                                                     
+            priceText.setString("30 COINS");
+            priceText.setPosition({810.f, 400.f});
+            window.draw(priceText);
+                                                     
+        // Если выбрано зелье, показываем кнопку КУПИТЬ
+            if (selectedBonus != 0) {
+                window.draw(buyBonusBtn);
+                               }
+            } else if (page == 6) {
+                window.draw(coinsText);
+                window.draw(leftArrowShop);
+                window.draw(rightArrowShop);
+                window.draw(backBtn_skins);
+                               
+                if (previewSkin == 1) {
+                    Texture t;
+                    t.loadFromFile("sprites/characters/dog/run_1.png");
+                    Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
+                s.setPosition({660.f, 300.f}); s.setScale({1.5f, 1.5f});
+                                  window.draw(s);
+                                  
+       #if VERSION==3
+                                  Text t1(menuFont);
+       #else
+                                  Text t1;
+                                  t1.setFont(menuFont);
+       #endif
+                                  t1.setString("DEFAULT");
+                                  t1.setCharacterSize(30); t1.setFillColor(Color::Black); t1.setPosition({580.f, 450.f});
+                                  window.draw(t1);
 
-            if (page == 0) {
-                window.draw(startBtn);
-                window.draw(exitBtn);
-            } else if (page == 1) {
-                window.draw(levelsBtn);
-                window.draw(shopBtn);
-                window.draw(backBtn_play);
-            } else if (page == 2) {
-                window.draw(level1Btn);
-                window.draw(level2Btn);
-                /*window.draw(level3Btn);*/
+                    } else if (previewSkin == 2) {
+                        Texture t;
+                t.loadFromFile("sprites/characters/panda/run_1.png");
+                        Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
+                    s.setPosition({660.f, 300.f}); s.setScale({1.5f, 1.5f});
+                        window.draw(s);
+                                  
+                            if (hasPanda) {
+       #if VERSION==3
+                                Text t2(menuFont);
+       #else
+                                      Text t2;
+                                      t2.setFont(menuFont);
+       #endif
+                                      t2.setString("ALREADY OWNED");
+                                      t2.setCharacterSize(30); t2.setFillColor(Color::Green); t2.setPosition({680.f, 480.f});
+                                      window.draw(t2);
+                                  } else {
+       #if VERSION==3
+                                      Text t3(menuFont);
+       #else
+                                      Text t3;
+                                      t3.setFont(menuFont);
+       #endif
+                                      t3.setString("100 COINS");
+                                      t3.setCharacterSize(30); t3.setFillColor(Color::Black); t3.setPosition({580.f, 450.f});
+                                      window.draw(t3);
+                                      window.draw(buySkinBtn);
+                                  }
+                              }
+                          }
 
-                    if (unlockedLevel < 2) {
+                   window.display();
+               }
 
-                        lockSprite.setPosition({820.f, 310.f});
-                        window.draw(lockSprite);
-                }
-                    if (unlockedLevel < 3) {
-
-                        lockSprite.setPosition({750.f, 600.f});
-                       // window.draw(lockSprite);
-                    }
+               return selectedLevel;
 
 
-                window.draw(backBtn_levels);
-
-
-            } else if (page == 3) {
-               // window.draw(shopPanel);
-                window.draw(backBtn_shop);
-            }
-
-            window.display();
-        }
-
-        return selectedLevel;
     }
 
 
@@ -995,8 +1196,13 @@ int main(){
 
 
     int unlockedLevel = 1;
-        int totalCoins = 0;
-        bool goToLevels = false;
+    int totalCoins = 0;
+    int extraLives = 0;       // Купленные зелья жизни
+    int extraTime = 0;        // Купленные зелья времени
+    int selectedSkin = 1; // выбранный скил (собака 1, панда 2, и тд)
+    bool hasPandaSkin = false;
+
+    bool goToLevels = false;
 
 
 
@@ -1076,7 +1282,8 @@ int main(){
     srand(time(0));
         while (window.isOpen()) {
             // Передаем goToLevels ? 2 : 0. Если true, меню откроется на 2 странице (список уровней)
-            int selectedLevel = runMenu(window, unlockedLevel, goToLevels ? 1 : 0);
+            int selectedLevel = runMenu(window, unlockedLevel, totalCoins, extraLives, extraTime, selectedSkin, hasPandaSkin, goToLevels ? 1 : 0);
+
 
             if (selectedLevel == -1) return 0;
             goToLevels = false;
@@ -1736,9 +1943,9 @@ int main(){
                     if (characterBounds.intersects((*level.maths[i]).getWallBounds())){
 #endif
                         if(character.direct>0)
-                            character.setPosition(character.getPosition().x-5.f, character.getPosition().y);
+                            character.setPosition({character.getPosition().x-5.f, character.getPosition().y});
                         else
-                            character.setPosition(character.getPosition().x+5.f, character.getPosition().y);
+                            character.setPosition({character.getPosition().x+5.f, character.getPosition().y});
                     }
                 }
             }
