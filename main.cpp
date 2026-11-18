@@ -1,4 +1,4 @@
-#define VERSION 3
+#define VERSION 2
 
 #include <SFML/Graphics.hpp>
 #include <vector>
@@ -30,8 +30,8 @@ public:
     float dy=0.f;
     const float gravity=0.5f;
 
-    bool isMovingLeft = false;
-    bool isMovingRight = false;
+    bool isMovingLeft=false;
+    bool isMovingRight=false;
 
     //штуки для получения урона
     bool invuln=false;
@@ -54,7 +54,7 @@ public:
             textures[3].loadFromFile("sprites/characters/dog/run_4.png");
             jumpTexture.loadFromFile("sprites/characters/dog/jump.png");
             }
-            
+
             else if (skinID == 2) {
 
             textures[0].loadFromFile("sprites/characters/panda/run_1.png");
@@ -64,7 +64,7 @@ public:
             jumpTexture.loadFromFile("sprites/characters/panda/jump_2.png");
             }
 
-            
+
             // Сюда потом добавить else if (skinID == 3) { ... }
 
 
@@ -245,6 +245,8 @@ public:
         triangle.setPoint(1, {15.f, -25.f});
         triangle.setPoint(2, {30.f, 0.f});
         triangle.setFillColor(Color(32, 58, 39));
+        triangle.setOutlineColor(Color::White);
+        triangle.setOutlineThickness(2.f);
     }
     FloatRect getBounds() const { return getTransform().transformRect(triangle.getGlobalBounds()); }
     void draw(RenderTarget& target, RenderStates states) const override {
@@ -604,7 +606,7 @@ public:
         ImageButton levelsBtn("sprites/buttons/levels.png", 470.f, 200.f, 0.3f, [&](){ page = 2; });
         ImageButton shopBtn("sprites/buttons/shop.png", 830.f, 200.f, 0.3f, [&](){ page = 3; });
         ImageButton wardrobeBtn("sprites/buttons/wardrobe.png", 635.f, 390.f, 0.5f, [&](){ page = 4; });
-              
+
         ImageButton backBtn_play("sprites/buttons/back.png", 630.f, 600.f, 0.3f, [&](){ page = 0; });
 
         // уровни
@@ -613,30 +615,30 @@ public:
         ImageButton level3Btn("sprites/buttons/level_3.png", 455.f, 350.f, 0.31f, [&](){ if (unlockedLevel >= 3) selectedLevel = 3;});
         ImageButton backBtn_levels("sprites/buttons/back.png", 630.f, 600.f, 0.25f, [&](){ page = 1; });
 
-                
+
         // --- МАГАЗИН
         ImageButton bonusesBtn("sprites/buttons/bonuses.png", 400.f, 350.f, 0.45f, [&](){ page = 5; });
         ImageButton skinsBtn("sprites/buttons/skins.png", 870.f, 350.f, 0.45f, [&](){ page = 6; });
         ImageButton backBtn_shop("sprites/buttons/back.png", 630.f, 550.f, 0.25f, [&](){ page = 1; });
-              
+
         // --- БОНУСЫ
         ImageButton lifePotionBtn("sprites/buttons/life_potion.png", 400.f, 350.f, 0.45f, [&](){ selectedBonus = 1; });
         ImageButton timePotionBtn("sprites/buttons/time_potion.png", 870.f, 350.f, 0.45f, [&](){ selectedBonus = 2; });
-                          
+
             // Кнопка покупки (появляется только когда выбрано зелье)
         Button buyBonusBtn(530.f, 430.f, 200.f, 60.f, "BUY", menuFont, [&](){
                       if (selectedBonus == 1 && totalCoins >= 50) { totalCoins -= 50; extraLives++; }
                       if (selectedBonus == 2 && totalCoins >= 30) { totalCoins -= 30; extraTime++; }
                     });
-                          
+
         ImageButton backBtn_bonuses("sprites/buttons/back.png", 630.f, 600.f, 0.25f, [&](){ page = 3; });
-                  
+
             // --- СКИНЫ
-                     
+
     ImageButton leftArrowShop("sprites/buttons/left_2.png", 400.f, 350.f, 0.1f, [&](){previewSkin = (previewSkin == 1) ? 2 : 1; });
     ImageButton rightArrowShop("sprites/buttons/right.png", 900.f, 350.f, 0.1f, [&](){previewSkin = (previewSkin == 1) ? 2 : 1;
                           });
-                          
+
     Button buySkinBtn(550.f, 500.f, 200.f, 60.f, "BUY", menuFont, [&](){
                               if (previewSkin == 2 && !hasPanda && totalCoins >= 100) {
                                   totalCoins -= 100;
@@ -645,22 +647,22 @@ public:
                               }
                           });
     ImageButton backBtn_skins("sprites/buttons/back.png", 650.f, 650.f, 0.25f, [&](){ page = 3; });
-                  
-                  
+
+
     // --- ГАРДЕРОБ (page 4)
     ImageButton leftArrowBtn("sprites/buttons/left_2.png", 400.f, 400.f, 0.1f, [&](){ previewSkin = (previewSkin == 1) ? 2 : 1; });
     ImageButton rightArrowBtn("sprites/buttons/right.png", 950.f, 400.f, 0.1f, [&](){ previewSkin = (previewSkin == 1) ? 2 : 1; });
-                  
+
         // Текстовая кнопка "Надеть"
     Button equipBtn(550.f, 500.f, 200.f, 60.f, "PUT ON", menuFont, [&](){
                               if (previewSkin == 1 || (previewSkin == 2 && hasPanda)) {
                                   selectedSkin = previewSkin; // Надеваем ТОЛЬКО если куплено
                               }
                           });
-                  
+
     ImageButton backBtn_wardrobe("sprites/buttons/back.png", 650.f, 620.f, 0.25f, [&](){ page = 1; });
 
-            
+
     while (window.isOpen() && selectedLevel == -1) {
 
 #if VERSION==3
@@ -729,7 +731,7 @@ public:
             window.draw(leftArrowBtn);
             window.draw(rightArrowBtn);
             window.draw(backBtn_wardrobe);
-                              
+
             if (previewSkin == 1) {
                 Texture t;
                 t.loadFromFile("sprites/characters/dog/run_1.png");
@@ -750,8 +752,8 @@ public:
                     // emptyBox.setFillColor(Color(0, 0, 0, 100));
                     emptyBox.setPosition({650.f, 250.f});
                     //  window.draw(emptyBox);
-                                      
-                                     
+
+
        #if VERSION==3
                                       Text lockedText(menuFont);
        #else
@@ -771,7 +773,7 @@ public:
                 window.draw(lifePotionBtn);
                 window.draw(timePotionBtn);
                 window.draw(backBtn_bonuses);
-                              
+
             // Рисуем цены под зельями (УНИВЕРСАЛЬНЫЙ КОД)
         #if VERSION==3
             Text priceText(menuFont);
@@ -779,19 +781,19 @@ public:
             Text priceText;
             priceText.setFont(menuFont);
     #endif
-                              
+
             // Рисуем цены под зельями
             priceText.setCharacterSize(30);
             priceText.setFillColor(Color::Black);
-                                                     
+
             priceText.setString("50 COINS");
             priceText.setPosition({340.f, 400.f});
             window.draw(priceText);
-                                                     
+
             priceText.setString("30 COINS");
             priceText.setPosition({810.f, 400.f});
             window.draw(priceText);
-                                                     
+
         // Если выбрано зелье, показываем кнопку КУПИТЬ
             if (selectedBonus != 0) {
                 window.draw(buyBonusBtn);
@@ -801,14 +803,14 @@ public:
                 window.draw(leftArrowShop);
                 window.draw(rightArrowShop);
                 window.draw(backBtn_skins);
-                               
+
                 if (previewSkin == 1) {
                     Texture t;
                     t.loadFromFile("sprites/characters/dog/run_1.png");
                     Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
                 s.setPosition({660.f, 300.f}); s.setScale({1.5f, 1.5f});
                                   window.draw(s);
-                                  
+
        #if VERSION==3
                                   Text t1(menuFont);
        #else
@@ -825,7 +827,7 @@ public:
                         Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
                     s.setPosition({660.f, 300.f}); s.setScale({1.5f, 1.5f});
                         window.draw(s);
-                                  
+
                             if (hasPanda) {
        #if VERSION==3
                                 Text t2(menuFont);
@@ -957,6 +959,11 @@ public:
 //.........................LEVELS.......................................
 
 class Level{
+
+private:
+    string backgroundPath="sprites/background.jpg";
+    Texture backgroundTex;
+    Sprite background;
 public:
     vector<Platform*> platforms;
     vector<Spike> spikes;
@@ -970,6 +977,7 @@ public:
     vector<Math*> maths;
     float levelWidth = 4000.f;
 
+
     Level():levelEnd(levelEndTex) {}
     void create(int levelNumber){
         clearLevel();
@@ -981,6 +989,7 @@ public:
 
         switch(levelNumber){
             case 1:{
+                backgroundPath="sprites/background.jpg";
                 startPos={50.f, 660.f};
                 levelEnd.setPosition({3770.f, 445.f});
                 Math* math1=new Math(250.f, 650.f);
@@ -1026,6 +1035,7 @@ public:
                 break;
             }
             case 2:{
+                backgroundPath="sprites/background_2.jpg";
                 startPos={50.f, 550.f};
                 levelEnd.setPosition({3850.f, 147.f});
                 Math* math1=new Math(3300.f, 750.f);
@@ -1083,6 +1093,7 @@ public:
             }
 
             case 3: {
+                backgroundPath="sprites/background_31.jpg";
 
                 startPos={50.f, 360.f};
                 levelWidth = 4920.f;
@@ -1159,11 +1170,17 @@ public:
 
             }
             case 4: {
+                backgroundPath="sprites/background_42 (1) (1).png";
                 startPos={50.f, 660.f};
                 levelEnd.setPosition({1200.f, 400.f});
                 Platform* plat1=new Platform(); (*plat1).setPosition({0.f, 700.f}); (*plat1).medium_plat();
             }
         }
+        backgroundTex.loadFromFile(backgroundPath);
+        backgroundTex.setRepeated(true);
+        background.setTexture(backgroundTex, true);
+        background.setTextureRect(sf::IntRect({0, 0}, {7000, 900}));
+        background.setScale({1.5f, 1.5f});
     }
 
     void clearLevel(){
@@ -1186,6 +1203,10 @@ public:
 
         for (int i=0; i<maths.size(); i++) delete maths[i];
         maths.clear();
+    }
+
+    void drawBackground(RenderTarget& target) {
+        target.draw(background);
     }
 };
 
@@ -1297,13 +1318,6 @@ int main(){
 
     RectangleShape backk({7000.f, 900.f});
     backk.setFillColor(Color(172, 231, 242));
-
-    Texture backgroundTex;
-    backgroundTex.loadFromFile("sprites/background.jpg");
-    backgroundTex.setRepeated(true);
-    Sprite background(backgroundTex);
-    background.setTextureRect(sf::IntRect({0, 0}, {7000, 900}));
-    background.setScale({1.5f, 1.5f});
 
     Level level;
     int levelNumb=selectedLevel;
@@ -1643,21 +1657,21 @@ int main(){
                 if (const auto* key = event->getIf<Event::KeyPressed>()) {
                     if (key->code == Keyboard::Key::Enter) {
                         if (userInput == currentTask->answer) {
-                            for (int i = 0; i < level.maths.size(); i++) {
-                                if (level.maths[i]->activation(character.getBounds())) {
-                                    level.maths[i]->isSolved = true;
-                                }
-                            }
-                            showMathTask = false;
-                            showMathMenu = false;
                             countCoins += coinsForMath;
                             moneyText.setString("x " + to_string(countCoins));
                         } else {
                             damageCount++;
                             health.updateHealth(damageCount);
-                            showMathTask = false;
-                            showMathMenu = false;
                         }
+
+                        for (int i = 0; i < level.maths.size(); i++) {
+                            if (level.maths[i]->activation(character.getBounds())) {
+                                level.maths[i]->isSolved = true;
+                            }
+                        }
+
+                        showMathTask = false;
+                        showMathMenu = false;
                         userInput = "";
                         inputText.setString("");
                     }
@@ -2071,7 +2085,7 @@ int main(){
             window.setView(view);
 
             window.draw(backk);
-            window.draw(background);
+            level.drawBackground(window);
 
             for (int i=0; i<level.platforms.size(); i++) window.draw(*level.platforms[i]);
             for (auto& spike : level.spikes) window.draw(spike);
