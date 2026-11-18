@@ -1232,23 +1232,23 @@ int main(){
 
 
     // Level 2
-    MathTask l2_easy1("sprites/tasks/level2/l2_easy1.jpg", "-3");
-    MathTask l2_easy2("sprites/tasks/level2/l2_easy2.jpg", "9.7");
-    MathTask l2_easy3("sprites/tasks/level2/l2_easy3.jpg", "7");
-    MathTask l2_easy4("sprites/tasks/level2/l2_easy4.jpg", "7");
-    MathTask l2_easy5("sprites/tasks/level2/l2_easy5.jpg", "7");
+    MathTask l2_easy1("sprites/tasks/level2/l2_easy1.jpg", "4");
+    MathTask l2_easy2("sprites/tasks/level2/l2_easy2.jpg", "2");
+    MathTask l2_easy3("sprites/tasks/level2/l2_easy3.jpg", "4");
+    MathTask l2_easy4("sprites/tasks/level2/l2_easy4.jpg", "2");
+    MathTask l2_easy5("sprites/tasks/level2/l2_easy5.jpg", "3");
 
-    MathTask l2_med1("sprites/tasks/level2/l2_med1.jpg", "1");
+    MathTask l2_med1("sprites/tasks/level2/l2_med1.jpg", "4");
     MathTask l2_med2("sprites/tasks/level2/l2_med2.jpg", "1");
-    MathTask l2_med3("sprites/tasks/level2/l2_med3.jpg", "1");
-    MathTask l2_med4("sprites/tasks/level2/l2_med4.jpg", "1");
-    MathTask l2_med5("sprites/tasks/level2/l2_med5.jpg", "1");
+    MathTask l2_med3("sprites/tasks/level2/l2_med3.jpg", "3");
+    MathTask l2_med4("sprites/tasks/level2/l2_med4.jpg", "3");
+    MathTask l2_med5("sprites/tasks/level2/l2_med5.jpg", "3");
 
     MathTask l2_hard1("sprites/tasks/level2/l2_hard1.jpg", "1");
-    MathTask l2_hard2("sprites/tasks/level2/l2_hard2.jpg", "1");
-    MathTask l2_hard3("sprites/tasks/level2/l2_hard3.jpg", "1");
+    MathTask l2_hard2("sprites/tasks/level2/l2_hard2.jpg", "2");
+    MathTask l2_hard3("sprites/tasks/level2/l2_hard3.jpg", "2");
     MathTask l2_hard4("sprites/tasks/level2/l2_hard4.jpg", "1");
-    MathTask l2_hard5("sprites/tasks/level2/l2_hard5.jpg", "1");
+    MathTask l2_hard5("sprites/tasks/level2/l2_hard5.jpg", "3");
 
     vector<MathTask*> level2_easy={&l2_easy1, &l2_easy2, &l2_easy3, &l2_easy4, &l2_easy5};
     vector<MathTask*> level2_med={&l2_med1, &l2_med2, &l2_med3, &l2_med4, &l2_med5};
@@ -1256,23 +1256,23 @@ int main(){
 
 
     // Level 3
-    MathTask l3_easy1("sprites/tasks/level3/l3_easy1.jpg", "-3");
-    MathTask l3_easy2("sprites/tasks/level3/l3_easy2.jpg", "9.7");
-    MathTask l3_easy3("sprites/tasks/level3/l3_easy3.jpg", "7");
-    MathTask l3_easy4("sprites/tasks/level3/l3_easy4.jpg", "7");
-    MathTask l3_easy5("sprites/tasks/level3/l3_easy5.jpg", "7");
+    MathTask l3_easy1("sprites/tasks/level3/l3_easy1.jpg", "-0.3");
+    MathTask l3_easy2("sprites/tasks/level3/l3_easy2.jpg", "0.32");
+    MathTask l3_easy3("sprites/tasks/level3/l3_easy3.jpg", "1.2");
+    MathTask l3_easy4("sprites/tasks/level3/l3_easy4.jpg", "6.7");
+    MathTask l3_easy5("sprites/tasks/level3/l3_easy5.jpg", "2.7");
 
-    MathTask l3_med1("sprites/tasks/level3/l3_med1.jpg", "1");
-    MathTask l3_med2("sprites/tasks/level3/l3_med2.jpg", "1");
-    MathTask l3_med3("sprites/tasks/level3/l3_med3.jpg", "1");
-    MathTask l3_med4("sprites/tasks/level3/l3_med4.jpg", "1");
-    MathTask l3_med5("sprites/tasks/level3/l3_med5.jpg", "1");
+    MathTask l3_med1("sprites/tasks/level3/l3_med1.jpg", "2.06");
+    MathTask l3_med2("sprites/tasks/level3/l3_med2.jpg", "20.16");
+    MathTask l3_med3("sprites/tasks/level3/l3_med3.jpg", "0.8");
+    MathTask l3_med4("sprites/tasks/level3/l3_med4.jpg", "6");
+    MathTask l3_med5("sprites/tasks/level3/l3_med5.jpg", "0.1");
 
-    MathTask l3_hard1("sprites/tasks/level3/l3_hard1.jpg", "1");
-    MathTask l3_hard2("sprites/tasks/level3/l3_hard2.jpg", "1");
-    MathTask l3_hard3("sprites/tasks/level3/l3_hard3.jpg", "1");
-    MathTask l3_hard4("sprites/tasks/level3/l3_hard4.jpg", "1");
-    MathTask l3_hard5("sprites/tasks/level3/l3_hard5.jpg", "1");
+    MathTask l3_hard1("sprites/tasks/level3/l3_hard1.jpg", "22");
+    MathTask l3_hard2("sprites/tasks/level3/l3_hard2.jpg", "17.5");
+    MathTask l3_hard3("sprites/tasks/level3/l3_hard3.jpg", "13");
+    MathTask l3_hard4("sprites/tasks/level3/l3_hard4.jpg", "1.8");
+    MathTask l3_hard5("sprites/tasks/level3/l3_hard5.jpg", "8");
 
     vector<MathTask*> level3_easy={&l3_easy1, &l3_easy2, &l3_easy3, &l3_easy4, &l3_easy5};
     vector<MathTask*> level3_med={&l3_med1, &l3_med2, &l3_med3, &l3_med4, &l3_med5};
@@ -1325,6 +1325,22 @@ int main(){
     moneySprite.setScale({0.8f, 0.8f});
 
 
+    #if VERSION==3
+    Text difText(font);
+#else
+    Text difText;
+    difText.setFont(font);
+#endif
+
+
+    difText.setString("SOLVE THE TASK");
+
+    difText.setCharacterSize(50);
+    difText.setFillColor(Color(20, 40, 20));
+    difText.setPosition({590.f, 230.f});
+
+
+
 #if VERSION==3
     Text moneyText(font);
 #else
@@ -1340,9 +1356,11 @@ int main(){
     bool levelCompleted = false;
     bool isGameOver=false;
 
-    RectangleShape winPanel({540.f, 460.f});
+    RectangleShape winPanel({540.f, 470.f});
     winPanel.setFillColor(Color(200, 230, 200, 220));
     winPanel.setPosition({480.f, 230.f});
+    winPanel.setOutlineColor(Color(90.f, 112.f, 58.f));
+    winPanel.setOutlineThickness(6.f);
 
 
 #if VERSION==3
@@ -1364,6 +1382,8 @@ int main(){
     RectangleShape losePanel({540.f, 400.f});
     losePanel.setFillColor(Color(230, 200, 200, 220));
     losePanel.setPosition({480.f, 260.f});
+    losePanel.setOutlineColor(Color(139, 0, 0));
+    losePanel.setOutlineThickness(6.f);
 
 #if VERSION==3
     Text loseText(font);
@@ -1374,7 +1394,7 @@ int main(){
     loseText.setString("GAME OVER");
     loseText.setCharacterSize(60);
     loseText.setFillColor(Color(139, 0, 0));
-    loseText.setPosition({580.f, 300.f});
+    loseText.setPosition({610.f, 300.f});
 
 
 #if VERSION==3
@@ -1482,9 +1502,11 @@ int main(){
     RectangleShape mathWindow({600.f, 450.f});
     mathWindow.setPosition({450.f, 200.f});
     mathWindow.setFillColor(Color(200, 230, 200));
+    mathWindow.setOutlineColor(Color(90.f, 112.f, 58.f));
+    mathWindow.setOutlineThickness(6.f);
 
     RectangleShape input({500.f, 40.f});
-    input.setPosition({500.f, 600.f});
+    input.setPosition({500.f, 570.f});
     input.setFillColor(Color::White);
     input.setOutlineThickness(2.f);
     input.setOutlineColor(Color::Black);
@@ -1498,10 +1520,10 @@ int main(){
 
     inputText.setCharacterSize(30);
     inputText.setFillColor(Color::Black);
-    inputText.setPosition({515.f, 605.f});
+    inputText.setPosition({515.f, 570.f});
 
 
-    Button btnEasy(600.f, 300.f, 300.f, 50.f, "Easy (1)", font, [&](){
+    Button btnEasy(600.f, 350.f, 300.f, 50.f, "Easy (1)", font, [&](){
 
                                                 if(levelNumb==1){
                                                     currentTask=level1_easy[rand()%level1_easy.size()];
@@ -1528,7 +1550,7 @@ int main(){
                                                 coinsForMath=1;
                                                 });
 
-    Button btnMed(600.f, 370.f, 300.f, 50.f, "Meduim (3)", font, [&](){
+    Button btnMed(600.f, 420.f, 300.f, 50.f, "Meduim (3)", font, [&](){
 
                                                 if(levelNumb==1){
                                                     currentTask=level1_med[rand()%level1_med.size()];
@@ -1555,7 +1577,7 @@ int main(){
                                                 coinsForMath=3;
                                                 });
 
-    Button btnHard(600.f, 440.f, 300.f, 50.f, "Hard (5)", font, [&](){
+    Button btnHard(600.f, 490.f, 300.f, 50.f, "Hard (5)", font, [&](){
                                                 if(levelNumb==1){
                                                     currentTask=level1_hard[rand()%level1_hard.size()];
                                                 }
@@ -1961,7 +1983,7 @@ int main(){
 
                 totalCoins+=countCoins;
 
-                if(countCoins==level.coins.size()){
+                if(countCoins==level.coins.size()+coinsForMath){
                     totalCoins+=10;
                     coinsBonusText.setString("All coins bonus: +10");
                 }
@@ -2118,6 +2140,7 @@ int main(){
 
             if (showMathMenu){
                 window.draw(mathWindow);
+                window.draw(difText);
                 window.draw(btnEasy);
                 window.draw(btnMed);
                 window.draw(btnHard);
