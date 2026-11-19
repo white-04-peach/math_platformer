@@ -167,6 +167,7 @@ class Platform: public Drawable, public Transformable {
 protected:
     Sprite sprite;
     Texture large, medium, small;
+    string currentSize="large";
 
 public:
     Platform(): sprite(large) {
@@ -177,8 +178,27 @@ public:
         sprite.setScale({0.6f, 0.6f});
     }
 
-    void medium_plat() { sprite.setTexture(medium, true); sprite.setScale({0.36f, 0.36f}); }
-    void small_plat() { sprite.setTexture(small, true); sprite.setScale({0.47f, 0.47f}); }
+    void setTextures(const string& pathLarge, const string& pathMedium, const string& pathSmall){
+        large.loadFromFile(pathLarge);
+        medium.loadFromFile(pathMedium);
+        small.loadFromFile(pathSmall);
+
+        if (currentSize=="large"){
+                sprite.setTexture(large, true);
+                sprite.setScale({0.6f, 0.6f});
+        }
+        if (currentSize=="medium"){
+                sprite.setTexture(medium, true);
+                sprite.setScale({0.36f, 0.36f});
+        }
+        if (currentSize=="small"){
+            sprite.setTexture(small, true);
+            sprite.setScale({0.47f, 0.47f});
+        }
+    }
+
+    void medium_plat() { currentSize="medium"; sprite.setTexture(medium, true); sprite.setScale({0.36f, 0.36f}); }
+    void small_plat() { currentSize="small"; sprite.setTexture(small, true); sprite.setScale({0.47f, 0.47f}); }
     FloatRect getBounds() { return getTransform().transformRect(sprite.getGlobalBounds()); }
     virtual void movement(){}
     virtual Vector2f getSpeed(){ return {0.f, 0.f}; }
@@ -569,7 +589,7 @@ public:
         Texture menuBgTex;
         menuBgTex.loadFromFile("sprites/back_math.jpg");
         Sprite menuBg(menuBgTex);
-      //  menuBg.setScale({1.15f, 1.12f});
+        menuBg.setScale({1.15f, 1.12f});
 
         Texture lockTex;
         lockTex.loadFromFile("sprites/lock.png");
@@ -978,7 +998,8 @@ public:
     float levelWidth = 4000.f;
 
 
-    Level():levelEnd(levelEndTex) {}
+    Level(): levelEnd(levelEndTex),  background(backgroundTex){}
+
     void create(int levelNumber){
         clearLevel();
 
@@ -1164,6 +1185,10 @@ public:
                     Coin* c=new Coin();
                     (*c).setPosition(coin_positions[i]);
                     coins.push_back(c);
+                }
+
+                for (int i=0; i<platforms.size(); i++) {
+                    (*platforms[i]).setTextures("sprites/plat_big.jpg", "sprites/plat_medium.png", "sprites/plat_small_snow.png");
                 }
 
                 break;
