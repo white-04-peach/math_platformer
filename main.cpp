@@ -39,9 +39,13 @@ public:
     Clock blinkClock;
     bool isBlink=false;
 
-    //штуки для бонуса
+    //штуки для бонуса прыжка
     bool bonusEffect=false;
     Clock bonusClock;
+
+    //штуки для бонуса скорости
+    bool speedEffect=false;
+    Clock speedClock;
 
 
 
@@ -105,15 +109,27 @@ public:
         bonusClock.restart();
     }
 
-    void movement() {
+    void activateSpeedBonus(){
+        speedEffect=true;
+        speedClock.restart();
+    }
+
+    void movement(){
+        float currentSpeed=speed;
+        if (speedEffect){
+            if (speedClock.getElapsedTime().asSeconds()<=8.f)
+                currentSpeed=speed*2.f;
+            else
+                speedEffect=false;
+        }
         if (isMovingLeft) {
-            move({-speed, 0.f});
+            move({-currentSpeed, 0.f});
             direct=-1.f;
             sprite.setScale({-0.4f, 0.4f});
             if (!isJump) animation();
         }
         if (isMovingRight) {
-            move({speed, 0.f});
+            move({currentSpeed, 0.f});
             direct=1.f;
             sprite.setScale({0.4f, 0.4f});
             if (!isJump) animation();
@@ -171,9 +187,9 @@ protected:
 
 public:
     Platform(): sprite(large) {
-        large.loadFromFile("sprites/plat_big.png");
-        medium.loadFromFile("sprites/plat_medium.png");
-        small.loadFromFile("sprites/plat_small.png");
+        large.loadFromFile("sprites/platforms/plat_big.png");
+        medium.loadFromFile("sprites/platforms/plat_medium.png");
+        small.loadFromFile("sprites/platforms/plat_small.png");
         sprite.setTexture(large, true);
         sprite.setScale({0.6f, 0.6f});
     }
@@ -420,6 +436,37 @@ public:
         }
     }
 };
+
+
+
+class SpeedBonus: public Drawable, public Transformable{
+private:
+    Sprite sprite;
+    Texture texture;
+
+public:
+    bool onScreen=true;
+
+    SpeedBonus(): sprite(texture){
+        texture.loadFromFile("sprites/jump_bonus.png");
+        sprite.setTexture(texture, true);
+        sprite.setOrigin({texture.getSize().x/2.f, texture.getSize().y/2.f});
+        sprite.setScale({0.3f, 0.3f});
+    }
+
+    FloatRect getBounds() const{
+        return getTransform().transformRect(sprite.getGlobalBounds());
+    }
+
+    void draw(RenderTarget& target, RenderStates states) const override {
+        if (onScreen) {
+            states.transform *= getTransform();
+            target.draw(sprite, states);
+        }
+    }
+};
+
+
 
 
 
@@ -996,6 +1043,7 @@ public:
     vector<JumpBonus*> bonuses;
     vector<Math*> maths;
     float levelWidth = 4000.f;
+    vector<SpeedBonus*> speedBonuses;
 
 
     Level(): levelEnd(levelEndTex),  background(backgroundTex){}
@@ -1009,7 +1057,7 @@ public:
         levelEnd.setScale({0.2f, 0.2f});
 
         switch(levelNumber){
-            case 1:{
+            case 4:{
                 backgroundPath="sprites/background.jpg";
                 startPos={50.f, 660.f};
                 levelEnd.setPosition({3770.f, 445.f});
@@ -1188,17 +1236,82 @@ public:
                 }
 
                 for (int i=0; i<platforms.size(); i++) {
-                    (*platforms[i]).setTextures("sprites/plat_big.jpg", "sprites/plat_medium.png", "sprites/plat_small_snow.png");
+                    (*platforms[i]).setTextures("sprites/platforms/plat_big_snow.png", "sprites/platforms/plat_medium_snow.png", "sprites/platforms/plat_small_snow.png");
                 }
 
                 break;
 
             }
-            case 4: {
+            case 1: {
                 backgroundPath="sprites/background_42 (1) (1).png";
-                startPos={50.f, 660.f};
-                levelEnd.setPosition({1200.f, 400.f});
-                Platform* plat1=new Platform(); (*plat1).setPosition({0.f, 700.f}); (*plat1).medium_plat();
+                levelWidth=4900.f;
+                startPos={50.f, 160.f};
+                levelEnd.setPosition({4750.f, 600.f});
+
+                SpeedBonus* speedBonus=new SpeedBonus();
+                (*speedBonus).setPosition({2460.f, 160.f});
+                speedBonuses.push_back(speedBonus);
+
+                Platform* plat1=new Platform(); (*plat1).setPosition({0.f, 200.f}); (*plat1).medium_plat();
+                Platform* plat2=new Platform(); (*plat2).setPosition({80.f, 400.f}); (*plat2).small_plat();
+                MovingPlatform* plat3=new MovingPlatform(190.f, 550.f, 200.f); (*plat3).small_plat();
+                Platform* plat33=new Platform(); (*plat33).setPosition({80.f, 670.f}); (*plat33).small_plat();
+                Platform* plat4=new Platform(); (*plat4).setPosition({650.f, 650.f}); (*plat4).small_plat();
+                Platform* plat5=new Platform(); (*plat5).setPosition({950.f, 800.f}); (*plat5).medium_plat();
+                MovingPlatform* plat6=new MovingPlatform(880.f, 510.f, 250.f); (*plat6).small_plat();
+                Platform* plat8=new Platform(); (*plat8).setPosition({1300.f, 400.f}); (*plat8).small_plat();
+                Platform* plat9=new Platform(); (*plat9).setPosition({1600.f, 220.f}); (*plat9).small_plat();
+                Platform* plat10=new Platform(); (*plat10).setPosition({2000.f, 220.f}); (*plat10).small_plat();
+                Platform* plat11=new Platform(); (*plat11).setPosition({2400.f, 220.f}); (*plat11).small_plat();
+                Platform* plat00=new Platform(); (*plat00).setPosition({1500.f, 400.f});
+                Platform* plat000=new Platform(); (*plat000).setPosition({2270.f, 400.f});
+
+                FragilePlatform* plat7=new FragilePlatform(); (*plat7).setStartPos({1630.f, 800.f});
+                Platform* plat12=new Platform(); (*plat12).setPosition({2500.f, 800.f}); (*plat12).medium_plat();
+
+
+                vector<Vector2f> coin_positions={{140.f, 340.f},{710.f, 590.f}, {1080.f, 200.f}, {2060.f, 160.f}, {1720.f, 740.f}, {1820.f, 640.f},
+                                                {1920.f, 540.f}, {2020.f, 640.f}, {2120.f, 740.f}, {140.f, 610.f}, {3160.f, 590.f}
+                                                };
+                for (int i=0; i<coin_positions.size(); i++){
+                    Coin* c=new Coin();
+                    (*c).setPosition(coin_positions[i]);
+                    coins.push_back(c);
+                }
+
+
+
+                for (int i=0; i<40; i++){
+                    Spike s;
+                    s.setPosition({1500.f+i*38, 400});
+                    spikes.push_back(s);
+                }
+
+                //Spike s; s.setPosition({2590.f, 800.f}); spikes.push_back(s);
+
+
+
+                maths.push_back(new Math(2800.f, 750.f));
+                checkpoints.push_back(new Checkpoint(2580.f, 717.f));
+
+                Platform* plat13=new Platform(); (*plat13).setPosition({3100.f, 650.f}); (*plat13).small_plat();
+                Platform* plat14=new Platform(); (*plat14).setPosition({3500.f, 650.f}); (*plat14).medium_plat();
+                Platform* plat15=new Platform(); (*plat15).setPosition({4150.f, 650.f});
+
+                Enemy* enemy1=new Enemy(1155.f, 760.f, 300.f); enemies.push_back(enemy1);
+                Enemy* enemy2=new Enemy(3650.f, 610.f, 200.f); enemies.push_back(enemy2);
+                Enemy* enemy3=new Enemy(3850.f, 610.f, 100.f); enemies.push_back(enemy3);
+
+
+                platforms={plat1, plat2, plat3, plat33, plat4, plat5, plat6, plat7, plat8, plat9, plat10, plat11, plat00, plat000, plat12, plat13, plat14,
+                plat15};
+
+                for (int i=0; i<platforms.size(); i++) {
+                    (*platforms[i]).setTextures("sprites/platforms/plat_big_sand.png", "sprites/platforms/plat_medium_sand.png", "sprites/platforms/plat_small_sand.png");
+                }
+
+                break;
+
             }
         }
         backgroundTex.loadFromFile(backgroundPath);
@@ -1228,6 +1341,9 @@ public:
 
         for (int i=0; i<maths.size(); i++) delete maths[i];
         maths.clear();
+
+        for (int i=0; i<speedBonuses.size(); i++) delete speedBonuses[i];
+        speedBonuses.clear();
     }
 
     void drawBackground(RenderTarget& target) {
@@ -1905,9 +2021,13 @@ int main(){
                 for(int i=0; i<level.platforms.size(); i++)
                     (*level.platforms[i]).reset();
 
-                for (int i=0; i<level.bonuses.size(); i++) {
+                for (int i=0; i<level.bonuses.size(); i++){
                     (*level.bonuses[i]).onScreen=true;
-            }
+                }
+
+                for (int i=0; i<level.speedBonuses.size(); i++){
+                    (*level.speedBonuses[i]).onScreen=true;
+                }
 
                 prevPos=character.getPosition();
                 continue;
@@ -1936,13 +2056,26 @@ int main(){
 
             for (int i=0; i<level.bonuses.size(); i++){
                 if ((*level.bonuses[i]).onScreen) {
-#if VERSION == 3
+#if VERSION==3
                     if (character.getBounds().findIntersection((*level.bonuses[i]).getBounds())) {
 #else
                     if (character.getBounds().intersects((*level.bonuses[i]).getBounds())){
 #endif
                         (*level.bonuses[i]).onScreen=false;
                         character.activateBonus();
+                    }
+                }
+            }
+
+            for (int i=0; i<level.speedBonuses.size(); i++){
+                if ((*level.speedBonuses[i]).onScreen) {
+#if VERSION==3
+                    if (character.getBounds().findIntersection((*level.speedBonuses[i]).getBounds())) {
+#else
+                    if (character.getBounds().intersects((*level.speedBonuses[i]).getBounds())){
+#endif
+                        (*level.speedBonuses[i]).onScreen=false;
+                        character.activateSpeedBonus();
                     }
                 }
             }
@@ -2100,7 +2233,6 @@ int main(){
 
             float cameraX=character.getPosition().x +250.f;
             if (cameraX<750.f) cameraX=750.f;
-          //  if (cameraX>3150.f) cameraX=3150.f;
             if (cameraX > level.levelWidth - 750.f) {
                 cameraX = level.levelWidth - 750.f;
             }
@@ -2130,6 +2262,10 @@ int main(){
 
             for (int i=0; i<level.bonuses.size(); i++) {
                 window.draw(*level.bonuses[i]);
+            }
+
+            for (int i=0; i<level.speedBonuses.size(); i++){
+                window.draw(*level.speedBonuses[i]);
             }
 
 
