@@ -29,6 +29,7 @@ public:
     float direct=1.f;
     float dy=0.f;
     const float gravity=0.5f;
+    float jumpPower=-14.f;
 
     bool isMovingLeft=false;
     bool isMovingRight=false;
@@ -68,8 +69,23 @@ public:
             jumpTexture.loadFromFile("sprites/characters/panda/jump_2.png");
             }
 
+            else if (skinID == 3) {
+            jumpPower=-15.f;
+            textures[0].loadFromFile("sprites/characters/fox/run_1.png");
+            textures[1].loadFromFile("sprites/characters/fox/run_2.png");
+            textures[2].loadFromFile("sprites/characters/fox/run_3.png");
+            textures[3].loadFromFile("sprites/characters/fox/run_2.png");
+            jumpTexture.loadFromFile("sprites/characters/fox/jump.png");
+            }
 
-            // Сюда потом добавить else if (skinID == 3) { ... }
+            else if (skinID == 4) {
+
+            textures[0].loadFromFile("sprites/characters/panda/run_1.png");
+            textures[1].loadFromFile("sprites/characters/panda/run_2.png");
+            textures[2].loadFromFile("sprites/characters/panda/run_3.png");
+            textures[3].loadFromFile("sprites/characters/panda/run_4.png");
+            jumpTexture.loadFromFile("sprites/characters/panda/jump_2.png");
+            }
 
 
         current=0;
@@ -91,10 +107,10 @@ public:
             isJump=true;
 
             if (bonusEffect && bonusClock.getElapsedTime().asSeconds()<=5.f){
-                dy=-22.f;
+                dy=jumpPower-8.f;
             }
             else{
-                dy=-14.f;
+                dy=jumpPower;
                 bonusEffect=false;
             }
 
@@ -943,7 +959,7 @@ public:
 #endif
     {
         texture.loadFromFile(path);
-        sprite.setTexture(texture);
+        sprite.setTexture(texture, true);
         sprite.setScale({0.5f, 0.5f});
     }
 
@@ -977,7 +993,7 @@ public:
         wall.setFillColor(Color(18, 47, 170, 100));
 
         texture.loadFromFile("sprites/math.png");
-        sprite.setTexture(texture);
+        sprite.setTexture(texture, true);
         sprite.setOrigin({texture.getSize().x/2.f, texture.getSize().y/2.f});
         sprite.setScale({0.2f, 0.2f});
         sprite.setPosition({x, y});
