@@ -53,38 +53,38 @@ public:
     Character(int skinID = 1): sprite(textures[0]) {
             // Если выбран скин 1 (собака)
             if (skinID == 1) {
-            textures[0].loadFromFile("sprites/characters/dog/run_1.png");
-            textures[1].loadFromFile("sprites/characters/dog/run_2.png");
-            textures[2].loadFromFile("sprites/characters/dog/run_3.png");
-            textures[3].loadFromFile("sprites/characters/dog/run_4.png");
-            jumpTexture.loadFromFile("sprites/characters/dog/jump.png");
+                textures[0].loadFromFile("sprites/characters/dog/run_1.png");
+                textures[1].loadFromFile("sprites/characters/dog/run_2.png");
+                textures[2].loadFromFile("sprites/characters/dog/run_3.png");
+                textures[3].loadFromFile("sprites/characters/dog/run_4.png");
+                jumpTexture.loadFromFile("sprites/characters/dog/jump.png");
             }
 
             else if (skinID == 2) {
 
-            textures[0].loadFromFile("sprites/characters/panda/run_1.png");
-            textures[1].loadFromFile("sprites/characters/panda/run_2.png");
-            textures[2].loadFromFile("sprites/characters/panda/run_3.png");
-            textures[3].loadFromFile("sprites/characters/panda/run_4.png");
-            jumpTexture.loadFromFile("sprites/characters/panda/jump_2.png");
+                textures[0].loadFromFile("sprites/characters/panda/run_1.png");
+                textures[1].loadFromFile("sprites/characters/panda/run_2.png");
+                textures[2].loadFromFile("sprites/characters/panda/run_3.png");
+                textures[3].loadFromFile("sprites/characters/panda/run_4.png");
+                jumpTexture.loadFromFile("sprites/characters/panda/jump_2.png");
             }
 
             else if (skinID == 3) {
-            jumpPower=-15.f;
-            textures[0].loadFromFile("sprites/characters/fox/run_1.png");
-            textures[1].loadFromFile("sprites/characters/fox/run_2.png");
-            textures[2].loadFromFile("sprites/characters/fox/run_3.png");
-            textures[3].loadFromFile("sprites/characters/fox/run_2.png");
-            jumpTexture.loadFromFile("sprites/characters/fox/jump.png");
+                jumpPower=-15.f;
+                textures[0].loadFromFile("sprites/characters/fox/run_1.png");
+                textures[1].loadFromFile("sprites/characters/fox/run_2.png");
+                textures[2].loadFromFile("sprites/characters/fox/run_3.png");
+                textures[3].loadFromFile("sprites/characters/fox/run_2.png");
+                jumpTexture.loadFromFile("sprites/characters/fox/jump.png");
             }
 
             else if (skinID == 4) {
 
-            textures[0].loadFromFile("sprites/characters/panda/run_1.png");
-            textures[1].loadFromFile("sprites/characters/panda/run_2.png");
-            textures[2].loadFromFile("sprites/characters/panda/run_3.png");
-            textures[3].loadFromFile("sprites/characters/panda/run_4.png");
-            jumpTexture.loadFromFile("sprites/characters/panda/jump_2.png");
+                textures[0].loadFromFile("sprites/characters/penguin/run_1.png");
+                textures[1].loadFromFile("sprites/characters/penguin/run_2.png");
+                textures[2].loadFromFile("sprites/characters/penguin/run_3.png");
+                textures[3].loadFromFile("sprites/characters/penguin/run_2.png");
+                jumpTexture.loadFromFile("sprites/characters/penguin/jump.png");
             }
 
 
@@ -1064,7 +1064,7 @@ public:
 
     Level(): levelEnd(levelEndTex),  background(backgroundTex){}
 
-    void create(int levelNumber){
+    void create(int levelNumber, int skin){
         clearLevel();
 
         levelEndTex.loadFromFile("sprites/portal_1.png");
@@ -1073,9 +1073,13 @@ public:
         levelEnd.setScale({0.2f, 0.2f});
 
         switch(levelNumber){
-            case 4:{
+            case 1:{
                 backgroundPath="sprites/background.jpg";
                 startPos={50.f, 660.f};
+                if (skin==1){
+                    startPos.y-=20.f;
+                }
+
                 levelEnd.setPosition({3770.f, 445.f});
                 Math* math1=new Math(250.f, 650.f);
                 maths.push_back(math1);
@@ -1122,6 +1126,11 @@ public:
             case 2:{
                 backgroundPath="sprites/background_2.jpg";
                 startPos={50.f, 550.f};
+
+                if (skin==1){
+                    startPos.y-=20.f;
+                }
+
                 levelEnd.setPosition({3850.f, 147.f});
                 Math* math1=new Math(3300.f, 750.f);
                 maths.push_back(math1);
@@ -1181,6 +1190,10 @@ public:
                 backgroundPath="sprites/background_31.jpg";
 
                 startPos={50.f, 360.f};
+                if (skin==1){
+                    startPos.y-=20.f;
+                }
+
                 levelWidth = 4920.f;
                 levelEnd.setPosition({4840.f, 345.f});
                 Math* math1=new Math(1400.f, 530.f);
@@ -1258,10 +1271,14 @@ public:
                 break;
 
             }
-            case 1: {
+            case 4: {
                 backgroundPath="sprites/background_42 (1) (1).png";
                 levelWidth=4900.f;
                 startPos={50.f, 160.f};
+                if (skin==1){
+                    startPos.y-=20.f;
+                }
+
                 levelEnd.setPosition({4750.f, 600.f});
 
                 SpeedBonus* speedBonus=new SpeedBonus();
@@ -1374,7 +1391,7 @@ int main(){
 
 
     int unlockedLevel = 1;
-    int totalCoins = 0;
+    int totalCoins=10000;
     int extraLives = 0;       // Купленные зелья жизни
     int extraTime = 0;        // Купленные зелья времени
     int selectedSkin = 1; // выбранный скил (собака 1, панда 2, и тд)
@@ -1478,7 +1495,7 @@ int main(){
 
     Level level;
     int levelNumb=selectedLevel;
-    level.create(levelNumb);
+    level.create(levelNumb, selectedSkin);
 
     Character character;
     character.setPosition(level.startPos);
@@ -1609,7 +1626,7 @@ int main(){
                                                                 });
 
     Button btnRetry(550.f, 560.f, 400.f, 50.f, "Retry level", font, [&](){ levelCompleted=false;
-                                                                            level.create(levelNumb);
+                                                                            level.create(levelNumb, selectedSkin);
                                                                             character.setPosition(level.startPos);
                                                                             respawn=level.startPos;
                                                                             damageCount=0;
@@ -1627,7 +1644,7 @@ int main(){
                                                                         levelCompleted=false;
                                                                         levelNumb++;
 
-                                                                        level.create(levelNumb);
+                                                                        level.create(levelNumb, selectedSkin);
                                                                         character.setPosition(level.startPos);
                                                                         respawn=level.startPos;
                                                                         damageCount=0;
@@ -1652,7 +1669,7 @@ int main(){
                                                                                 isPaused=false;
                                                                                 levelCompleted=false;
                                                                                 isGameOver=false;
-                                                                                level.create(levelNumb);
+                                                                                level.create(levelNumb, selectedSkin);
                                                                                 character.setPosition(level.startPos);
                                                                                 respawn=level.startPos;
                                                                                 damageCount=0;
@@ -1670,6 +1687,27 @@ int main(){
     string userInput="";
     int coinsForMath=0;
 
+    Clock mathTimer;
+    float mathLimit=60.f;
+
+    ImageButton timeBonusBtn("sprites/buttons/time_potion_1.png", 550.f, 245.f, 0.25f, [&](){
+                                                                                            if (extraTime>0){
+                                                                                                extraTime--;
+                                                                                                mathLimit+=30.f;
+                                                                                            }});
+
+#if VERSION==3
+    Text extraTimeText(font);
+#else
+    Text extraTimeText;
+    extraTimeText.setFont(font);
+#endif
+    extraTimeText.setCharacterSize(36);
+    extraTimeText.setFillColor(Color::Black);
+    extraTimeText.setPosition({660.f, 225.f});
+    extraTimeText.setString("x " +to_string(extraTime));
+
+
     RectangleShape mathWindow({600.f, 450.f});
     mathWindow.setPosition({450.f, 200.f});
     mathWindow.setFillColor(Color(200, 230, 200));
@@ -1682,7 +1720,7 @@ int main(){
     input.setOutlineThickness(2.f);
     input.setOutlineColor(Color::Black);
 
-    #if VERSION==3
+#if VERSION==3
     Text inputText(font);
 #else
     Text inputText;
@@ -1693,8 +1731,21 @@ int main(){
     inputText.setFillColor(Color::Black);
     inputText.setPosition({515.f, 570.f});
 
+#if VERSION==3
+    Text timerText(font);
+#else
+    Text timerText;
+    timerText.setFont(font);
+#endif
+    timerText.setCharacterSize(40);
+    timerText.setFillColor(Color::Black);
+    timerText.setPosition({950.f, 215.f});
+    timerText.setString("1:00");
+
 
     Button btnEasy(600.f, 350.f, 300.f, 50.f, "Easy (1)", font, [&](){
+                                                mathLimit=60.f;
+                                                mathTimer.restart();
 
                                                 if(levelNumb==1){
                                                     currentTask=level1_easy[rand()%level1_easy.size()];
@@ -1723,6 +1774,8 @@ int main(){
 
     Button btnMed(600.f, 420.f, 300.f, 50.f, "Meduim (3)", font, [&](){
 
+                                                mathLimit=120.f;
+                                                mathTimer.restart();
                                                 if(levelNumb==1){
                                                     currentTask=level1_med[rand()%level1_med.size()];
                                                 }
@@ -1749,6 +1802,9 @@ int main(){
                                                 });
 
     Button btnHard(600.f, 490.f, 300.f, 50.f, "Hard (5)", font, [&](){
+                                                mathLimit=180.f;
+                                                mathTimer.restart();
+
                                                 if(levelNumb==1){
                                                     currentTask=level1_hard[rand()%level1_hard.size()];
                                                 }
@@ -1833,6 +1889,15 @@ int main(){
                         inputText.setString("");
                     }
                 }
+
+
+                if (const auto* mouse = event->getIf<Event::MouseButtonPressed>()) {
+                    if (mouse->button == Mouse::Button::Left) {
+                        Vector2f mousePos = window.mapPixelToCoords(mouse->position);
+                        timeBonusBtn.pressed(mousePos);
+                    }
+                }
+
                 continue;
             }
             else if (showMathMenu) {
@@ -1927,6 +1992,13 @@ int main(){
                     }
                 }
 
+                if (event.type==Event::MouseButtonPressed){
+                    if (event.mouseButton.button==Mouse::Left){
+                        Vector2f mousePos=window.mapPixelToCoords(Mouse::getPosition(window));
+                        timeBonusBtn.pressed(mousePos);
+                    }
+                }
+
                 continue;
             }
 
@@ -1940,6 +2012,7 @@ int main(){
                         btnHard.pressed(mousePos);
                    }
                 }
+
                 continue;
             }
 
@@ -2160,6 +2233,55 @@ int main(){
                 }
             }
 
+            if (showMathTask){
+
+                extraTimeText.setString("x "+to_string(extraTime));
+
+                float elapsed=mathTimer.getElapsedTime().asSeconds();
+                float remain=mathLimit-elapsed;
+
+                if (remain<0.f){
+                    remain=0.f;
+                }
+
+                int minutes=(int)(remain/60);
+                int seconds=(int)(remain)%60;
+
+                string secStr;
+                if(seconds<10){
+                    secStr="0"+to_string(seconds);
+                }
+                else{
+                    secStr=to_string(seconds);
+                }
+
+                timerText.setString(to_string(minutes)+ ":" +secStr);
+
+                if (remain<=10.f){
+                    timerText.setFillColor(Color(204, 0, 0));
+                }
+                else{
+                    timerText.setFillColor(Color::Black);
+                }
+
+
+                if (remain<=0.f){
+                    damageCount++;
+                    health.updateHealth(damageCount);
+
+                    for (int i=0; i<level.maths.size(); i++) {
+                        if ((*level.maths[i]).activation(character.getBounds())) {
+                            (*level.maths[i]).isSolved=true;
+                        }
+                    }
+
+                    showMathTask=false;
+                    showMathMenu=false;
+                    userInput="";
+                    inputText.setString("");
+                }
+            }
+
 
 
             if (characterBounds.contains(level.levelEnd.getPosition()) && !levelCompleted){
@@ -2341,7 +2463,10 @@ int main(){
                 window.draw(mathWindow);
                 window.draw(*currentTask);
                 window.draw(input);
+                window.draw(timerText);
                 window.draw(inputText);
+                window.draw(timeBonusBtn);
+                window.draw(extraTimeText);
             }
 
 
