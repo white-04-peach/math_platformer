@@ -1474,6 +1474,30 @@ int main(){
     vector<MathTask*> level3_hard={&l3_hard1, &l3_hard2, &l3_hard3, &l3_hard4, &l3_hard5};
 
 
+    // Level 4
+    MathTask l4_easy1("sprites/tasks/level4/l4_easy1.jpg", "0.81");
+    MathTask l4_easy2("sprites/tasks/level4/l4_easy2.jpg", "0.94");
+    MathTask l4_easy3("sprites/tasks/level4/l4_easy3.jpg", "0.97");
+    MathTask l4_easy4("sprites/tasks/level4/l4_easy4.jpg", "0.15");
+    MathTask l4_easy5("sprites/tasks/level4/l4_easy5.jpg", "0.69");
+
+    MathTask l4_med1("sprites/tasks/level4/l4_med1.jpg", "0.88");
+    MathTask l4_med2("sprites/tasks/level4/l4_med2.jpg", "0.2");
+    MathTask l4_med3("sprites/tasks/level4/l4_med3.jpg", "0.75");
+    MathTask l4_med4("sprites/tasks/level4/l4_med4.jpg", "0.6");
+    MathTask l4_med5("sprites/tasks/level4/l4_med5.jpg", "0.55");
+
+    MathTask l4_hard1("sprites/tasks/level4/l4_hard1.jpg", "0.375");
+    MathTask l4_hard2("sprites/tasks/level4/l4_hard2.jpg", "0.25");
+    MathTask l4_hard3("sprites/tasks/level4/l4_hard3.jpg", "0.25");
+    MathTask l4_hard4("sprites/tasks/level4/l4_hard4.jpg", "0.25");
+    MathTask l4_hard5("sprites/tasks/level4/l4_hard5.jpg", "0.5");
+
+    vector<MathTask*> level4_easy={&l4_easy1, &l4_easy2, &l4_easy3, &l4_easy4, &l4_easy5};
+    vector<MathTask*> level4_med={&l4_med1, &l4_med2, &l4_med3, &l4_med4, &l4_med5};
+    vector<MathTask*> level4_hard={&l4_hard1, &l4_hard2, &l4_hard3, &l4_hard4, &l4_hard5};
+
+
     srand(time(0));
         while (window.isOpen()) {
             // Передаем goToLevels ? 2 : 0. Если true, меню откроется на 2 странице (список уровней)
@@ -1757,7 +1781,7 @@ int main(){
                                                     currentTask=level3_easy[rand()%level3_easy.size()];
                                                 }
                                                 if(levelNumb==4){
-                                                    currentTask=level3_easy[rand()%level3_easy.size()];
+                                                    currentTask=level4_easy[rand()%level4_easy.size()];
                                                 }
                                                 if(levelNumb==5){
                                                     currentTask=level3_easy[rand()%level3_easy.size()];
