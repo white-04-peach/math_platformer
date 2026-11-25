@@ -53,11 +53,18 @@ public:
     Character(int skinID = 1): sprite(textures[0]) {
             // Если выбран скин 1 (собака)
             if (skinID == 1) {
-                textures[0].loadFromFile("sprites/characters/dog/run_1.png");
-                textures[1].loadFromFile("sprites/characters/dog/run_2.png");
-                textures[2].loadFromFile("sprites/characters/dog/run_3.png");
-                textures[3].loadFromFile("sprites/characters/dog/run_4.png");
-                jumpTexture.loadFromFile("sprites/characters/dog/jump.png");
+    //            textures[0].loadFromFile("sprites/characters/dog/run_1.png");
+      //          textures[1].loadFromFile("sprites/characters/dog/run_2.png");
+        //        textures[2].loadFromFile("sprites/characters/dog/run_3.png");
+          //      textures[3].loadFromFile("sprites/characters/dog/run_4.png");
+            //    jumpTexture.loadFromFile("sprites/characters/dog/jump.png");
+
+                textures[0].loadFromFile("sprites/characters/lion/run_1.png");
+                textures[1].loadFromFile("sprites/characters/lion/run_2.png");
+                textures[2].loadFromFile("sprites/characters/lion/run_3.png");
+                textures[3].loadFromFile("sprites/characters/lion/run_2.png");
+                jumpTexture.loadFromFile("sprites/characters/lion/jump.png");
+
             }
 
             else if (skinID == 2) {
@@ -85,6 +92,15 @@ public:
                 textures[2].loadFromFile("sprites/characters/penguin/run_3.png");
                 textures[3].loadFromFile("sprites/characters/penguin/run_2.png");
                 jumpTexture.loadFromFile("sprites/characters/penguin/jump.png");
+            }
+
+            else if (skinID == 5) {
+
+                textures[0].loadFromFile("sprites/characters/lion/run_1.png");
+                textures[1].loadFromFile("sprites/characters/lion/run_2.png");
+                textures[2].loadFromFile("sprites/characters/lion/run_3.png");
+                textures[3].loadFromFile("sprites/characters/lion/run_2.png");
+                jumpTexture.loadFromFile("sprites/characters/lion/jump.png");
             }
 
 
@@ -1740,6 +1756,55 @@ int main(){
     vector<MathTask*> level3_easy={&l3_easy1, &l3_easy2, &l3_easy3, &l3_easy4, &l3_easy5};
     vector<MathTask*> level3_med={&l3_med1, &l3_med2, &l3_med3, &l3_med4, &l3_med5};
     vector<MathTask*> level3_hard={&l3_hard1, &l3_hard2, &l3_hard3, &l3_hard4, &l3_hard5};
+
+
+    // Level 4
+    MathTask l4_easy1("sprites/tasks/level4/l4_easy1.jpg", "0.81");
+    MathTask l4_easy2("sprites/tasks/level4/l4_easy2.jpg", "0.94");
+    MathTask l4_easy3("sprites/tasks/level4/l4_easy3.jpg", "0.97");
+    MathTask l4_easy4("sprites/tasks/level4/l4_easy4.jpg", "0.15");
+    MathTask l4_easy5("sprites/tasks/level4/l4_easy5.jpg", "0.69");
+
+    MathTask l4_med1("sprites/tasks/level4/l4_med1.jpg", "0.88");
+    MathTask l4_med2("sprites/tasks/level4/l4_med2.jpg", "0.2");
+    MathTask l4_med3("sprites/tasks/level4/l4_med3.jpg", "0.75");
+    MathTask l4_med4("sprites/tasks/level4/l4_med4.jpg", "0.6");
+    MathTask l4_med5("sprites/tasks/level4/l4_med5.jpg", "0.55");
+
+    MathTask l4_hard1("sprites/tasks/level4/l4_hard1.jpg", "0.375");
+    MathTask l4_hard2("sprites/tasks/level4/l4_hard2.jpg", "0.25");
+    MathTask l4_hard3("sprites/tasks/level4/l4_hard3.jpg", "0.25");
+    MathTask l4_hard4("sprites/tasks/level4/l4_hard4.jpg", "0.25");
+    MathTask l4_hard5("sprites/tasks/level4/l4_hard5.jpg", "0.5");
+
+    vector<MathTask*> level4_easy={&l4_easy1, &l4_easy2, &l4_easy3, &l4_easy4, &l4_easy5};
+    vector<MathTask*> level4_med={&l4_med1, &l4_med2, &l4_med3, &l4_med4, &l4_med5};
+    vector<MathTask*> level4_hard={&l4_hard1, &l4_hard2, &l4_hard3, &l4_hard4, &l4_hard5};
+
+
+    // Level 5
+    MathTask l5_easy1("sprites/tasks/level5/l5_easy1.jpg", "17");
+    MathTask l5_easy2("sprites/tasks/level5/l5_easy2.jpg", "9");
+    MathTask l5_easy3("sprites/tasks/level5/l5_easy3.jpg", "71");
+    MathTask l5_easy4("sprites/tasks/level5/l5_easy4.jpg", "13");
+    MathTask l5_easy5("sprites/tasks/level5/l5_easy5.jpg", "25");
+
+    MathTask l5_med1("sprites/tasks/level5/l5_med1.jpg", "0.8");
+    MathTask l5_med2("sprites/tasks/level5/l5_med2.jpg", "0.8");
+    MathTask l5_med3("sprites/tasks/level5/l5_med3.jpg", "9");
+    MathTask l5_med4("sprites/tasks/level5/l5_med4.jpg", "37");
+    MathTask l5_med5("sprites/tasks/level5/l5_med5.jpg", "66");
+
+    MathTask l5_hard1("sprites/tasks/level5/l5_hard1.jpg", "0.2");
+    MathTask l5_hard2("sprites/tasks/level5/l5_hard2.jpg", "24");
+    MathTask l5_hard3("sprites/tasks/level5/l5_hard3.jpg", "63");
+    MathTask l5_hard4("sprites/tasks/level5/l5_hard4.jpg", "140");
+    MathTask l5_hard5("sprites/tasks/level5/l5_hard5.jpg", "388");
+
+    vector<MathTask*> level5_easy={&l5_easy1, &l5_easy2, &l5_easy3, &l5_easy4, &l5_easy5};
+    vector<MathTask*> level5_med={&l5_med1, &l5_med2, &l5_med3, &l5_med4, &l5_med5};
+    vector<MathTask*> level5_hard={&l5_hard1, &l5_hard2, &l5_hard3, &l5_hard4, &l5_hard5};
+
 
 
     srand(time(0));
