@@ -556,7 +556,7 @@ public:
 
 // ...................ÊÍÎÏÊÈ...........................
 class Button : public Drawable, public Transformable {
-protected:
+public:
     RectangleShape rect;
     Text text;
     function<void()> action;
@@ -679,10 +679,10 @@ public:
         #endif
             coinsText.setCharacterSize(48);
             coinsText.setFillColor(Color(40, 70, 40));
-            coinsText.setPosition({550.f, 40.f});
+            coinsText.setPosition({520.f, 40.f});
             potionsText.setCharacterSize(48);
             potionsText.setFillColor(Color(40, 70, 40));
-            potionsText.setPosition({490.f, 100.f});
+            potionsText.setPosition({480.f, 100.f});
 
         ImageButton startBtn("sprites/buttons/play.png", 630.f, 280.f, 0.3f, [&](){ page = 1; });
         ImageButton exitBtn("sprites/buttons/exit2.png", 630.f, 450.f, 0.3f, [&](){ window.close(); });
@@ -830,80 +830,118 @@ public:
             window.draw(rightArrowBtn);
             window.draw(backBtn_wardrobe);
 
-            if (previewSkin == 1) {
-                Texture t;
-                t.loadFromFile("sprites/characters/dog/run_1.png");
-                Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
-                s.setPosition({660.f, 300.f}); s.setScale({1.5f, 1.5f});
-                    window.draw(s);
-                    window.draw(equipBtn);
-                } else if (previewSkin == 2) {
-                    if (hasPanda) {
-                    Texture t;
-                t.loadFromFile("sprites/characters/panda/run_1.png");
-                    Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
-                    s.setPosition({660.f, 300.f}); s.setScale({1.5f, 1.5f});
-                        window.draw(s);
-                        window.draw(equipBtn);
-                    } else {
-                    RectangleShape emptyBox({200.f, 200.f});
-                    // emptyBox.setFillColor(Color(0, 0, 0, 100));
-                    emptyBox.setPosition({650.f, 250.f});
-                    //  window.draw(emptyBox);
-
-
-       #if VERSION==3
-                                      Text lockedText(menuFont);
-       #else
-                                      Text lockedText;
-                                      lockedText.setFont(menuFont);
-       #endif
-                                      lockedText.setString("NOT PURCHASED");
-                                      lockedText.setCharacterSize(30);
-                                      lockedText.setFillColor(Color::Red);
-                                      lockedText.setPosition({550.f, 480.f});
-                                      window.draw(lockedText);
-                                  }
-                } else if (previewSkin == 3) { // ЛИСА
-                    if (hasFox) {
-                        Texture t; t.loadFromFile("sprites/characters/fox/run_1.png");
-                        Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
-                        s.setPosition({660.f, 300.f}); s.setScale({1.3f, 1.3f});
-                        window.draw(s);
-                        window.draw(equipBtn);
-                    } else {
-#if VERSION==3
-                        Text lockedText(menuFont);
-#else
-                        Text lockedText; lockedText.setFont(menuFont);
-#endif
-                        lockedText.setString("NOT PURCHASED");
-                        lockedText.setCharacterSize(30); lockedText.setFillColor(Color::Red);
-                        lockedText.setPosition({550.f, 480.f});
-                        window.draw(lockedText);
-                    }
-                } else if (previewSkin == 4) { // ПИНГВИН
-                    if (hasPenguin) {
-                        Texture t; t.loadFromFile("sprites/characters/penguin/run_1.png");
-                        Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
-                        s.setPosition({660.f, 300.f}); s.setScale({1.3f, 1.3f});
-                        window.draw(s);
-                        window.draw(equipBtn);
-                    } else {
-#if VERSION==3
-                        Text lockedText(menuFont);
-#else
-                        Text lockedText; lockedText.setFont(menuFont);
-#endif
-                        lockedText.setString("NOT PURCHASED");
-                        lockedText.setCharacterSize(30); lockedText.setFillColor(Color::Red);
-                        lockedText.setPosition({550.f, 480.f});
-                        window.draw(lockedText);
-                    }
-                }
-        
+            bool isSkinOwned = false;
             
-            } else if (page == 5) {
+            // СОБАКА (Всегда куплена)
+            if (previewSkin == 1) {
+                isSkinOwned = true;
+                Texture t; t.loadFromFile("sprites/characters/dog/run_1.png");
+                Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
+                s.setPosition({660.f, 300.f}); s.setScale({1.4f, 1.4f});
+                window.draw(s);
+            }
+            // ПАНДА
+            else if (previewSkin == 2) {
+                Texture t; t.loadFromFile("sprites/characters/panda/run_1.png");
+                Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
+                s.setPosition({660.f, 300.f}); s.setScale({1.4f, 1.4f});
+                
+                if (hasPanda) {
+                    isSkinOwned = true;
+                    window.draw(s);
+                } else {
+                    s.setColor(Color(255, 255, 255, 100)); // Бледный
+                    window.draw(s);
+                }
+            }
+            // 3. ЛИСА
+            else if (previewSkin == 3) {
+                Texture t; t.loadFromFile("sprites/characters/fox/run_1.png");
+                Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
+                s.setPosition({660.f, 300.f}); s.setScale({1.3f, 1.3f});
+                
+                if (hasFox) {
+                    isSkinOwned = true;
+                    window.draw(s);
+                } else {
+                    s.setColor(Color(255, 255, 255, 100));
+                    window.draw(s);
+                }
+            }
+            // 4. ПИНГВИН
+            else if (previewSkin == 4) {
+                Texture t; t.loadFromFile("sprites/characters/penguin/run_1.png");
+                Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
+                s.setPosition({660.f, 300.f}); s.setScale({1.3f, 1.3f});
+                
+                if (hasPenguin) {
+                    isSkinOwned = true;
+                    window.draw(s);
+                } else {
+                    s.setColor(Color(255, 255, 255, 100));
+                    window.draw(s);
+                }
+            }
+
+            // --- ЛОГИКА КНОПОК И НАДПИСЕЙ ---
+            if (isSkinOwned) {
+                if (previewSkin == selectedSkin) {
+                    // Надет (Зеленая надпись)
+#if VERSION==3
+                    Text activeText(menuFont);
+#else
+                    Text activeText; activeText.setFont(menuFont);
+#endif
+                    activeText.setString("ACTIVE SKIN");
+                    activeText.setCharacterSize(44);
+                    activeText.setFillColor(Color(100, 150, 100)); // Приглушенный зеленый
+                    
+                    FloatRect aRect = activeText.getLocalBounds();
+#if VERSION==3
+                    activeText.setOrigin({aRect.position.x + aRect.size.x/2.f, aRect.position.y + aRect.size.y/2.f});
+#else
+                    activeText.setOrigin({aRect.left + aRect.width/2.f, aRect.top + aRect.height/2.f});
+#endif
+                    activeText.setPosition({650.f, 480.f});
+                    window.draw(activeText);
+                } else {
+                    // Не надет (Кнопка PUT ON)
+                    equipBtn.text.setString("PUT ON");
+                    equipBtn.text.setFillColor(Color::White);
+                    
+                    FloatRect tRect = equipBtn.text.getLocalBounds();
+#if VERSION==3
+                    equipBtn.text.setOrigin({tRect.position.x + tRect.size.x/2.f, tRect.position.y + tRect.size.y/2.f});
+#else
+                    equipBtn.text.setOrigin({tRect.left + tRect.width/2.f, tRect.top + tRect.height/2.f});
+#endif
+                    equipBtn.text.setPosition({100.f, 30.f});
+                    window.draw(equipBtn);
+                }
+            } else {
+                // Не куплен (Красная надпись под бледным скином)
+#if VERSION==3
+                Text lockedText(menuFont);
+#else
+                Text lockedText; lockedText.setFont(menuFont);
+#endif
+                lockedText.setString("NOT PURCHASED");
+                lockedText.setCharacterSize(40);
+                lockedText.setFillColor(Color(200, 50, 50)); // Красный
+                
+                FloatRect tRect = lockedText.getLocalBounds();
+#if VERSION==3
+                lockedText.setOrigin({tRect.position.x + tRect.size.x/2.f, tRect.position.y + tRect.size.y/2.f});
+#else
+                lockedText.setOrigin({tRect.left + tRect.width/2.f, tRect.top + tRect.height/2.f});
+#endif
+                lockedText.setPosition({660.f, 480.f});
+                window.draw(lockedText);
+            }
+        }
+            
+            
+            else if (page == 5) {
                 window.draw(coinsText);
                 window.draw(potionsText);
                 window.draw(lifePotionBtn);
@@ -954,7 +992,7 @@ public:
                                   t1.setFont(menuFont);
        #endif
                                   t1.setString("DEFAULT");
-                                  t1.setCharacterSize(30); t1.setFillColor(Color::Black); t1.setPosition({580.f, 450.f});
+                                  t1.setCharacterSize(40); t1.setFillColor(Color(40, 70, 40)); t1.setPosition({550.f, 450.f});
                                   window.draw(t1);
 
             } else if (previewSkin == 2) {
@@ -972,7 +1010,7 @@ public:
                                       t2.setFont(menuFont);
        #endif
                                       t2.setString("ALREADY OWNED");
-                                      t2.setCharacterSize(30); t2.setFillColor(Color::Green); t2.setPosition({680.f, 480.f});
+                                      t2.setCharacterSize(40); t2.setFillColor(Color(100, 150, 100)); t2.setPosition({500.f, 450.f});
                                       window.draw(t2);
                                   } else {
        #if VERSION==3
@@ -999,7 +1037,7 @@ public:
                     Text t3; t3.setFont(menuFont);
 #endif
                     t3.setString("ALREADY OWNED");
-                    t3.setCharacterSize(30); t3.setFillColor(Color::Green); t3.setPosition({680.f, 480.f});
+                    t3.setCharacterSize(40); t3.setFillColor(Color(100, 150, 100)); t3.setPosition({500.f, 450.f});
                     window.draw(t3);
                 } else {
 #if VERSION==3
@@ -1025,7 +1063,7 @@ public:
                     Text t4; t4.setFont(menuFont);
 #endif
                     t4.setString("ALREADY OWNED");
-                    t4.setCharacterSize(30); t4.setFillColor(Color::Green); t4.setPosition({680.f, 480.f});
+                    t4.setCharacterSize(40); t4.setFillColor(Color(100, 150, 100)); t4.setPosition({500.f, 450.f});
                     window.draw(t4);
                 } else {
 #if VERSION==3
@@ -1816,6 +1854,25 @@ int main(){
     extraTimeText.setPosition({660.f, 225.f});
     extraTimeText.setString("x " +to_string(extraTime));
 
+    ImageButton lifeBonusBtn("sprites/buttons/life_potion.png", 90.f, 190.f, 0.2f, [&](){
+                if (extraLives > 0 && damageCount > 0) {
+                    extraLives--;
+                    damageCount--; // Восстанавливаем 1 жизнь
+                    health.updateHealth(damageCount);
+                }
+            });
+
+#if VERSION==3
+    Text extraLifeText(font);
+#else
+    Text extraLifeText;
+    extraLifeText.setFont(font);
+#endif
+    extraLifeText.setCharacterSize(28);
+    extraLifeText.setFillColor(Color::White);
+    extraLifeText.setPosition({175.f, 170.f}); // Текст правее кнопки
+    extraLifeText.setString("x " + to_string(extraLives));
+            
 
     RectangleShape mathWindow({600.f, 450.f});
     mathWindow.setPosition({450.f, 200.f});
@@ -2026,6 +2083,7 @@ int main(){
                     if (mouse->button == Mouse::Button::Left) {
                         Vector2f mousePos = window.mapPixelToCoords(mouse->position);
                         pauseBtn.pressed(mousePos);
+                        lifeBonusBtn.pressed(mousePos);
                     }
                 }
             }
@@ -2130,6 +2188,7 @@ int main(){
                 if (event.type==Event::MouseButtonPressed && event.mouseButton.button==Mouse::Left){
                     Vector2f mousePos=window.mapPixelToCoords(Mouse::getPosition(window));
                     pauseBtn.pressed(mousePos);
+                    lifeBonusBtn.pressed(mousePos);
                 }
             }
 
@@ -2529,6 +2588,10 @@ int main(){
             window.draw(health);
             window.draw(moneySprite);
             window.draw(moneyText);
+            
+            extraLifeText.setString("x " + to_string(extraLives));
+            window.draw(lifeBonusBtn);
+            window.draw(extraLifeText);
 
             window.draw(pauseBtn);
             if(isPaused){
