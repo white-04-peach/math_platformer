@@ -1,4 +1,4 @@
-#define VERSION 3
+#define VERSION 2
 
 #include <SFML/Graphics.hpp>
 #include <vector>
@@ -53,17 +53,11 @@ public:
     Character(int skinID = 1): sprite(textures[0]) {
             // Если выбран скин 1 (собака)
             if (skinID == 1) {
-    //            textures[0].loadFromFile("sprites/characters/dog/run_1.png");
-      //          textures[1].loadFromFile("sprites/characters/dog/run_2.png");
-        //        textures[2].loadFromFile("sprites/characters/dog/run_3.png");
-          //      textures[3].loadFromFile("sprites/characters/dog/run_4.png");
-            //    jumpTexture.loadFromFile("sprites/characters/dog/jump.png");
-
-                textures[0].loadFromFile("sprites/characters/lion/run_1.png");
-                textures[1].loadFromFile("sprites/characters/lion/run_2.png");
-                textures[2].loadFromFile("sprites/characters/lion/run_3.png");
-                textures[3].loadFromFile("sprites/characters/lion/run_2.png");
-                jumpTexture.loadFromFile("sprites/characters/lion/jump.png");
+                textures[0].loadFromFile("sprites/characters/dog/run_1.png");
+                textures[1].loadFromFile("sprites/characters/dog/run_2.png");
+                textures[2].loadFromFile("sprites/characters/dog/run_3.png");
+                textures[3].loadFromFile("sprites/characters/dog/run_4.png");
+                jumpTexture.loadFromFile("sprites/characters/dog/jump.png");
 
             }
 
@@ -713,11 +707,11 @@ public:
         ImageButton level1Btn("sprites/buttons/level_1.png", 450.f, 200.f, 0.3f, [&](){ selectedLevel = 1; });
         ImageButton level2Btn("sprites/buttons/level_2.png", 820.f, 200.f, 0.3f, [&](){ if (unlockedLevel >= 2) selectedLevel = 2;});
         ImageButton level3Btn("sprites/buttons/level_3.png", 455.f, 350.f, 0.31f, [&](){ if (unlockedLevel >= 3) selectedLevel = 3;});
-            
+
         ImageButton level4Btn("sprites/buttons/level_4.png", 820.f, 350.f, 0.3f, [&](){ if (unlockedLevel >= 4) selectedLevel = 4;});
         ImageButton level5Btn("sprites/buttons/level_5.png", 455.f, 500.f, 0.3f, [&](){ if (unlockedLevel >= 5) selectedLevel = 5;});
         ImageButton backBtn_levels("sprites/buttons/back.png", 630.f, 640.f, 0.25f, [&](){ page = 1; });
-        
+
 
 
         // --- МАГАЗИН
@@ -857,7 +851,7 @@ public:
             window.draw(backBtn_wardrobe);
 
             bool isSkinOwned = false;
-            
+
             // СОБАКА (Всегда куплена)
             if (previewSkin == 1) {
                 isSkinOwned = true;
@@ -871,7 +865,7 @@ public:
                 Texture t; t.loadFromFile("sprites/characters/panda/run_1.png");
                 Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
                 s.setPosition({660.f, 300.f}); s.setScale({1.4f, 1.4f});
-                
+
                 if (hasPanda) {
                     isSkinOwned = true;
                     window.draw(s);
@@ -885,7 +879,7 @@ public:
                 Texture t; t.loadFromFile("sprites/characters/fox/run_1.png");
                 Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
                 s.setPosition({660.f, 300.f}); s.setScale({1.3f, 1.3f});
-                
+
                 if (hasFox) {
                     isSkinOwned = true;
                     window.draw(s);
@@ -899,7 +893,7 @@ public:
                 Texture t; t.loadFromFile("sprites/characters/penguin/run_1.png");
                 Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
                 s.setPosition({660.f, 300.f}); s.setScale({1.3f, 1.3f});
-                
+
                 if (hasPenguin) {
                     isSkinOwned = true;
                     window.draw(s);
@@ -921,7 +915,7 @@ public:
                     activeText.setString("ACTIVE SKIN");
                     activeText.setCharacterSize(44);
                     activeText.setFillColor(Color(100, 150, 100)); // Приглушенный зеленый
-                    
+
                     FloatRect aRect = activeText.getLocalBounds();
 #if VERSION==3
                     activeText.setOrigin({aRect.position.x + aRect.size.x/2.f, aRect.position.y + aRect.size.y/2.f});
@@ -934,7 +928,7 @@ public:
                     // Не надет (Кнопка PUT ON)
                     equipBtn.text.setString("PUT ON");
                     equipBtn.text.setFillColor(Color::White);
-                    
+
                     FloatRect tRect = equipBtn.text.getLocalBounds();
 #if VERSION==3
                     equipBtn.text.setOrigin({tRect.position.x + tRect.size.x/2.f, tRect.position.y + tRect.size.y/2.f});
@@ -954,7 +948,7 @@ public:
                 lockedText.setString("NOT PURCHASED");
                 lockedText.setCharacterSize(40);
                 lockedText.setFillColor(Color(200, 50, 50)); // Красный
-                
+
                 FloatRect tRect = lockedText.getLocalBounds();
 #if VERSION==3
                 lockedText.setOrigin({tRect.position.x + tRect.size.x/2.f, tRect.position.y + tRect.size.y/2.f});
@@ -965,8 +959,8 @@ public:
                 window.draw(lockedText);
             }
         }
-            
-            
+
+
             else if (page == 5) {
                 window.draw(coinsText);
                 window.draw(potionsText);
@@ -1055,7 +1049,7 @@ public:
                 Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
                 s.setPosition({660.f, 300.f}); s.setScale({1.35f, 1.35f});
                 window.draw(s);
-                
+
                 if (hasFox) {
 #if VERSION==3
                     Text t3(menuFont);
@@ -1081,7 +1075,7 @@ public:
                 Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
                 s.setPosition({660.f, 300.f}); s.setScale({1.35f, 1.35f});
                 window.draw(s);
-                
+
                 if (hasPenguin) {
 #if VERSION==3
                     Text t4(menuFont);
@@ -1103,8 +1097,8 @@ public:
                     window.draw(buySkinBtn);
                 }
             }
-                
-                
+
+
                           }
 
                    window.display();
@@ -1209,6 +1203,65 @@ public:
 };
 
 
+class Key: public Drawable, public Transformable{
+private:
+    Sprite sprite;
+    Texture texture;
+public:
+    bool onScreen=true;
+
+    Key(): sprite(texture){
+        texture.loadFromFile("sprites/key.png");
+        sprite.setTexture(texture, true);
+        sprite.setOrigin({texture.getSize().x/2.f, texture.getSize().y/2.f});
+        sprite.setScale({0.09f, 0.09f});
+    }
+
+    FloatRect getBounds() const {
+        return getTransform().transformRect(sprite.getGlobalBounds());
+    }
+
+    void draw(RenderTarget& target, RenderStates states) const override {
+        if (onScreen) {
+            states.transform *= getTransform();
+            target.draw(sprite, states);
+        }
+    }
+
+    void drawInv(RenderTarget& target) const {
+        Sprite temp=sprite;
+        temp.setPosition({1450.f, 50.f});
+        target.draw(temp);
+    }
+};
+
+
+class Lockk: public Drawable, public Transformable{
+private:
+    Sprite sprite;
+    Texture texture;
+public:
+    bool isOpen=false;
+
+    Lockk(): sprite(texture){
+        texture.loadFromFile("sprites/lock1.png");
+        sprite.setTexture(texture, true);
+        sprite.setOrigin({texture.getSize().x/2.f, texture.getSize().y/2.f});
+        sprite.setScale({0.1f, 0.1f});
+    }
+
+    FloatRect getBounds() const {
+        return getTransform().transformRect(sprite.getGlobalBounds());
+    }
+
+    void draw(RenderTarget& target, RenderStates states) const override {
+        if (!isOpen){
+            states.transform *= getTransform();
+            target.draw(sprite, states);
+        }
+    }
+};
+
 
 //.........................LEVELS.......................................
 
@@ -1229,6 +1282,8 @@ public:
     vector<Enemy*> enemies;
     vector<JumpBonus*> bonuses;
     vector<Math*> maths;
+    vector<Key*> keys;
+    vector<Lockk*> locks;
     float levelWidth = 4000.f;
     vector<SpeedBonus*> speedBonuses;
 
@@ -1358,7 +1413,7 @@ public:
             }
 
             case 3: {
-                backgroundPath="sprites/background_31.jpg";
+                backgroundPath="sprites/background_333.jpg";
 
                 startPos={50.f, 360.f};
                 if (skin==1){
@@ -1443,7 +1498,7 @@ public:
 
             }
             case 4: {
-                backgroundPath="sprites/background_42 (1) (1).png";
+                backgroundPath="sprites/background_4.jpg";
                 levelWidth=4900.f;
                 startPos={50.f, 160.f};
                 if (skin==1){
@@ -1451,6 +1506,14 @@ public:
                 }
 
                 levelEnd.setPosition({4750.f, 600.f});
+
+                Key* key=new Key();
+                (*key).setPosition({140.f, 550.f});
+                keys.push_back(key);
+
+                Lockk* lock=new Lockk();
+                (*lock).setPosition({4750.f, 600.f});
+                locks.push_back(lock);
 
                 SpeedBonus* speedBonus=new SpeedBonus();
                 (*speedBonus).setPosition({2460.f, 160.f});
@@ -1517,7 +1580,7 @@ public:
                 break;
 
             }
-                
+
             case 5: {
                 backgroundPath = "sprites/back_africa.png";
                 startPos = {50.f, 660.f};
@@ -1529,14 +1592,14 @@ public:
                 levelEnd.setPosition({4850.f, 545.f});
 
                 Platform* p1 = new Platform(); (*p1).setPosition({0.f, 750.f}); (*p1).medium_plat();
-                
+
                 FragilePlatform* p2 = new FragilePlatform();
                 (*p2).setStartPos({350.f, 580.f}); (*p2).small_plat();
                 FragilePlatform* p3 = new FragilePlatform();
                 (*p3).setStartPos({540.f, 400.f}); (*p3).small_plat();
-                
+
                 MovingPlatform* p4 = new MovingPlatform(730.f, 240.f, 300.f); (*p4).small_plat();
-                
+
                 Platform* p5 = new Platform(); (*p5).setPosition({200.f, 200.f}); (*p5).medium_plat();
 
                 // 3. Движущаяся над шипами
@@ -1545,22 +1608,22 @@ public:
                 Spike s3; s3.setPosition({700.f, 700.f});
                 spikes.push_back(s1); spikes.push_back(s2); spikes.push_back(s3);
 
-                
+
 
                 // 4. Островок с врагом и чекпоинтом
-                
+
                 checkpoints.push_back(new Checkpoint(1150.f, 370.f));
                 Enemy* enemy1 = new Enemy(1150.f, 400.f, 150.f);
                 enemies.push_back(enemy1);
 
                 // 5. Платформа с бонусом прыжка
-        
+
                 JumpBonus* jumpBonus = new JumpBonus();
                 (*jumpBonus).setPosition({1500.f, 550.f});
                 bonuses.push_back(jumpBonus);
 
                 // 6. Движущаяся (подъем)
-                
+
 
                 // 7. Высокий островок
                 Platform* p7 = new Platform(); (*p7).setPosition({2100.f, 300.f}); (*p7).small_plat();
@@ -1584,7 +1647,7 @@ public:
                 // 10. Хрупкая
                 FragilePlatform* p10 = new FragilePlatform();
                 (*p10).setStartPos({3400.f, 500.f}); (*p10).small_plat();
-                
+
                 // 11. Хрупкая
                 FragilePlatform* p11 = new FragilePlatform();
                 (*p11).setStartPos({3700.f, 550.f}); (*p11).small_plat();
@@ -1614,9 +1677,9 @@ public:
                     coins.push_back(c);
                 }
 
-                
-              
-                
+
+
+
         for (int i=0; i<platforms.size(); i++) {
         (*platforms[i]).setTextures("sprites/platforms/plat_big_savana.png",
                             "sprites/platforms/plat_medium_savana.png",
@@ -1630,7 +1693,7 @@ public:
         backgroundTex.loadFromFile(backgroundPath);
         backgroundTex.setRepeated(true);
         background.setTexture(backgroundTex, true);
-    
+
         background.setTextureRect(sf::IntRect({0, 0}, {7000, 900}));
         background.setScale({1.5f, 1.5f});
 
@@ -1659,6 +1722,12 @@ public:
 
         for (int i=0; i<speedBonuses.size(); i++) delete speedBonuses[i];
         speedBonuses.clear();
+
+        for (int i=0; i<keys.size(); i++) delete keys[i];
+        keys.clear();
+
+        for (int i=0; i<locks.size(); i++) delete locks[i];
+        locks.clear();
     }
 
     void drawBackground(RenderTarget& target) {
@@ -1827,7 +1896,8 @@ int main(){
     backk.setFillColor(Color(172, 231, 242));
 
     Level level;
-    int levelNumb=5; // исправить selectedLevel;
+    int levelNumb=selectedLevel; // исправить selectedLevel;
+    //int levelNumb=4;
     level.create(levelNumb, selectedSkin);
 
     Character character(selectedSkin);
@@ -1952,7 +2022,7 @@ int main(){
     totalText.setFillColor(Color(40, 70, 40));
     totalText.setPosition({550.f, 435.f});
 
-
+    bool hasKey=false;
     bool returnToMenu = false;
     Button btnMenu(550.f, 490.f, 400.f, 50.f, "Main menu", font, [&](){
                                                                         returnToMenu = true;
@@ -1966,6 +2036,7 @@ int main(){
                                                                             health.updateHealth(0);
                                                                             moneyText.setString("x 0");
                                                                             countCoins=0;
+                                                                            hasKey=false;
                                                                         });
 
 
@@ -1984,6 +2055,7 @@ int main(){
                                                                         health.updateHealth(0);
                                                                         moneyText.setString("x 0");
                                                                         countCoins=0;
+                                                                        hasKey=false;
                                                                 });
 
 
@@ -2009,6 +2081,7 @@ int main(){
                                                                                 health.updateHealth(0);
                                                                                 moneyText.setString("x 0");
                                                                                 countCoins=0;
+                                                                                hasKey=false;
                                                                             });
 
     Button btnMenuPause(550.f, 490.f, 400.f, 50.f, "Main Menu", font, [&](){ returnToMenu=true; isGameOver=false;});
@@ -2058,7 +2131,7 @@ int main(){
     extraLifeText.setFillColor(Color::White);
     extraLifeText.setPosition({175.f, 170.f}); // Текст правее кнопки
     extraLifeText.setString("x " + to_string(extraLives));
-            
+
 
     RectangleShape mathWindow({600.f, 450.f});
     mathWindow.setPosition({450.f, 200.f});
@@ -2543,11 +2616,24 @@ int main(){
 #if VERSION==3
                     if (characterBounds.findIntersection(level.coins[i]->getBounds())){
 #else
-                    if (characterBounds.intersects(level.coins[i]->getBounds())){
+                    if (characterBounds.intersects((*level.coins[i]).getBounds())){
 #endif
-                        level.coins[i]->onScreen=false;
+                        (*level.coins[i]).onScreen=false;
                         countCoins++;
                         moneyText.setString("x " + to_string(countCoins));
+                    }
+                }
+            }
+
+            for (int i=0; i<level.keys.size(); i++){
+                if ((*level.keys[i]).onScreen){
+#if VERSION==3
+                    if (characterBounds.findIntersection(level.keys[i]->getBounds())) {
+#else
+                    if (characterBounds.intersects((*level.keys[i]).getBounds())) {
+#endif
+                        (*level.keys[i]).onScreen=false;
+                        hasKey=true;
                     }
                 }
             }
@@ -2721,6 +2807,52 @@ int main(){
                 }
 
                 if (!onPlatform) character.isJump=true;
+
+
+                for (int i=0; i<level.locks.size(); i++) {
+                    if (!(*level.locks[i]).isOpen){
+                        FloatRect lockBounds=(*level.locks[i]).getBounds();
+
+#if VERSION==3
+                        bool isIntersecting = characterBounds.findIntersection(lockBounds).has_value();
+                        float charW = characterBounds.size.x;
+                        float charH = characterBounds.size.y;
+#else
+                        bool isIntersecting=characterBounds.intersects(lockBounds);
+                        float charW=characterBounds.width;
+                        float charH=characterBounds.height;
+#endif
+
+                        if (isIntersecting){
+
+                            if (hasKey) {
+                                (*level.locks[i]).isOpen=true;
+                                hasKey=false;
+                                continue;
+                            }
+
+                            float prevBottom=prevPos.y+charH/2.f;
+                            float prevTop=prevPos.y-charH/2.f;
+
+                            if (character.dy>=0.f && prevBottom<=lockBounds.top+5.f){
+                                character.setPosition({character.getPosition().x, lockBounds.top-charH/2.f});
+                                character.landing();
+                            }
+
+                            else if(character.dy < 0.f && prevTop >= lockBounds.top + lockBounds.height - 5.f) {
+                                character.setPosition({character.getPosition().x, lockBounds.top + lockBounds.height + charH / 2.f});
+                                character.dy = 0.f;
+                            }
+
+                            else{
+                                if(prevPos.x<lockBounds.left)
+                                    character.setPosition({lockBounds.left-charW/2.f, character.getPosition().y});
+                                else
+                                    character.setPosition({lockBounds.left+lockBounds.width+charW/2.f, character.getPosition().y});
+                            }
+                        }
+                    }
+                }
         }
 
             float cameraX=character.getPosition().x +250.f;
@@ -2752,6 +2884,16 @@ int main(){
                 window.draw(*level.enemies[i]);
             }
 
+            for (int i=0; i<level.keys.size(); i++){
+                window.draw(*level.keys[i]);
+            }
+
+            for (int i=0; i<level.locks.size(); i++){
+                if(!hasKey){
+                    window.draw(*level.locks[i]);
+                }
+            }
+
             for (int i=0; i<level.bonuses.size(); i++) {
                 window.draw(*level.bonuses[i]);
             }
@@ -2762,6 +2904,10 @@ int main(){
 
 
             window.draw(level.levelEnd);
+            for (int i=0; i<level.locks.size(); i++){
+                window.draw(*level.locks[i]);
+            }
+
 
             for (int i=0; i<level.maths.size(); i++){
                 window.draw(*level.maths[i]);
@@ -2774,7 +2920,10 @@ int main(){
             window.draw(health);
             window.draw(moneySprite);
             window.draw(moneyText);
-            
+            if (hasKey){
+                (*level.keys[0]).drawInv(window);
+            }
+
             extraLifeText.setString("x " + to_string(extraLives));
             window.draw(lifeBonusBtn);
             window.draw(extraLifeText);
