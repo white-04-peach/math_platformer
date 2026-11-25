@@ -53,11 +53,18 @@ public:
     Character(int skinID = 1): sprite(textures[0]) {
             // Если выбран скин 1 (собака)
             if (skinID == 1) {
-                textures[0].loadFromFile("sprites/characters/dog/run_1.png");
-                textures[1].loadFromFile("sprites/characters/dog/run_2.png");
-                textures[2].loadFromFile("sprites/characters/dog/run_3.png");
-                textures[3].loadFromFile("sprites/characters/dog/run_4.png");
-                jumpTexture.loadFromFile("sprites/characters/dog/jump.png");
+    //            textures[0].loadFromFile("sprites/characters/dog/run_1.png");
+      //          textures[1].loadFromFile("sprites/characters/dog/run_2.png");
+        //        textures[2].loadFromFile("sprites/characters/dog/run_3.png");
+          //      textures[3].loadFromFile("sprites/characters/dog/run_4.png");
+            //    jumpTexture.loadFromFile("sprites/characters/dog/jump.png");
+
+                textures[0].loadFromFile("sprites/characters/lion/run_1.png");
+                textures[1].loadFromFile("sprites/characters/lion/run_2.png");
+                textures[2].loadFromFile("sprites/characters/lion/run_3.png");
+                textures[3].loadFromFile("sprites/characters/lion/run_2.png");
+                jumpTexture.loadFromFile("sprites/characters/lion/jump.png");
+
             }
 
             else if (skinID == 2) {
@@ -85,6 +92,15 @@ public:
                 textures[2].loadFromFile("sprites/characters/penguin/run_3.png");
                 textures[3].loadFromFile("sprites/characters/penguin/run_2.png");
                 jumpTexture.loadFromFile("sprites/characters/penguin/jump.png");
+            }
+
+            else if (skinID == 5) {
+
+                textures[0].loadFromFile("sprites/characters/lion/run_1.png");
+                textures[1].loadFromFile("sprites/characters/lion/run_2.png");
+                textures[2].loadFromFile("sprites/characters/lion/run_3.png");
+                textures[3].loadFromFile("sprites/characters/lion/run_2.png");
+                jumpTexture.loadFromFile("sprites/characters/lion/jump.png");
             }
 
 
