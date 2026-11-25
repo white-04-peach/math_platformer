@@ -697,7 +697,11 @@ public:
         ImageButton level1Btn("sprites/buttons/level_1.png", 450.f, 200.f, 0.3f, [&](){ selectedLevel = 1; });
         ImageButton level2Btn("sprites/buttons/level_2.png", 820.f, 200.f, 0.3f, [&](){ if (unlockedLevel >= 2) selectedLevel = 2;});
         ImageButton level3Btn("sprites/buttons/level_3.png", 455.f, 350.f, 0.31f, [&](){ if (unlockedLevel >= 3) selectedLevel = 3;});
-        ImageButton backBtn_levels("sprites/buttons/back.png", 630.f, 600.f, 0.25f, [&](){ page = 1; });
+            
+        ImageButton level4Btn("sprites/buttons/level_4.png", 820.f, 350.f, 0.3f, [&](){ if (unlockedLevel >= 4) selectedLevel = 4;});
+        ImageButton level5Btn("sprites/buttons/level_5.png", 455.f, 500.f, 0.3f, [&](){ if (unlockedLevel >= 5) selectedLevel = 5;});
+        ImageButton backBtn_levels("sprites/buttons/back.png", 630.f, 640.f, 0.25f, [&](){ page = 1; });
+        
 
 
         // --- МАГАЗИН
@@ -772,7 +776,9 @@ public:
                         Vector2f mp = window.mapPixelToCoords(mouse->position);
                         if (page == 0) { startBtn.pressed(mp); exitBtn.pressed(mp); }
                         else if (page == 1) { levelsBtn.pressed(mp); shopBtn.pressed(mp); wardrobeBtn.pressed(mp); backBtn_play.pressed(mp); }
-                        else if (page == 2) { level1Btn.pressed(mp); level2Btn.pressed(mp); level3Btn.pressed(mp); backBtn_levels.pressed(mp); }
+                        else if (page == 2) { level1Btn.pressed(mp); level2Btn.pressed(mp); level3Btn.pressed(mp);
+                            level4Btn.pressed(mp); level5Btn.pressed(mp);
+                            backBtn_levels.pressed(mp); }
                         else if (page == 3) { bonusesBtn.pressed(mp); skinsBtn.pressed(mp); backBtn_shop.pressed(mp); }
                         else if (page == 4) { leftArrowBtn.pressed(mp); rightArrowBtn.pressed(mp); equipBtn.pressed(mp); backBtn_wardrobe.pressed(mp); }
                         else if (page == 5) { lifePotionBtn.pressed(mp); timePotionBtn.pressed(mp); buyBonusBtn.pressed(mp); backBtn_bonuses.pressed(mp); }
@@ -789,7 +795,7 @@ public:
                         Vector2f mp = window.mapPixelToCoords(Mouse::getPosition(window));
                         if (page == 0) { startBtn.pressed(mp); exitBtn.pressed(mp); }
                         else if (page == 1) { levelsBtn.pressed(mp); shopBtn.pressed(mp); wardrobeBtn.pressed(mp); backBtn_play.pressed(mp); }
-                        else if (page == 2) { level1Btn.pressed(mp); level2Btn.pressed(mp); level3Btn.pressed(mp); backBtn_levels.pressed(mp); }
+                        else if (page == 2) { level1Btn.pressed(mp); level2Btn.pressed(mp); level3Btn.pressed(mp); level4Btn.pressed(mp); level5Btn.pressed(mp); backBtn_levels.pressed(mp); }
                         else if (page == 3) { bonusesBtn.pressed(mp); skinsBtn.pressed(mp); backBtn_shop.pressed(mp); }
                         else if (page == 4) { leftArrowBtn.pressed(mp); rightArrowBtn.pressed(mp); equipBtn.pressed(mp); backBtn_wardrobe.pressed(mp); }
                         else if (page == 5) { lifePotionBtn.pressed(mp); timePotionBtn.pressed(mp); buyBonusBtn.pressed(mp); backBtn_bonuses.pressed(mp); }
@@ -817,8 +823,12 @@ public:
             window.draw(level1Btn);
             window.draw(level2Btn);
             window.draw(level3Btn);
+            window.draw(level4Btn);
+            window.draw(level5Btn);
                 if (unlockedLevel < 2) { lockSprite.setPosition({820.f, 200.f}); window.draw(lockSprite); }
                 if (unlockedLevel < 3) { lockSprite.setPosition({455.f, 350.f}); window.draw(lockSprite); }
+                if (unlockedLevel < 4) { lockSprite.setPosition({820.f, 350.f}); window.draw(lockSprite); }
+                if (unlockedLevel < 5) { lockSprite.setPosition({455.f, 500.f}); window.draw(lockSprite); }
                                window.draw(backBtn_levels);
         } else if (page == 3) {
             window.draw(coinsText);
@@ -1491,12 +1501,123 @@ public:
                 break;
 
             }
+                
+            case 5: {
+                backgroundPath = "sprites/back_africa.png";
+                startPos = {50.f, 660.f};
+                if (skin == 1) {
+                startPos.y -= 20.f;
+                }
+
+                levelWidth = 5000.f;
+                levelEnd.setPosition({4850.f, 545.f});
+
+                Platform* p1 = new Platform(); (*p1).setPosition({0.f, 750.f}); (*p1).medium_plat();
+                
+                FragilePlatform* p2 = new FragilePlatform();
+                (*p2).setStartPos({350.f, 580.f}); (*p2).small_plat();
+                FragilePlatform* p3 = new FragilePlatform();
+                (*p3).setStartPos({540.f, 400.f}); (*p3).small_plat();
+                
+                MovingPlatform* p4 = new MovingPlatform(730.f, 240.f, 300.f); (*p4).small_plat();
+                
+                Platform* p5 = new Platform(); (*p5).setPosition({200.f, 200.f}); (*p5).medium_plat();
+
+                // 3. Движущаяся над шипами
+                Spike s1; s1.setPosition({600.f, 700.f});
+                Spike s2; s2.setPosition({650.f, 700.f});
+                Spike s3; s3.setPosition({700.f, 700.f});
+                spikes.push_back(s1); spikes.push_back(s2); spikes.push_back(s3);
+
+                
+
+                // 4. Островок с врагом и чекпоинтом
+                
+                checkpoints.push_back(new Checkpoint(1150.f, 370.f));
+                Enemy* enemy1 = new Enemy(1150.f, 400.f, 150.f);
+                enemies.push_back(enemy1);
+
+                // 5. Платформа с бонусом прыжка
+        
+                JumpBonus* jumpBonus = new JumpBonus();
+                (*jumpBonus).setPosition({1500.f, 550.f});
+                bonuses.push_back(jumpBonus);
+
+                // 6. Движущаяся (подъем)
+                
+
+                // 7. Высокий островок
+                Platform* p7 = new Platform(); (*p7).setPosition({2100.f, 300.f}); (*p7).small_plat();
+
+                // 8. Платформа с задачей
+                Platform* p8 = new Platform(); (*p8).setPosition({2400.f, 500.f}); (*p8).medium_plat();
+                Math* math2 = new Math(2450.f, 450.f);
+                maths.push_back(math2);
+
+                // 9. Платформа с чекпоинтом и скоростью
+                Platform* p9 = new Platform(); (*p9).setPosition({2800.f, 600.f}); (*p9).medium_plat();
+                checkpoints.push_back(new Checkpoint(2850.f, 520.f));
+                SpeedBonus* speedBonus = new SpeedBonus();
+                (*speedBonus).setPosition({2900.f, 550.f});
+                speedBonuses.push_back(speedBonus);
+
+                // Враг на земле под платформой 9
+                Enemy* enemy2 = new Enemy(3100.f, 550.f, 200.f);
+                enemies.push_back(enemy2);
+
+                // 10. Хрупкая
+                FragilePlatform* p10 = new FragilePlatform();
+                (*p10).setStartPos({3400.f, 500.f}); (*p10).small_plat();
+                
+                // 11. Хрупкая
+                FragilePlatform* p11 = new FragilePlatform();
+                (*p11).setStartPos({3700.f, 550.f}); (*p11).small_plat();
+
+                // 12. Движущаяся
+                MovingPlatform* p12 = new MovingPlatform(4000.f, 600.f, 350.f);
+                (*p12).medium_plat();
+
+                // 13. ФИНИШНАЯ ПЛОЩАДКА
+                Platform* p13 = new Platform(); (*p13).setPosition({4500.f, 600.f}); (*p13).medium_plat();
+                Enemy* enemy3 = new Enemy(4600.f, 550.f, 100.f);
+                enemies.push_back(enemy3);
+
+                // СОБИРАЕМ ВСЕ ПЛАТФОРМЫ
+                platforms = {p1, p2, p3, p4, p5, p7, p8, p9, p10, p11, p12, p13};
+
+                // МОНЕТКИ (расставлены по пути следования)
+                vector<Vector2f> coin_positions = {
+                    {200.f, 650.f}, {460.f, 530.f}, {700.f, 450.f}, {1150.f, 400.f},
+                    {1500.f, 550.f}, {1800.f, 400.f}, {2150.f, 250.f}, {2450.f, 450.f},
+                    {2900.f, 550.f}, {3100.f, 500.f}, {3450.f, 450.f}, {3750.f, 500.f},
+                    {4100.f, 550.f}, {4600.f, 550.f}
+                };
+                for (int i = 0; i < coin_positions.size(); i++) {
+                    Coin* c = new Coin();
+                    (*c).setPosition(coin_positions[i]);
+                    coins.push_back(c);
+                }
+
+                
+              
+                
+        for (int i=0; i<platforms.size(); i++) {
+        (*platforms[i]).setTextures("sprites/platforms/plat_big_savana.png",
+                            "sprites/platforms/plat_medium_savana.png",
+                            "sprites/platforms/plat_small_savana.png");
+                }
+
+                break;
+            }
+
         }
         backgroundTex.loadFromFile(backgroundPath);
         backgroundTex.setRepeated(true);
         background.setTexture(backgroundTex, true);
+    
         background.setTextureRect(sf::IntRect({0, 0}, {7000, 900}));
         background.setScale({1.5f, 1.5f});
+
     }
 
     void clearLevel(){
@@ -1641,7 +1762,7 @@ int main(){
     backk.setFillColor(Color(172, 231, 242));
 
     Level level;
-    int levelNumb=selectedLevel;
+    int levelNumb=5; // исправить selectedLevel;
     level.create(levelNumb, selectedSkin);
 
     Character character(selectedSkin);
