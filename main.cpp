@@ -53,17 +53,12 @@ public:
     Character(int skinID = 1): sprite(textures[0]) {
             // Если выбран скин 1 (собака)
             if (skinID == 1) {
-    //            textures[0].loadFromFile("sprites/characters/dog/run_1.png");
-      //          textures[1].loadFromFile("sprites/characters/dog/run_2.png");
-        //        textures[2].loadFromFile("sprites/characters/dog/run_3.png");
-          //      textures[3].loadFromFile("sprites/characters/dog/run_4.png");
-            //    jumpTexture.loadFromFile("sprites/characters/dog/jump.png");
+                textures[0].loadFromFile("sprites/characters/dog/run_1.png");
+                textures[1].loadFromFile("sprites/characters/dog/run_2.png");
+                textures[2].loadFromFile("sprites/characters/dog/run_3.png");
+                textures[3].loadFromFile("sprites/characters/dog/run_4.png");
+                jumpTexture.loadFromFile("sprites/characters/dog/jump.png");
 
-                textures[0].loadFromFile("sprites/characters/lion/run_1.png");
-                textures[1].loadFromFile("sprites/characters/lion/run_2.png");
-                textures[2].loadFromFile("sprites/characters/lion/run_3.png");
-                textures[3].loadFromFile("sprites/characters/lion/run_2.png");
-                jumpTexture.loadFromFile("sprites/characters/lion/jump.png");
 
             }
 
@@ -77,7 +72,7 @@ public:
             }
 
             else if (skinID == 3) {
-                jumpPower=-15.f;
+
                 textures[0].loadFromFile("sprites/characters/fox/run_1.png");
                 textures[1].loadFromFile("sprites/characters/fox/run_2.png");
                 textures[2].loadFromFile("sprites/characters/fox/run_3.png");
@@ -194,6 +189,9 @@ public:
             setPosition({getPosition().x-(direct*50.f), getPosition().y});
         }
     }
+
+    void setJumpPower(float p){
+        jumpPower=p;}
 
     void landing() {
         isJump=false;
@@ -1203,7 +1201,7 @@ public:
             }
 
             case 3: {
-                backgroundPath="sprites/background_31.jpg";
+                backgroundPath="sprites/background_333.jpg";
 
                 startPos={50.f, 360.f};
                 if (skin==1){
@@ -1288,7 +1286,7 @@ public:
 
             }
             case 4: {
-                backgroundPath="sprites/background_42 (1) (1).png";
+                backgroundPath="sprites/background_44.jpg";
                 levelWidth=4900.f;
                 startPos={50.f, 160.f};
                 if (skin==1){
@@ -1563,6 +1561,13 @@ int main(){
     level.create(levelNumb, selectedSkin);
 
     Character character;
+    if (levelNumb==4 && selectedSkin==3){
+        character.setJumpPower(-15.f);
+    }
+    else{
+        character.setJumpPower(-14.f);
+    }
+
     character.setPosition(level.startPos);
     Vector2f respawn=level.startPos;
 
@@ -1692,6 +1697,12 @@ int main(){
 
     Button btnRetry(550.f, 560.f, 400.f, 50.f, "Retry level", font, [&](){ levelCompleted=false;
                                                                             level.create(levelNumb, selectedSkin);
+                                                                            if (levelNumb==4 && selectedSkin==3){
+                                                                                character.setJumpPower(-15.f);
+                                                                            }
+                                                                            else{
+                                                                                character.setJumpPower(-14.f);
+                                                                            }
                                                                             character.setPosition(level.startPos);
                                                                             respawn=level.startPos;
                                                                             damageCount=0;
@@ -1710,6 +1721,12 @@ int main(){
                                                                         levelNumb++;
 
                                                                         level.create(levelNumb, selectedSkin);
+                                                                        if (levelNumb==4 && selectedSkin==3){
+                                                                            character.setJumpPower(-15.f);
+                                                                        }
+                                                                        else{
+                                                                            character.setJumpPower(-14.f);
+                                                                        }
                                                                         character.setPosition(level.startPos);
                                                                         respawn=level.startPos;
                                                                         damageCount=0;
@@ -1735,6 +1752,12 @@ int main(){
                                                                                 levelCompleted=false;
                                                                                 isGameOver=false;
                                                                                 level.create(levelNumb, selectedSkin);
+                                                                                if (levelNumb==4 && selectedSkin==3){
+                                                                                    character.setJumpPower(-15.f);
+                                                                                }
+                                                                                else{
+                                                                                    character.setJumpPower(-14.f);
+                                                                                }
                                                                                 character.setPosition(level.startPos);
                                                                                 respawn=level.startPos;
                                                                                 damageCount=0;
