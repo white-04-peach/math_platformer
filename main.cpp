@@ -1,4 +1,4 @@
-#define VERSION 2
+#define VERSION 3
 
 #include <SFML/Graphics.hpp>
 #include <vector>
@@ -579,7 +579,8 @@ public:
         text.setFillColor(Color::White);
 
 #if VERSION==3
-        text.setOrigin({text.getLocalBounds().size.x / 2.f, text.getLocalBounds().size.y / 2.f});
+        FloatRect textRect = text.getLocalBounds();
+        text.setOrigin({textRect.position.x + textRect.size.x / 2.f, textRect.position.y + textRect.size.y / 2.f});
 #else
         FloatRect textRect=text.getLocalBounds();
         text.setOrigin({textRect.left + textRect.width / 2.f, textRect.top + textRect.height / 2.f});
@@ -648,7 +649,7 @@ public:
         }
     };
 
-        int runMenu(RenderWindow& window, int& unlockedLevel, int& totalCoins, int& extraLives, int& extraTime, int& selectedSkin, bool& hasPanda, int startPage = 0) {
+        int runMenu(RenderWindow& window, int& unlockedLevel, int& totalCoins, int& extraLives, int& extraTime, int& selectedSkin, bool& hasPanda, bool& hasFox, bool& hasPenguin, int startPage = 0) {
         Texture menuBgTex;
         menuBgTex.loadFromFile("sprites/back_math.jpg");
         Sprite menuBg(menuBgTex);
@@ -718,30 +719,44 @@ public:
 
             // --- СКИНЫ
 
-    ImageButton leftArrowShop("sprites/buttons/left_2.png", 400.f, 350.f, 0.1f, [&](){previewSkin = (previewSkin == 1) ? 2 : 1; });
-    ImageButton rightArrowShop("sprites/buttons/right.png", 900.f, 350.f, 0.1f, [&](){previewSkin = (previewSkin == 1) ? 2 : 1;
-                          });
+    ImageButton leftArrowShop("sprites/buttons/left_2.png", 400.f, 350.f, 0.1f, [&](){
+            previewSkin--;
+            if (previewSkin < 1) previewSkin = 4;
+    });
+    ImageButton rightArrowShop("sprites/buttons/right.png", 900.f, 350.f, 0.1f, [&](){
+            previewSkin++;
+            if (previewSkin > 4) previewSkin = 1;
+        });
 
     Button buySkinBtn(550.f, 500.f, 200.f, 60.f, "BUY", menuFont, [&](){
-                              if (previewSkin == 2 && !hasPanda && totalCoins >= 100) {
-                                  totalCoins -= 100;
-                                  hasPanda = true;
-                                  selectedSkin = 2;
-                              }
-                          });
+                if (previewSkin == 2 && !hasPanda && totalCoins >= 100) {
+                    totalCoins -= 100; hasPanda = true; selectedSkin = 2;
+                } else if (previewSkin == 3 && !hasFox && totalCoins >= 150) { // лиса за 150
+                    totalCoins -= 150; hasFox = true; selectedSkin = 3;
+                } else if (previewSkin == 4 && !hasPenguin && totalCoins >= 200) { // пингвин за 200
+                    totalCoins -= 200; hasPenguin = true; selectedSkin = 4;
+                }
+            });
     ImageButton backBtn_skins("sprites/buttons/back.png", 650.f, 650.f, 0.25f, [&](){ page = 3; });
 
 
     // --- ГАРДЕРОБ (page 4)
-    ImageButton leftArrowBtn("sprites/buttons/left_2.png", 400.f, 400.f, 0.1f, [&](){ previewSkin = (previewSkin == 1) ? 2 : 1; });
-    ImageButton rightArrowBtn("sprites/buttons/right.png", 950.f, 400.f, 0.1f, [&](){ previewSkin = (previewSkin == 1) ? 2 : 1; });
+    ImageButton leftArrowBtn("sprites/buttons/left_2.png", 400.f, 350.f, 0.1f, [&](){
+            previewSkin--;
+            if (previewSkin < 1) previewSkin = 4;
+    });
+    ImageButton rightArrowBtn("sprites/buttons/right.png", 900.f, 350.f, 0.1f, [&](){
+            previewSkin++;
+            if (previewSkin > 4) previewSkin = 1;
+            });
 
-        // Текстовая кнопка "Надеть"
-    Button equipBtn(550.f, 500.f, 200.f, 60.f, "PUT ON", menuFont, [&](){
-                              if (previewSkin == 1 || (previewSkin == 2 && hasPanda)) {
-                                  selectedSkin = previewSkin; // Надеваем ТОЛЬКО если куплено
-                              }
-                          });
+    // Текстовая кнопка "Надеть"
+    Button equipBtn(550.f, 470.f, 200.f, 60.f, "PUT ON", menuFont, [&](){
+        if (previewSkin == 1 || (previewSkin == 2 && hasPanda) ||
+            (previewSkin == 3 && hasFox) || (previewSkin == 4 && hasPenguin)) {
+                selectedSkin = previewSkin; // Надеваем ТОЛЬКО если куплено
+                            }
+        });
 
     ImageButton backBtn_wardrobe("sprites/buttons/back.png", 650.f, 620.f, 0.25f, [&](){ page = 1; });
 
@@ -819,7 +834,7 @@ public:
                 Texture t;
                 t.loadFromFile("sprites/characters/dog/run_1.png");
                 Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
-                s.setPosition({690.f, 350.f}); s.setScale({1.5f, 1.5f});
+                s.setPosition({660.f, 300.f}); s.setScale({1.5f, 1.5f});
                     window.draw(s);
                     window.draw(equipBtn);
                 } else if (previewSkin == 2) {
@@ -827,7 +842,7 @@ public:
                     Texture t;
                 t.loadFromFile("sprites/characters/panda/run_1.png");
                     Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
-                    s.setPosition({750.f, 350.f}); s.setScale({1.5f, 1.5f});
+                    s.setPosition({660.f, 300.f}); s.setScale({1.5f, 1.5f});
                         window.draw(s);
                         window.draw(equipBtn);
                     } else {
@@ -849,7 +864,45 @@ public:
                                       lockedText.setPosition({550.f, 480.f});
                                       window.draw(lockedText);
                                   }
-                              }
+                } else if (previewSkin == 3) { // ЛИСА
+                    if (hasFox) {
+                        Texture t; t.loadFromFile("sprites/characters/fox/run_1.png");
+                        Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
+                        s.setPosition({660.f, 300.f}); s.setScale({1.3f, 1.3f});
+                        window.draw(s);
+                        window.draw(equipBtn);
+                    } else {
+#if VERSION==3
+                        Text lockedText(menuFont);
+#else
+                        Text lockedText; lockedText.setFont(menuFont);
+#endif
+                        lockedText.setString("NOT PURCHASED");
+                        lockedText.setCharacterSize(30); lockedText.setFillColor(Color::Red);
+                        lockedText.setPosition({550.f, 480.f});
+                        window.draw(lockedText);
+                    }
+                } else if (previewSkin == 4) { // ПИНГВИН
+                    if (hasPenguin) {
+                        Texture t; t.loadFromFile("sprites/characters/penguin/run_1.png");
+                        Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
+                        s.setPosition({660.f, 300.f}); s.setScale({1.3f, 1.3f});
+                        window.draw(s);
+                        window.draw(equipBtn);
+                    } else {
+#if VERSION==3
+                        Text lockedText(menuFont);
+#else
+                        Text lockedText; lockedText.setFont(menuFont);
+#endif
+                        lockedText.setString("NOT PURCHASED");
+                        lockedText.setCharacterSize(30); lockedText.setFillColor(Color::Red);
+                        lockedText.setPosition({550.f, 480.f});
+                        window.draw(lockedText);
+                    }
+                }
+        
+            
             } else if (page == 5) {
                 window.draw(coinsText);
                 window.draw(potionsText);
@@ -887,7 +940,7 @@ public:
                 window.draw(rightArrowShop);
                 window.draw(backBtn_skins);
 
-                if (previewSkin == 1) {
+            if (previewSkin == 1) {
                     Texture t;
                     t.loadFromFile("sprites/characters/dog/run_1.png");
                     Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
@@ -904,7 +957,7 @@ public:
                                   t1.setCharacterSize(30); t1.setFillColor(Color::Black); t1.setPosition({580.f, 450.f});
                                   window.draw(t1);
 
-                    } else if (previewSkin == 2) {
+            } else if (previewSkin == 2) {
                         Texture t;
                 t.loadFromFile("sprites/characters/panda/run_1.png");
                         Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
@@ -933,7 +986,61 @@ public:
                                       window.draw(t3);
                                       window.draw(buySkinBtn);
                                   }
-                              }
+            } else if (previewSkin == 3) { // ЛИСА
+                Texture t; t.loadFromFile("sprites/characters/fox/run_1.png");
+                Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
+                s.setPosition({660.f, 300.f}); s.setScale({1.35f, 1.35f});
+                window.draw(s);
+                
+                if (hasFox) {
+#if VERSION==3
+                    Text t3(menuFont);
+#else
+                    Text t3; t3.setFont(menuFont);
+#endif
+                    t3.setString("ALREADY OWNED");
+                    t3.setCharacterSize(30); t3.setFillColor(Color::Green); t3.setPosition({680.f, 480.f});
+                    window.draw(t3);
+                } else {
+#if VERSION==3
+                    Text t3(menuFont);
+#else
+                    Text t3; t3.setFont(menuFont);
+#endif
+                    t3.setString("150 COINS");
+                    t3.setCharacterSize(30); t3.setFillColor(Color::Black); t3.setPosition({580.f, 450.f});
+                    window.draw(t3);
+                    window.draw(buySkinBtn);
+                }
+            } else if (previewSkin == 4) { // ПИНГВИН
+                Texture t; t.loadFromFile("sprites/characters/penguin/run_1.png");
+                Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
+                s.setPosition({660.f, 300.f}); s.setScale({1.35f, 1.35f});
+                window.draw(s);
+                
+                if (hasPenguin) {
+#if VERSION==3
+                    Text t4(menuFont);
+#else
+                    Text t4; t4.setFont(menuFont);
+#endif
+                    t4.setString("ALREADY OWNED");
+                    t4.setCharacterSize(30); t4.setFillColor(Color::Green); t4.setPosition({680.f, 480.f});
+                    window.draw(t4);
+                } else {
+#if VERSION==3
+                    Text t4(menuFont);
+#else
+                    Text t4; t4.setFont(menuFont);
+#endif
+                    t4.setString("200 COINS");
+                    t4.setCharacterSize(30); t4.setFillColor(Color::Black); t4.setPosition({580.f, 450.f});
+                    window.draw(t4);
+                    window.draw(buySkinBtn);
+                }
+            }
+                
+                
                           }
 
                    window.display();
@@ -1396,6 +1503,8 @@ int main(){
     int extraTime = 0;        // Купленные зелья времени
     int selectedSkin = 1; // выбранный скил (собака 1, панда 2, и тд)
     bool hasPandaSkin = false;
+    bool hasFoxSkin = false;
+    bool hasPenguinSkin = false;
 
     bool goToLevels = false;
 
@@ -1474,34 +1583,10 @@ int main(){
     vector<MathTask*> level3_hard={&l3_hard1, &l3_hard2, &l3_hard3, &l3_hard4, &l3_hard5};
 
 
-    // Level 4
-    MathTask l4_easy1("sprites/tasks/level4/l4_easy1.jpg", "0.81");
-    MathTask l4_easy2("sprites/tasks/level4/l4_easy2.jpg", "0.94");
-    MathTask l4_easy3("sprites/tasks/level4/l4_easy3.jpg", "0.97");
-    MathTask l4_easy4("sprites/tasks/level4/l4_easy4.jpg", "0.15");
-    MathTask l4_easy5("sprites/tasks/level4/l4_easy5.jpg", "0.69");
-
-    MathTask l4_med1("sprites/tasks/level4/l4_med1.jpg", "0.88");
-    MathTask l4_med2("sprites/tasks/level4/l4_med2.jpg", "0.2");
-    MathTask l4_med3("sprites/tasks/level4/l4_med3.jpg", "0.75");
-    MathTask l4_med4("sprites/tasks/level4/l4_med4.jpg", "0.6");
-    MathTask l4_med5("sprites/tasks/level4/l4_med5.jpg", "0.55");
-
-    MathTask l4_hard1("sprites/tasks/level4/l4_hard1.jpg", "0.375");
-    MathTask l4_hard2("sprites/tasks/level4/l4_hard2.jpg", "0.25");
-    MathTask l4_hard3("sprites/tasks/level4/l4_hard3.jpg", "0.25");
-    MathTask l4_hard4("sprites/tasks/level4/l4_hard4.jpg", "0.25");
-    MathTask l4_hard5("sprites/tasks/level4/l4_hard5.jpg", "0.5");
-
-    vector<MathTask*> level4_easy={&l4_easy1, &l4_easy2, &l4_easy3, &l4_easy4, &l4_easy5};
-    vector<MathTask*> level4_med={&l4_med1, &l4_med2, &l4_med3, &l4_med4, &l4_med5};
-    vector<MathTask*> level4_hard={&l4_hard1, &l4_hard2, &l4_hard3, &l4_hard4, &l4_hard5};
-
-
     srand(time(0));
         while (window.isOpen()) {
             // Передаем goToLevels ? 2 : 0. Если true, меню откроется на 2 странице (список уровней)
-            int selectedLevel = runMenu(window, unlockedLevel, totalCoins, extraLives, extraTime, selectedSkin, hasPandaSkin, goToLevels ? 1 : 0);
+            int selectedLevel = runMenu(window, unlockedLevel, totalCoins, extraLives, extraTime, selectedSkin, hasPandaSkin, hasFoxSkin, hasPenguinSkin, goToLevels ? 1 : 0);
 
 
             if (selectedLevel == -1) return 0;
@@ -1521,7 +1606,7 @@ int main(){
     int levelNumb=selectedLevel;
     level.create(levelNumb, selectedSkin);
 
-    Character character;
+    Character character(selectedSkin);
     character.setPosition(level.startPos);
     Vector2f respawn=level.startPos;
 
@@ -1781,7 +1866,7 @@ int main(){
                                                     currentTask=level3_easy[rand()%level3_easy.size()];
                                                 }
                                                 if(levelNumb==4){
-                                                    currentTask=level4_easy[rand()%level4_easy.size()];
+                                                    currentTask=level3_easy[rand()%level3_easy.size()];
                                                 }
                                                 if(levelNumb==5){
                                                     currentTask=level3_easy[rand()%level3_easy.size()];
