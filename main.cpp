@@ -1,4 +1,4 @@
-#define VERSION 2
+#define VERSION 3
 
 #include <SFML/Graphics.hpp>
 #include <vector>
@@ -58,7 +58,6 @@ public:
                 textures[2].loadFromFile("sprites/characters/dog/run_3.png");
                 textures[3].loadFromFile("sprites/characters/dog/run_4.png");
                 jumpTexture.loadFromFile("sprites/characters/dog/jump.png");
-
             }
 
             else if (skinID == 2) {
@@ -87,14 +86,13 @@ public:
                 textures[3].loadFromFile("sprites/characters/penguin/run_2.png");
                 jumpTexture.loadFromFile("sprites/characters/penguin/jump.png");
             }
-
+        
             else if (skinID == 5) {
-
-                textures[0].loadFromFile("sprites/characters/lion/run_1.png");
-                textures[1].loadFromFile("sprites/characters/lion/run_2.png");
-                textures[2].loadFromFile("sprites/characters/lion/run_3.png");
-                textures[3].loadFromFile("sprites/characters/lion/run_2.png");
-                jumpTexture.loadFromFile("sprites/characters/lion/jump.png");
+        textures[0].loadFromFile("sprites/characters/lion/run_1.png");
+        textures[1].loadFromFile("sprites/characters/lion/run_2.png");
+        textures[2].loadFromFile("sprites/characters/lion/run_3.png");
+    textures[3].loadFromFile("sprites/characters/lion/run_3.png");
+    jumpTexture.loadFromFile("sprites/characters/lion/jump.png");
             }
 
 
@@ -659,7 +657,7 @@ public:
         }
     };
 
-        int runMenu(RenderWindow& window, int& unlockedLevel, int& totalCoins, int& extraLives, int& extraTime, int& selectedSkin, bool& hasPanda, bool& hasFox, bool& hasPenguin, int startPage = 0) {
+        int runMenu(RenderWindow& window, int& unlockedLevel, int& totalCoins, int& extraLives, int& extraTime, int& selectedSkin, bool& hasPanda, bool& hasFox, bool& hasPenguin, bool& hasLion, int startPage = 0) {
         Texture menuBgTex;
         menuBgTex.loadFromFile("sprites/back_math.jpg");
         Sprite menuBg(menuBgTex);
@@ -679,7 +677,7 @@ public:
 
         Font menuFont;
         #if VERSION==3
-        menuFont.openFromFile("/System/Library/Fonts/Supplemental/Arial.ttf");
+        menuFont.openFromFile("pix2_1.ttf");
         Text coinsText(menuFont);
         Text potionsText(menuFont);
         #else
@@ -707,11 +705,11 @@ public:
         ImageButton level1Btn("sprites/buttons/level_1.png", 450.f, 200.f, 0.3f, [&](){ selectedLevel = 1; });
         ImageButton level2Btn("sprites/buttons/level_2.png", 820.f, 200.f, 0.3f, [&](){ if (unlockedLevel >= 2) selectedLevel = 2;});
         ImageButton level3Btn("sprites/buttons/level_3.png", 455.f, 350.f, 0.31f, [&](){ if (unlockedLevel >= 3) selectedLevel = 3;});
-
+            
         ImageButton level4Btn("sprites/buttons/level_4.png", 820.f, 350.f, 0.3f, [&](){ if (unlockedLevel >= 4) selectedLevel = 4;});
         ImageButton level5Btn("sprites/buttons/level_5.png", 455.f, 500.f, 0.3f, [&](){ if (unlockedLevel >= 5) selectedLevel = 5;});
         ImageButton backBtn_levels("sprites/buttons/back.png", 630.f, 640.f, 0.25f, [&](){ page = 1; });
-
+        
 
 
         // --- МАГАЗИН
@@ -735,11 +733,11 @@ public:
 
     ImageButton leftArrowShop("sprites/buttons/left_2.png", 400.f, 350.f, 0.1f, [&](){
             previewSkin--;
-            if (previewSkin < 1) previewSkin = 4;
+            if (previewSkin < 1) previewSkin = 5;
     });
     ImageButton rightArrowShop("sprites/buttons/right.png", 900.f, 350.f, 0.1f, [&](){
             previewSkin++;
-            if (previewSkin > 4) previewSkin = 1;
+            if (previewSkin > 5) previewSkin = 1;
         });
 
     Button buySkinBtn(550.f, 500.f, 200.f, 60.f, "BUY", menuFont, [&](){
@@ -749,25 +747,27 @@ public:
                     totalCoins -= 150; hasFox = true; selectedSkin = 3;
                 } else if (previewSkin == 4 && !hasPenguin && totalCoins >= 200) { // пингвин за 200
                     totalCoins -= 200; hasPenguin = true; selectedSkin = 4;
-                }
+                } else if (previewSkin == 5 && !hasLion && totalCoins >= 250) {
+                    totalCoins -= 250; hasLion = true; selectedSkin = 5;
+                        }
             });
-    ImageButton backBtn_skins("sprites/buttons/back.png", 650.f, 650.f, 0.25f, [&](){ page = 3; });
+    ImageButton backBtn_skins("sprites/buttons/back.png", 650.f, 650.f, 0.22f, [&](){ page = 3; });
 
 
     // --- ГАРДЕРОБ (page 4)
     ImageButton leftArrowBtn("sprites/buttons/left_2.png", 400.f, 350.f, 0.1f, [&](){
             previewSkin--;
-            if (previewSkin < 1) previewSkin = 4;
+            if (previewSkin < 1) previewSkin = 5;
     });
     ImageButton rightArrowBtn("sprites/buttons/right.png", 900.f, 350.f, 0.1f, [&](){
             previewSkin++;
-            if (previewSkin > 4) previewSkin = 1;
+            if (previewSkin > 5) previewSkin = 1;
             });
 
     // Текстовая кнопка "Надеть"
     Button equipBtn(550.f, 470.f, 200.f, 60.f, "PUT ON", menuFont, [&](){
         if (previewSkin == 1 || (previewSkin == 2 && hasPanda) ||
-            (previewSkin == 3 && hasFox) || (previewSkin == 4 && hasPenguin)) {
+            (previewSkin == 3 && hasFox) || (previewSkin == 4 && hasPenguin) ||   (previewSkin == 5 && hasLion)) {
                 selectedSkin = previewSkin; // Надеваем ТОЛЬКО если куплено
                             }
         });
@@ -820,7 +820,7 @@ public:
 
             window.draw(menuBg);
             coinsText.setString("Coins: " + to_string(totalCoins));
-            potionsText.setString("Life: " + to_string(extraLives) + "  Time: " + to_string(extraTime));
+            potionsText.setString("Life: " + to_string(extraLives) + "        Time: " + to_string(extraTime));
         if (page == 0) {
             window.draw(startBtn);
             window.draw(exitBtn);
@@ -851,7 +851,7 @@ public:
             window.draw(backBtn_wardrobe);
 
             bool isSkinOwned = false;
-
+            
             // СОБАКА (Всегда куплена)
             if (previewSkin == 1) {
                 isSkinOwned = true;
@@ -865,7 +865,7 @@ public:
                 Texture t; t.loadFromFile("sprites/characters/panda/run_1.png");
                 Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
                 s.setPosition({660.f, 300.f}); s.setScale({1.4f, 1.4f});
-
+                
                 if (hasPanda) {
                     isSkinOwned = true;
                     window.draw(s);
@@ -879,7 +879,7 @@ public:
                 Texture t; t.loadFromFile("sprites/characters/fox/run_1.png");
                 Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
                 s.setPosition({660.f, 300.f}); s.setScale({1.3f, 1.3f});
-
+                
                 if (hasFox) {
                     isSkinOwned = true;
                     window.draw(s);
@@ -893,7 +893,7 @@ public:
                 Texture t; t.loadFromFile("sprites/characters/penguin/run_1.png");
                 Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
                 s.setPosition({660.f, 300.f}); s.setScale({1.3f, 1.3f});
-
+                
                 if (hasPenguin) {
                     isSkinOwned = true;
                     window.draw(s);
@@ -902,7 +902,21 @@ public:
                     window.draw(s);
                 }
             }
-
+            // лев
+            else if (previewSkin == 5) {
+            Texture t; t.loadFromFile("sprites/characters/lion/run_1.png");
+            Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
+                s.setPosition({660.f, 300.f}); s.setScale({1.5f, 1.5f});
+                            
+                if (hasLion) {
+                isSkinOwned = true;
+                window.draw(s);
+                } else {
+                s.setColor(Color(255, 255, 255, 100));
+                window.draw(s);
+                        }
+            }
+        
             // --- ЛОГИКА КНОПОК И НАДПИСЕЙ ---
             if (isSkinOwned) {
                 if (previewSkin == selectedSkin) {
@@ -915,7 +929,7 @@ public:
                     activeText.setString("ACTIVE SKIN");
                     activeText.setCharacterSize(44);
                     activeText.setFillColor(Color(100, 150, 100)); // Приглушенный зеленый
-
+                    
                     FloatRect aRect = activeText.getLocalBounds();
 #if VERSION==3
                     activeText.setOrigin({aRect.position.x + aRect.size.x/2.f, aRect.position.y + aRect.size.y/2.f});
@@ -928,7 +942,7 @@ public:
                     // Не надет (Кнопка PUT ON)
                     equipBtn.text.setString("PUT ON");
                     equipBtn.text.setFillColor(Color::White);
-
+                    
                     FloatRect tRect = equipBtn.text.getLocalBounds();
 #if VERSION==3
                     equipBtn.text.setOrigin({tRect.position.x + tRect.size.x/2.f, tRect.position.y + tRect.size.y/2.f});
@@ -948,7 +962,7 @@ public:
                 lockedText.setString("NOT PURCHASED");
                 lockedText.setCharacterSize(40);
                 lockedText.setFillColor(Color(200, 50, 50)); // Красный
-
+                
                 FloatRect tRect = lockedText.getLocalBounds();
 #if VERSION==3
                 lockedText.setOrigin({tRect.position.x + tRect.size.x/2.f, tRect.position.y + tRect.size.y/2.f});
@@ -959,8 +973,8 @@ public:
                 window.draw(lockedText);
             }
         }
-
-
+            
+            
             else if (page == 5) {
                 window.draw(coinsText);
                 window.draw(potionsText);
@@ -1012,7 +1026,7 @@ public:
                                   t1.setFont(menuFont);
        #endif
                                   t1.setString("DEFAULT");
-                                  t1.setCharacterSize(40); t1.setFillColor(Color(40, 70, 40)); t1.setPosition({550.f, 450.f});
+                                  t1.setCharacterSize(45); t1.setFillColor(Color(40, 70, 40)); t1.setPosition({570.f, 450.f});
                                   window.draw(t1);
 
             } else if (previewSkin == 2) {
@@ -1049,7 +1063,7 @@ public:
                 Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
                 s.setPosition({660.f, 300.f}); s.setScale({1.35f, 1.35f});
                 window.draw(s);
-
+                
                 if (hasFox) {
 #if VERSION==3
                     Text t3(menuFont);
@@ -1075,7 +1089,7 @@ public:
                 Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
                 s.setPosition({660.f, 300.f}); s.setScale({1.35f, 1.35f});
                 window.draw(s);
-
+                
                 if (hasPenguin) {
 #if VERSION==3
                     Text t4(menuFont);
@@ -1097,8 +1111,35 @@ public:
                     window.draw(buySkinBtn);
                 }
             }
-
-
+            else if (previewSkin == 5) {
+            Texture t; t.loadFromFile("sprites/characters/lion/run_1.png");
+            Sprite s(t); s.setOrigin({t.getSize().x/2.f, t.getSize().y/2.f});
+            s.setPosition({660.f, 300.f}); s.setScale({1.5f, 1.5f});
+            window.draw(s);
+                           
+            if (hasLion) {
+#if VERSION==3
+                        Text t5(menuFont);
+#else
+                               Text t5; t5.setFont(menuFont);
+#endif
+                               t5.setString("ALREADY OWNED");
+                               t5.setCharacterSize(40); t5.setFillColor(Color(100, 150, 100)); t5.setPosition({500.f, 450.f});
+                               window.draw(t5);
+                           } else {
+           #if VERSION==3
+                               Text t5(menuFont);
+           #else
+                               Text t5; t5.setFont(menuFont);
+           #endif
+                               t5.setString("250 COINS");
+                               t5.setCharacterSize(30); t5.setFillColor(Color::Black); t5.setPosition({580.f, 450.f});
+                               window.draw(t5);
+                               window.draw(buySkinBtn);
+                           }
+                       }
+                
+                
                           }
 
                    window.display();
@@ -1203,65 +1244,6 @@ public:
 };
 
 
-class Key: public Drawable, public Transformable{
-private:
-    Sprite sprite;
-    Texture texture;
-public:
-    bool onScreen=true;
-
-    Key(): sprite(texture){
-        texture.loadFromFile("sprites/key.png");
-        sprite.setTexture(texture, true);
-        sprite.setOrigin({texture.getSize().x/2.f, texture.getSize().y/2.f});
-        sprite.setScale({0.09f, 0.09f});
-    }
-
-    FloatRect getBounds() const {
-        return getTransform().transformRect(sprite.getGlobalBounds());
-    }
-
-    void draw(RenderTarget& target, RenderStates states) const override {
-        if (onScreen) {
-            states.transform *= getTransform();
-            target.draw(sprite, states);
-        }
-    }
-
-    void drawInv(RenderTarget& target) const {
-        Sprite temp=sprite;
-        temp.setPosition({1450.f, 50.f});
-        target.draw(temp);
-    }
-};
-
-
-class Lockk: public Drawable, public Transformable{
-private:
-    Sprite sprite;
-    Texture texture;
-public:
-    bool isOpen=false;
-
-    Lockk(): sprite(texture){
-        texture.loadFromFile("sprites/lock1.png");
-        sprite.setTexture(texture, true);
-        sprite.setOrigin({texture.getSize().x/2.f, texture.getSize().y/2.f});
-        sprite.setScale({0.1f, 0.1f});
-    }
-
-    FloatRect getBounds() const {
-        return getTransform().transformRect(sprite.getGlobalBounds());
-    }
-
-    void draw(RenderTarget& target, RenderStates states) const override {
-        if (!isOpen){
-            states.transform *= getTransform();
-            target.draw(sprite, states);
-        }
-    }
-};
-
 
 //.........................LEVELS.......................................
 
@@ -1282,8 +1264,6 @@ public:
     vector<Enemy*> enemies;
     vector<JumpBonus*> bonuses;
     vector<Math*> maths;
-    vector<Key*> keys;
-    vector<Lockk*> locks;
     float levelWidth = 4000.f;
     vector<SpeedBonus*> speedBonuses;
 
@@ -1413,7 +1393,7 @@ public:
             }
 
             case 3: {
-                backgroundPath="sprites/background_333.jpg";
+                backgroundPath="sprites/background_31.jpg";
 
                 startPos={50.f, 360.f};
                 if (skin==1){
@@ -1498,7 +1478,7 @@ public:
 
             }
             case 4: {
-                backgroundPath="sprites/background_4.jpg";
+                backgroundPath="sprites/background_42 (1) (1).png";
                 levelWidth=4900.f;
                 startPos={50.f, 160.f};
                 if (skin==1){
@@ -1506,14 +1486,6 @@ public:
                 }
 
                 levelEnd.setPosition({4750.f, 600.f});
-
-                Key* key=new Key();
-                (*key).setPosition({140.f, 550.f});
-                keys.push_back(key);
-
-                Lockk* lock=new Lockk();
-                (*lock).setPosition({4750.f, 600.f});
-                locks.push_back(lock);
 
                 SpeedBonus* speedBonus=new SpeedBonus();
                 (*speedBonus).setPosition({2460.f, 160.f});
@@ -1580,7 +1552,7 @@ public:
                 break;
 
             }
-
+                
             case 5: {
                 backgroundPath = "sprites/back_africa.png";
                 startPos = {50.f, 660.f};
@@ -1588,88 +1560,73 @@ public:
                 startPos.y -= 20.f;
                 }
 
-                levelWidth = 5000.f;
-                levelEnd.setPosition({4850.f, 545.f});
+                levelWidth = 4800.f;
+                levelEnd.setPosition({4600.f, 480.f});
 
                 Platform* p1 = new Platform(); (*p1).setPosition({0.f, 750.f}); (*p1).medium_plat();
-
+                
                 FragilePlatform* p2 = new FragilePlatform();
                 (*p2).setStartPos({350.f, 580.f}); (*p2).small_plat();
                 FragilePlatform* p3 = new FragilePlatform();
                 (*p3).setStartPos({540.f, 400.f}); (*p3).small_plat();
-
-                MovingPlatform* p4 = new MovingPlatform(730.f, 240.f, 300.f); (*p4).small_plat();
-
-                Platform* p5 = new Platform(); (*p5).setPosition({200.f, 200.f}); (*p5).medium_plat();
-
-                // 3. Движущаяся над шипами
-                Spike s1; s1.setPosition({600.f, 700.f});
-                Spike s2; s2.setPosition({650.f, 700.f});
-                Spike s3; s3.setPosition({700.f, 700.f});
-                spikes.push_back(s1); spikes.push_back(s2); spikes.push_back(s3);
-
-
-
-                // 4. Островок с врагом и чекпоинтом
-
-                checkpoints.push_back(new Checkpoint(1150.f, 370.f));
-                Enemy* enemy1 = new Enemy(1150.f, 400.f, 150.f);
-                enemies.push_back(enemy1);
-
-                // 5. Платформа с бонусом прыжка
-
-                JumpBonus* jumpBonus = new JumpBonus();
-                (*jumpBonus).setPosition({1500.f, 550.f});
-                bonuses.push_back(jumpBonus);
-
-                // 6. Движущаяся (подъем)
-
-
-                // 7. Высокий островок
-                Platform* p7 = new Platform(); (*p7).setPosition({2100.f, 300.f}); (*p7).small_plat();
-
-                // 8. Платформа с задачей
-                Platform* p8 = new Platform(); (*p8).setPosition({2400.f, 500.f}); (*p8).medium_plat();
-                Math* math2 = new Math(2450.f, 450.f);
-                maths.push_back(math2);
-
-                // 9. Платформа с чекпоинтом и скоростью
-                Platform* p9 = new Platform(); (*p9).setPosition({2800.f, 600.f}); (*p9).medium_plat();
-                checkpoints.push_back(new Checkpoint(2850.f, 520.f));
+                
+                MovingPlatform* p4 = new MovingPlatform(710.f, 240.f, 300.f); (*p4).small_plat();
+                
+                Platform* p5 = new Platform(); (*p5).setPosition({260.f, 200.f}); (*p5).medium_plat();
+                
                 SpeedBonus* speedBonus = new SpeedBonus();
-                (*speedBonus).setPosition({2900.f, 550.f});
+                (*speedBonus).setPosition({300.f, 160.f});
                 speedBonuses.push_back(speedBonus);
 
-                // Враг на земле под платформой 9
-                Enemy* enemy2 = new Enemy(3100.f, 550.f, 200.f);
+                MovingPlatform* p6 = new MovingPlatform(1000.f, 400.f, 200.f); (*p6).small_plat();
+                
+                Platform* p7 = new Platform(); (*p7).setPosition({1350.f, 600.f});
+                checkpoints.push_back(new Checkpoint(1800.f, 520.f));
+                Enemy* enemy1 = new Enemy(1600.f, 560.f, 150.f);
+                enemies.push_back(enemy1);
+                
+                Math* math1=new Math(2000.f, 550.f);
+                maths.push_back(math1);
+                
+                Platform* p8= new Platform(); (*p8).setPosition({2200.f, 700.f}); (*p8).medium_plat();
+                
+                Spike s1; s1.setPosition({2220.f, 700.f});
+                Spike s2; s2.setPosition({2250.f, 700.f});
+                Spike s3; s3.setPosition({2280.f, 700.f});
+                Spike s4; s4.setPosition({4250.f, 530.f});
+                Spike s5; s5.setPosition({4350.f, 530.f});
+                spikes.push_back(s1); spikes.push_back(s2); spikes.push_back(s3);spikes.push_back(s4);
+                spikes.push_back(s5);
+                
+                Platform* p9= new Platform(); (*p9).setPosition({2600.f, 700.f}); (*p9).medium_plat();
+                
+                Platform* p10= new Platform(); (*p10).setPosition({2950.f, 530.f}); (*p10).medium_plat();
+                Enemy* enemy2 = new Enemy(3100.f, 490.f, 200.f);
                 enemies.push_back(enemy2);
-
-                // 10. Хрупкая
-                FragilePlatform* p10 = new FragilePlatform();
-                (*p10).setStartPos({3400.f, 500.f}); (*p10).small_plat();
-
-                // 11. Хрупкая
+                
                 FragilePlatform* p11 = new FragilePlatform();
-                (*p11).setStartPos({3700.f, 550.f}); (*p11).small_plat();
+                (*p11).setStartPos({3450.f, 530.f}); (*p11).small_plat();
+                
+                JumpBonus* jumpBonus=new JumpBonus();
+                (*jumpBonus).setPosition({3500.f, 440.f});
+                bonuses.push_back(jumpBonus);
+                
+                Platform* p12= new Platform(); (*p12).setPosition({4000.f, 530.f});
+        
+                platforms = {p1, p2, p3, p4, p5, p7, p6, p8, p9, p10, p11, p12};
 
-                // 12. Движущаяся
-                MovingPlatform* p12 = new MovingPlatform(4000.f, 600.f, 350.f);
-                (*p12).medium_plat();
-
-                // 13. ФИНИШНАЯ ПЛОЩАДКА
-                Platform* p13 = new Platform(); (*p13).setPosition({4500.f, 600.f}); (*p13).medium_plat();
-                Enemy* enemy3 = new Enemy(4600.f, 550.f, 100.f);
-                enemies.push_back(enemy3);
-
-                // СОБИРАЕМ ВСЕ ПЛАТФОРМЫ
-                platforms = {p1, p2, p3, p4, p5, p7, p8, p9, p10, p11, p12, p13};
-
-                // МОНЕТКИ (расставлены по пути следования)
+                // МОНЕТКИ
                 vector<Vector2f> coin_positions = {
-                    {200.f, 650.f}, {460.f, 530.f}, {700.f, 450.f}, {1150.f, 400.f},
-                    {1500.f, 550.f}, {1800.f, 400.f}, {2150.f, 250.f}, {2450.f, 450.f},
-                    {2900.f, 550.f}, {3100.f, 500.f}, {3450.f, 450.f}, {3750.f, 500.f},
-                    {4100.f, 550.f}, {4600.f, 550.f}
+                    {100.f, 650.f},   // Над стартовой платформой p1
+                    {350.f, 480.f},// Над хрупкой p2
+                    {370.f, 30.f},
+                    {540.f, 300.f},   // Над хрупкой p3
+                    {850.f, 150.f},   // Над движущейся p4
+                    {1100.f, 300.f},  // Над движущейся p6
+                    {1350.f, 500.f},  // Над платформой p7
+                    {2600.f, 600.f},  // Над платформой p9
+                    {2950.f, 430.f},  // Над платформой p10
+                    {4000.f, 430.f}
                 };
                 for (int i = 0; i < coin_positions.size(); i++) {
                     Coin* c = new Coin();
@@ -1677,9 +1634,9 @@ public:
                     coins.push_back(c);
                 }
 
-
-
-
+                
+              
+                
         for (int i=0; i<platforms.size(); i++) {
         (*platforms[i]).setTextures("sprites/platforms/plat_big_savana.png",
                             "sprites/platforms/plat_medium_savana.png",
@@ -1693,7 +1650,7 @@ public:
         backgroundTex.loadFromFile(backgroundPath);
         backgroundTex.setRepeated(true);
         background.setTexture(backgroundTex, true);
-
+    
         background.setTextureRect(sf::IntRect({0, 0}, {7000, 900}));
         background.setScale({1.5f, 1.5f});
 
@@ -1722,12 +1679,6 @@ public:
 
         for (int i=0; i<speedBonuses.size(); i++) delete speedBonuses[i];
         speedBonuses.clear();
-
-        for (int i=0; i<keys.size(); i++) delete keys[i];
-        keys.clear();
-
-        for (int i=0; i<locks.size(); i++) delete locks[i];
-        locks.clear();
     }
 
     void drawBackground(RenderTarget& target) {
@@ -1749,6 +1700,7 @@ int main(){
     bool hasPandaSkin = false;
     bool hasFoxSkin = false;
     bool hasPenguinSkin = false;
+    bool hasLionSkin = false;
 
     bool goToLevels = false;
 
@@ -1825,61 +1777,59 @@ int main(){
     vector<MathTask*> level3_easy={&l3_easy1, &l3_easy2, &l3_easy3, &l3_easy4, &l3_easy5};
     vector<MathTask*> level3_med={&l3_med1, &l3_med2, &l3_med3, &l3_med4, &l3_med5};
     vector<MathTask*> level3_hard={&l3_hard1, &l3_hard2, &l3_hard3, &l3_hard4, &l3_hard5};
-
-
+    
     // Level 4
-    MathTask l4_easy1("sprites/tasks/level4/l4_easy1.jpg", "0.81");
-    MathTask l4_easy2("sprites/tasks/level4/l4_easy2.jpg", "0.94");
-    MathTask l4_easy3("sprites/tasks/level4/l4_easy3.jpg", "0.97");
-    MathTask l4_easy4("sprites/tasks/level4/l4_easy4.jpg", "0.15");
-    MathTask l4_easy5("sprites/tasks/level4/l4_easy5.jpg", "0.69");
+        MathTask l4_easy1("sprites/tasks/level4/l4_easy1.jpg", "0.81");
+        MathTask l4_easy2("sprites/tasks/level4/l4_easy2.jpg", "0.94");
+        MathTask l4_easy3("sprites/tasks/level4/l4_easy3.jpg", "0.97");
+        MathTask l4_easy4("sprites/tasks/level4/l4_easy4.jpg", "0.15");
+        MathTask l4_easy5("sprites/tasks/level4/l4_easy5.jpg", "0.69");
 
-    MathTask l4_med1("sprites/tasks/level4/l4_med1.jpg", "0.88");
-    MathTask l4_med2("sprites/tasks/level4/l4_med2.jpg", "0.2");
-    MathTask l4_med3("sprites/tasks/level4/l4_med3.jpg", "0.75");
-    MathTask l4_med4("sprites/tasks/level4/l4_med4.jpg", "0.6");
-    MathTask l4_med5("sprites/tasks/level4/l4_med5.jpg", "0.55");
+        MathTask l4_med1("sprites/tasks/level4/l4_med1.jpg", "0.88");
+        MathTask l4_med2("sprites/tasks/level4/l4_med2.jpg", "0.2");
+        MathTask l4_med3("sprites/tasks/level4/l4_med3.jpg", "0.75");
+        MathTask l4_med4("sprites/tasks/level4/l4_med4.jpg", "0.6");
+        MathTask l4_med5("sprites/tasks/level4/l4_med5.jpg", "0.55");
 
-    MathTask l4_hard1("sprites/tasks/level4/l4_hard1.jpg", "0.375");
-    MathTask l4_hard2("sprites/tasks/level4/l4_hard2.jpg", "0.25");
-    MathTask l4_hard3("sprites/tasks/level4/l4_hard3.jpg", "0.25");
-    MathTask l4_hard4("sprites/tasks/level4/l4_hard4.jpg", "0.25");
-    MathTask l4_hard5("sprites/tasks/level4/l4_hard5.jpg", "0.5");
+        MathTask l4_hard1("sprites/tasks/level4/l4_hard1.jpg", "0.375");
+        MathTask l4_hard2("sprites/tasks/level4/l4_hard2.jpg", "0.25");
+        MathTask l4_hard3("sprites/tasks/level4/l4_hard3.jpg", "0.25");
+        MathTask l4_hard4("sprites/tasks/level4/l4_hard4.jpg", "0.25");
+        MathTask l4_hard5("sprites/tasks/level4/l4_hard5.jpg", "0.5");
 
-    vector<MathTask*> level4_easy={&l4_easy1, &l4_easy2, &l4_easy3, &l4_easy4, &l4_easy5};
-    vector<MathTask*> level4_med={&l4_med1, &l4_med2, &l4_med3, &l4_med4, &l4_med5};
-    vector<MathTask*> level4_hard={&l4_hard1, &l4_hard2, &l4_hard3, &l4_hard4, &l4_hard5};
+        vector<MathTask*> level4_easy={&l4_easy1, &l4_easy2, &l4_easy3, &l4_easy4, &l4_easy5};
+        vector<MathTask*> level4_med={&l4_med1, &l4_med2, &l4_med3, &l4_med4, &l4_med5};
+        vector<MathTask*> level4_hard={&l4_hard1, &l4_hard2, &l4_hard3, &l4_hard4, &l4_hard5};
 
 
-    // Level 5
-    MathTask l5_easy1("sprites/tasks/level5/l5_easy1.jpg", "17");
-    MathTask l5_easy2("sprites/tasks/level5/l5_easy2.jpg", "9");
-    MathTask l5_easy3("sprites/tasks/level5/l5_easy3.jpg", "71");
-    MathTask l5_easy4("sprites/tasks/level5/l5_easy4.jpg", "13");
-    MathTask l5_easy5("sprites/tasks/level5/l5_easy5.jpg", "25");
+        // Level 5
+        MathTask l5_easy1("sprites/tasks/level5/l5_easy1.jpg", "17");
+        MathTask l5_easy2("sprites/tasks/level5/l5_easy2.jpg", "9");
+        MathTask l5_easy3("sprites/tasks/level5/l5_easy3.jpg", "71");
+        MathTask l5_easy4("sprites/tasks/level5/l5_easy4.jpg", "13");
+        MathTask l5_easy5("sprites/tasks/level5/l5_easy5.jpg", "25");
 
-    MathTask l5_med1("sprites/tasks/level5/l5_med1.jpg", "0.8");
-    MathTask l5_med2("sprites/tasks/level5/l5_med2.jpg", "0.8");
-    MathTask l5_med3("sprites/tasks/level5/l5_med3.jpg", "9");
-    MathTask l5_med4("sprites/tasks/level5/l5_med4.jpg", "37");
-    MathTask l5_med5("sprites/tasks/level5/l5_med5.jpg", "66");
+        MathTask l5_med1("sprites/tasks/level5/l5_med1.jpg", "0.8");
+        MathTask l5_med2("sprites/tasks/level5/l5_med2.jpg", "0.8");
+        MathTask l5_med3("sprites/tasks/level5/l5_med3.jpg", "9");
+        MathTask l5_med4("sprites/tasks/level5/l5_med4.jpg", "37");
+        MathTask l5_med5("sprites/tasks/level5/l5_med5.jpg", "66");
 
-    MathTask l5_hard1("sprites/tasks/level5/l5_hard1.jpg", "0.2");
-    MathTask l5_hard2("sprites/tasks/level5/l5_hard2.jpg", "24");
-    MathTask l5_hard3("sprites/tasks/level5/l5_hard3.jpg", "63");
-    MathTask l5_hard4("sprites/tasks/level5/l5_hard4.jpg", "140");
-    MathTask l5_hard5("sprites/tasks/level5/l5_hard5.jpg", "388");
+        MathTask l5_hard1("sprites/tasks/level5/l5_hard1.jpg", "0.2");
+        MathTask l5_hard2("sprites/tasks/level5/l5_hard2.jpg", "24");
+        MathTask l5_hard3("sprites/tasks/level5/l5_hard3.jpg", "63");
+        MathTask l5_hard4("sprites/tasks/level5/l5_hard4.jpg", "140");
+        MathTask l5_hard5("sprites/tasks/level5/l5_hard5.jpg", "388");
 
-    vector<MathTask*> level5_easy={&l5_easy1, &l5_easy2, &l5_easy3, &l5_easy4, &l5_easy5};
-    vector<MathTask*> level5_med={&l5_med1, &l5_med2, &l5_med3, &l5_med4, &l5_med5};
-    vector<MathTask*> level5_hard={&l5_hard1, &l5_hard2, &l5_hard3, &l5_hard4, &l5_hard5};
-
+        vector<MathTask*> level5_easy={&l5_easy1, &l5_easy2, &l5_easy3, &l5_easy4, &l5_easy5};
+        vector<MathTask*> level5_med={&l5_med1, &l5_med2, &l5_med3, &l5_med4, &l5_med5};
+        vector<MathTask*> level5_hard={&l5_hard1, &l5_hard2, &l5_hard3, &l5_hard4, &l5_hard5};
 
 
     srand(time(0));
         while (window.isOpen()) {
             // Передаем goToLevels ? 2 : 0. Если true, меню откроется на 2 странице (список уровней)
-            int selectedLevel = runMenu(window, unlockedLevel, totalCoins, extraLives, extraTime, selectedSkin, hasPandaSkin, hasFoxSkin, hasPenguinSkin, goToLevels ? 1 : 0);
+            int selectedLevel = runMenu(window, unlockedLevel, totalCoins, extraLives, extraTime, selectedSkin, hasPandaSkin, hasFoxSkin, hasPenguinSkin, hasLionSkin, goToLevels ? 1 : 0);
 
 
             if (selectedLevel == -1) return 0;
@@ -1887,7 +1837,7 @@ int main(){
 
     Font font;
 #if VERSION==3
-    font.openFromFile("/System/Library/Fonts/Supplemental/Arial.ttf");
+    font.openFromFile("pix2_1.ttf");
 #else
     font.loadFromFile("pix2.ttf");
 #endif
@@ -1896,8 +1846,7 @@ int main(){
     backk.setFillColor(Color(172, 231, 242));
 
     Level level;
-    int levelNumb=selectedLevel; // исправить selectedLevel;
-    //int levelNumb=4;
+    int levelNumb= selectedLevel;; // исправить
     level.create(levelNumb, selectedSkin);
 
     Character character(selectedSkin);
@@ -2022,7 +1971,7 @@ int main(){
     totalText.setFillColor(Color(40, 70, 40));
     totalText.setPosition({550.f, 435.f});
 
-    bool hasKey=false;
+
     bool returnToMenu = false;
     Button btnMenu(550.f, 490.f, 400.f, 50.f, "Main menu", font, [&](){
                                                                         returnToMenu = true;
@@ -2036,7 +1985,6 @@ int main(){
                                                                             health.updateHealth(0);
                                                                             moneyText.setString("x 0");
                                                                             countCoins=0;
-                                                                            hasKey=false;
                                                                         });
 
 
@@ -2055,7 +2003,6 @@ int main(){
                                                                         health.updateHealth(0);
                                                                         moneyText.setString("x 0");
                                                                         countCoins=0;
-                                                                        hasKey=false;
                                                                 });
 
 
@@ -2081,7 +2028,6 @@ int main(){
                                                                                 health.updateHealth(0);
                                                                                 moneyText.setString("x 0");
                                                                                 countCoins=0;
-                                                                                hasKey=false;
                                                                             });
 
     Button btnMenuPause(550.f, 490.f, 400.f, 50.f, "Main Menu", font, [&](){ returnToMenu=true; isGameOver=false;});
@@ -2131,7 +2077,7 @@ int main(){
     extraLifeText.setFillColor(Color::White);
     extraLifeText.setPosition({175.f, 170.f}); // Текст правее кнопки
     extraLifeText.setString("x " + to_string(extraLives));
-
+            
 
     RectangleShape mathWindow({600.f, 450.f});
     mathWindow.setPosition({450.f, 200.f});
@@ -2169,91 +2115,51 @@ int main(){
 
 
     Button btnEasy(600.f, 350.f, 300.f, 50.f, "Easy (1)", font, [&](){
-                                                mathLimit=60.f;
-                                                mathTimer.restart();
+                                                        mathLimit=60.f;
+                                                        mathTimer.restart();
 
-                                                if(levelNumb==1){
-                                                    currentTask=level1_easy[rand()%level1_easy.size()];
-                                                }
-                                                if(levelNumb==2){
-                                                    currentTask=level2_easy[rand()%level2_easy.size()];
-                                                }
-                                                if(levelNumb==3){
-                                                    currentTask=level3_easy[rand()%level3_easy.size()];
-                                                }
-                                                if(levelNumb==4){
-                                                    currentTask=level3_easy[rand()%level3_easy.size()];
-                                                }
-                                                if(levelNumb==5){
-                                                    currentTask=level3_easy[rand()%level3_easy.size()];
-                                                }
-                                                if(levelNumb==6){
-                                                    currentTask=level3_easy[rand()%level3_easy.size()];
-                                                }
+                                                        if(levelNumb==1){ currentTask=level1_easy[rand()%level1_easy.size()]; }
+                                                        if(levelNumb==2){ currentTask=level2_easy[rand()%level2_easy.size()]; }
+                                                        if(levelNumb==3){ currentTask=level3_easy[rand()%level3_easy.size()]; }
+                                                        if(levelNumb==4){ currentTask=level4_easy[rand()%level4_easy.size()]; }
+                                                        if(levelNumb==5){ currentTask=level5_easy[rand()%level5_easy.size()]; }
 
-                                                (*currentTask).setPosition({470.f, 300.f});
-                                                showMathMenu=false;
-                                                showMathTask=true;
-                                                coinsForMath=1;
-                                                });
-
+                                                        (*currentTask).setPosition({470.f, 300.f});
+                                                        showMathMenu=false;
+                                                        showMathTask=true;
+                                                        coinsForMath=1;
+                                                        });
+            
     Button btnMed(600.f, 420.f, 300.f, 50.f, "Meduim (3)", font, [&](){
+                                                        mathLimit=120.f;
+                                                        mathTimer.restart();
+                                                        if(levelNumb==1){ currentTask=level1_med[rand()%level1_med.size()]; }
+                                                        if(levelNumb==2){ currentTask=level2_med[rand()%level2_med.size()]; }
+                                                        if(levelNumb==3){ currentTask=level3_med[rand()%level3_med.size()]; }
+                                                        if(levelNumb==4){ currentTask=level4_med[rand()%level4_med.size()]; } // <--- ИСПРАВЛЕНО
+                                                        if(levelNumb==5){ currentTask=level5_med[rand()%level5_med.size()]; } // <--- ИСПРАВЛЕНО
 
-                                                mathLimit=120.f;
-                                                mathTimer.restart();
-                                                if(levelNumb==1){
-                                                    currentTask=level1_med[rand()%level1_med.size()];
-                                                }
-                                                if(levelNumb==2){
-                                                    currentTask=level2_med[rand()%level2_med.size()];
-                                                }
-                                                if(levelNumb==3){
-                                                    currentTask=level3_med[rand()%level3_med.size()];
-                                                }
-                                                if(levelNumb==4){
-                                                    currentTask=level3_med[rand()%level3_med.size()];
-                                                }
-                                                if(levelNumb==5){
-                                                   currentTask=level3_med[rand()%level3_med.size()];
-                                                }
-                                                if(levelNumb==6){
-                                                    currentTask=level3_med[rand()%level3_med.size()];
-                                                }
-
-                                                (*currentTask).setPosition({470.f, 300.f});
-                                                showMathMenu=false;
-                                                showMathTask=true;
-                                                coinsForMath=3;
-                                                });
+                                                        (*currentTask).setPosition({470.f, 300.f});
+                                                        showMathMenu=false;
+                                                        showMathTask=true;
+                                                        coinsForMath=3;
+                                                        });
 
     Button btnHard(600.f, 490.f, 300.f, 50.f, "Hard (5)", font, [&](){
-                                                mathLimit=180.f;
-                                                mathTimer.restart();
+                                                        mathLimit=180.f;
+                                                        mathTimer.restart();
 
-                                                if(levelNumb==1){
-                                                    currentTask=level1_hard[rand()%level1_hard.size()];
-                                                }
-                                                if(levelNumb==2){
-                                                    currentTask=level2_hard[rand()%level2_hard.size()];
-                                                }
-                                                if(levelNumb==3){
-                                                    currentTask=level3_hard[rand()%level3_hard.size()];
-                                                }
-                                                if(levelNumb==4){
-                                                    currentTask=level3_hard[rand()%level3_hard.size()];
-                                                }
-                                                if(levelNumb==5){
-                                                    currentTask=level3_hard[rand()%level3_hard.size()];
-                                                }
-                                                if(levelNumb==6){
-                                                    currentTask=level3_hard[rand()%level3_hard.size()];
-                                                }
+                                                        if(levelNumb==1){ currentTask=level1_hard[rand()%level1_hard.size()]; }
+                                                        if(levelNumb==2){ currentTask=level2_hard[rand()%level2_hard.size()]; }
+                                                        if(levelNumb==3){ currentTask=level3_hard[rand()%level3_hard.size()]; }
+                                                        if(levelNumb==4){ currentTask=level4_hard[rand()%level4_hard.size()]; } // <--- ИСПРАВЛЕНО
+                                                        if(levelNumb==5){ currentTask=level5_hard[rand()%level5_hard.size()]; } // <--- ИСПРАВЛЕНО
 
-                                                (*currentTask).setPosition({470.f, 300.f});
-                                                showMathMenu=false;
-                                                showMathTask=true;
-                                                coinsForMath=5;
-                                                });
+                                                        (*currentTask).setPosition({470.f, 300.f});
+                                                        showMathMenu=false;
+                                                        showMathTask=true;
+                                                        coinsForMath=5;
+                                                        });
 
 
 
@@ -2616,24 +2522,11 @@ int main(){
 #if VERSION==3
                     if (characterBounds.findIntersection(level.coins[i]->getBounds())){
 #else
-                    if (characterBounds.intersects((*level.coins[i]).getBounds())){
+                    if (characterBounds.intersects(level.coins[i]->getBounds())){
 #endif
-                        (*level.coins[i]).onScreen=false;
+                        level.coins[i]->onScreen=false;
                         countCoins++;
                         moneyText.setString("x " + to_string(countCoins));
-                    }
-                }
-            }
-
-            for (int i=0; i<level.keys.size(); i++){
-                if ((*level.keys[i]).onScreen){
-#if VERSION==3
-                    if (characterBounds.findIntersection(level.keys[i]->getBounds())) {
-#else
-                    if (characterBounds.intersects((*level.keys[i]).getBounds())) {
-#endif
-                        (*level.keys[i]).onScreen=false;
-                        hasKey=true;
                     }
                 }
             }
@@ -2807,52 +2700,6 @@ int main(){
                 }
 
                 if (!onPlatform) character.isJump=true;
-
-
-                for (int i=0; i<level.locks.size(); i++) {
-                    if (!(*level.locks[i]).isOpen){
-                        FloatRect lockBounds=(*level.locks[i]).getBounds();
-
-#if VERSION==3
-                        bool isIntersecting = characterBounds.findIntersection(lockBounds).has_value();
-                        float charW = characterBounds.size.x;
-                        float charH = characterBounds.size.y;
-#else
-                        bool isIntersecting=characterBounds.intersects(lockBounds);
-                        float charW=characterBounds.width;
-                        float charH=characterBounds.height;
-#endif
-
-                        if (isIntersecting){
-
-                            if (hasKey) {
-                                (*level.locks[i]).isOpen=true;
-                                hasKey=false;
-                                continue;
-                            }
-
-                            float prevBottom=prevPos.y+charH/2.f;
-                            float prevTop=prevPos.y-charH/2.f;
-
-                            if (character.dy>=0.f && prevBottom<=lockBounds.top+5.f){
-                                character.setPosition({character.getPosition().x, lockBounds.top-charH/2.f});
-                                character.landing();
-                            }
-
-                            else if(character.dy < 0.f && prevTop >= lockBounds.top + lockBounds.height - 5.f) {
-                                character.setPosition({character.getPosition().x, lockBounds.top + lockBounds.height + charH / 2.f});
-                                character.dy = 0.f;
-                            }
-
-                            else{
-                                if(prevPos.x<lockBounds.left)
-                                    character.setPosition({lockBounds.left-charW/2.f, character.getPosition().y});
-                                else
-                                    character.setPosition({lockBounds.left+lockBounds.width+charW/2.f, character.getPosition().y});
-                            }
-                        }
-                    }
-                }
         }
 
             float cameraX=character.getPosition().x +250.f;
@@ -2884,16 +2731,6 @@ int main(){
                 window.draw(*level.enemies[i]);
             }
 
-            for (int i=0; i<level.keys.size(); i++){
-                window.draw(*level.keys[i]);
-            }
-
-            for (int i=0; i<level.locks.size(); i++){
-                if(!hasKey){
-                    window.draw(*level.locks[i]);
-                }
-            }
-
             for (int i=0; i<level.bonuses.size(); i++) {
                 window.draw(*level.bonuses[i]);
             }
@@ -2904,10 +2741,6 @@ int main(){
 
 
             window.draw(level.levelEnd);
-            for (int i=0; i<level.locks.size(); i++){
-                window.draw(*level.locks[i]);
-            }
-
 
             for (int i=0; i<level.maths.size(); i++){
                 window.draw(*level.maths[i]);
@@ -2920,10 +2753,7 @@ int main(){
             window.draw(health);
             window.draw(moneySprite);
             window.draw(moneyText);
-            if (hasKey){
-                (*level.keys[0]).drawInv(window);
-            }
-
+            
             extraLifeText.setString("x " + to_string(extraLives));
             window.draw(lifeBonusBtn);
             window.draw(extraLifeText);
